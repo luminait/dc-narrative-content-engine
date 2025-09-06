@@ -18,10 +18,10 @@ export default function MainContainer({ children }: { children: React.ReactNode 
 
     return (
         <main
-            className={cn(
+            className={`w-full ${cn(
                 "transition-all duration-300",
                 isMobile ? "ml-0" : open ? MAIN_MARGIN_LEFT_OPEN : MAIN_MARGIN_LEFT_COLLAPSED
-            ) + "w-full flex-1 overflow-y-auto"}
+            )}`}
         >
             {children}
         </main>

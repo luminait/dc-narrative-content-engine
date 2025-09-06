@@ -2,15 +2,27 @@ import {
     Sidebar,
     SidebarContent, SidebarFooter,
     SidebarGroup,
+    SidebarGroupAction,
     SidebarGroupContent,
     SidebarGroupLabel,
     SidebarHeader,
-    SidebarMenu,
+    SidebarMenu, SidebarMenuBadge,
     SidebarMenuButton,
-    SidebarMenuItem,
+    SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem,
     SidebarSeparator
 } from "@/components/ui/sidebar"
-import {Calendar, ChevronDown, ChevronUp, Home, Megaphone, Plus, Search, Settings, User2} from "lucide-react";
+import {
+    Calendar,
+    ChevronDown,
+    ChevronUp,
+    Home,
+    Megaphone,
+    Plus,
+    Projector,
+    Search,
+    Settings,
+    User2
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
@@ -65,18 +77,18 @@ const AppSidebar = () => {
             <SidebarHeader className={"py-4"}>
                 <SidebarMenuItem>
                     <SidebarMenuButton>
-                        <Link href={"/"} className={"flex items-center"}>
+                        <Link href={"/"} className={"flex flex-1 items-center w-full"}>
                             <Image src={"/logo.webp"} alt={"logo"} width={32} height={32} className={"rounded-full"}/>
                             <div className={"ml-2 flex flex-col align-start"}>
-                                <span className={"font-bold`"}>DC Content Generator</span>
-                                <p className="text-sm text-gray-500">by luminAIt • Deez Collectibles</p>
+                                <span className={"font-bold`"}>Content Generator</span>
+                                <p className="text-sm text-gray-500">by luminAIt</p>
                             </div>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarSeparator/>
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent className={"px-4 overflow-hidden"}>
                 <SidebarGroup>
                     <SidebarGroupLabel>
                         Application
