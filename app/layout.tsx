@@ -1,12 +1,12 @@
 import type {Metadata} from "next";
 import {Geist} from "next/font/google";
-import {ThemeProvider} from "@/components/providers/ThemeProvider";
+import {ThemeProvider} from "@/ui/providers/ThemeProvider";
 import "./globals.css";
-import {SidebarProvider} from "@/components/ui/sidebar";
-import AppSidebar from "@/components/AppSidebar";
-import Navbar from "@/components/Navbar";
+import {SidebarProvider} from "@/ui/shadcn/sidebar";
+import AppSidebar from "@/ui/layout/AppSidebar";
+import Navbar from "@/ui/layout/Navbar";
 import {cookies} from "next/headers";
-import MainContainer from "@/components/MainContainer";
+import MainContainer from "@/ui/layout/MainContainer";
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -45,7 +45,7 @@ export default async function RootLayout({
                 <MainContainer>
                     <div className="flex h-screen flex-col">
                         <Navbar/>
-                        <div className="flex-1 overflow-y-auto p-4">
+                        <div className="flex-1 overflow-y-auto p-8">
                             {children}
                         </div>
                     </div>

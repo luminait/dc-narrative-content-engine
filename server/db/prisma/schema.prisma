@@ -1,0 +1,261 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id                  String              @id @default(uuid())
+  version_number      Int                 @default(1)
+  title               String
+  campaign_objective  String // CHECK constraint: char_length(campaign_objective) > 25
+  created_by          String?             @db.Uuid
+  created_at          DateTime?           @default(now()) @db.Timestamp()
+  updated_at          DateTime?           @updatedAt @db.Timestamp()
+  deleted_at          DateTime?           @db.Timestamp()
+  days_of_week        Weekdays[]
+  frequency           EventCadence?
+  post_type           PostType            @default(single_image)
+  post_caption_length CaptionLength       @default(short)
+  post_video_length   VideoLengthSeconds?
+  start_date          DateTime?           @db.Date
+  end_date            DateTime?           @db.Date
+  narrative_context   String?
+  is_active           Boolean             @default(true)
+  is_archived         Boolean             @default(false)
+
+  creator     User?                 @relation(fields: [created_by], references: [user_id])
+  characters  CampaignsCharacters[]
+  personas    CampaignsPersonas[]
+  mergeFields ShotstackMergeField[]
+  renders     ShotstackRender[]
+  // The trigger trg_enforce_archived_inactive is not representable in Prisma Schema.
+  // It runs: execute FUNCTION enforce_archived_inactive ();
+
+  @@map("campaigns")
+}
+
+model User {
+  id         BigInt    @default(autoincrement())
+  email      String    @unique
+  created_at DateTime? @default(now()) @db.Timestamp()
+  updated_at DateTime? @updatedAt @db.Timestamp()
+  deleted_at DateTime? @db.Timestamp()
+  user_id    String    @unique @db.Uuid
+  role       UserRole  @default(client)
+
+  authUser  AuthUser   @relation(fields: [user_id], references: [id])
+  campaigns Campaign[]
+
+  @@id([id, user_id])
+  @@map("users_and_roles")
+}
+
+model Character {
+  id                 String                @id @default(uuid())
+  name               String
+  created_at         DateTime?             @default(now()) @db.Timestamp()
+  updated_at         DateTime?             @updatedAt @db.Timestamp()
+  deleted_at         DateTime?             @db.Timestamp()
+  is_human           Boolean?              @default(false)
+  is_trainer         Boolean?              @default(false)
+  character_types    String?
+  personality        String?
+  height_centimeters Int?
+  weight_grams       Int?
+  moral_alignment    MoralAlignment?
+  campaigns          CampaignsCharacters[]
+  assets             CharacterAsset[]
+
+  @@map("characters")
+}
+
+model CampaignsCharacters {
+  campaign_id  String
+  character_id String
+  campaign     Campaign  @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  character    Character @relation(fields: [character_id], references: [id])
+
+  @@id([campaign_id, character_id])
+  @@map("campaigns_characters")
+}
+
+model Persona {
+  id          Int                 @id @default(autoincrement()) @map("key")
+  label       String?
+  created_at  DateTime?           @default(now()) @db.Timestamp()
+  updated_at  DateTime?           @updatedAt @db.Timestamp()
+  deleted_at  DateTime?           @db.Timestamp()
+  description String?
+  campaigns   CampaignsPersonas[]
+
+  @@map("personas")
+}
+
+model CampaignsPersonas {
+  id          String @id @default(uuid())
+  campaign_id String
+  persona_key Int?
+
+  campaign Campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  persona  Persona? @relation(fields: [persona_key], references: [id])
+
+  @@unique([campaign_id, persona_key], name: "unique_campaign_persona")
+  @@map("campaigns_personas")
+}
+
+model CharacterAsset {
+  id           String    @id @default(uuid())
+  character_id String?
+  asset_ref    String    @db.Uuid
+  label        String?
+  attributes   Json?
+  is_primary   Boolean?  @default(false)
+  created_at   DateTime? @default(now()) @db.Timestamp()
+  updated_at   DateTime? @updatedAt @db.Timestamp()
+  deleted_at   DateTime? @db.Timestamp()
+
+  character     Character?    @relation(fields: [character_id], references: [id])
+  storageObject StorageObject @relation(fields: [asset_ref], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+  @@map("character_assets")
+}
+
+// Placeholder model for Supabase (auth)
+model AuthUser {
+  id    String @id @db.Uuid
+  users User[]
+  // This table is in the '(auth)' schema. You may need to enable multi-schema support
+  // in the datasource block if you haven't already.
+  // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
+
+  @@map("users")
+}
+
+// Placeholder model for Supabase storage
+model StorageObject {
+  id     String           @id @db.Uuid
+  assets CharacterAsset[]
+  render ShotstackRender?
+  // This table is in the 'storage' schema. You may need to enable multi-schema support
+  // in the datasource block if you haven't already.
+  // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
+
+  @@map("objects")
+}
+
+model ShotstackMergeField {
+  id               String              @id @default(uuid())
+  merge_field      String
+  description      String?
+  media_value_type MergeFieldValueType @default(image)
+  start_time       Decimal?
+  end_time         Decimal?
+  campaign_id      String
+  merge_field_type MergeFieldType?
+  default_value    String?
+
+  campaign Campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+
+  @@unique([campaign_id, merge_field])
+  @@map("shotstack_merge_fields")
+}
+
+model ShotstackRender {
+  id          String   @id @db.Uuid
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+  status      String?
+  url         String?
+  campaign_id String?
+
+  storageObject StorageObject @relation(fields: [id], references: [id], onDelete: Cascade)
+  campaign      Campaign?     @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+
+  @@map("shotstack_renders")
+}
+
+enum UserRole {
+  client
+  admin
+}
+
+enum Weekdays {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+enum EventCadence {
+  daily
+  weekly
+  monthly
+}
+
+enum PostType {
+  single_image
+  video
+  carousel
+}
+
+enum CaptionLength {
+  short
+  medium
+  long
+}
+
+enum VideoLengthSeconds {
+  THIRTY
+  FORTY_FIVE
+  SIXTY
+}
+
+enum MoralAlignment {
+  LawfulGood     @map("Lawful Good")
+  NeutralGood    @map("Neutral Good")
+  ChaoticGood    @map("Chaotic Good")
+  LawfulNeutral  @map("Lawful Neutral")
+  TrueNeutral    @map("True Neutral")
+  ChaoticNeutral @map("Chaotic Neutral")
+  LawfulEvil     @map("Lawful Evil")
+  NeutralEvil    @map("Neutral Evil")
+  ChaoticEvil    @map("Chaotic Evil")
+}
+
+enum MergeFieldValueType {
+  image
+  text
+  video
+  audio_voice
+  audio_music
+  gen_ai_image
+  gen_ai_text
+  gen_ai_video
+  gen_ai_voice
+  gen_ai_music
+  image_or_video
+}
+
+enum MergeFieldType {
+  text
+  character
+  environment
+  music
+  voiceover
+  sfx
+  luma_matte
+}
