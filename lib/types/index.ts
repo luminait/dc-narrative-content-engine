@@ -1,118 +1,189 @@
-import {LucideIcon} from "lucide-react";
+import {Videos} from "next/dist/lib/metadata/types/metadata-types";
 
+/** ********************************************************************************************************************
+ * 
+ * CAMPAIGN CLASS TYPES
+ *
+ **********************************************************************************************************************/
+
+/**
+ * Represents a dynamic field for video generation, aligned with the `ShotstackMergeField` Prisma model.
+ */
 export type MergeField = {
-    id: string;
-    merge_field: string;
-    description: string;
-    media_value_type: string;
-    start_time: string;
-    end_time: string;
-    campaign_id: string;
-    merge_field_type: string;
-    default_value?: string;
+  id: string;
+  mergeField: string;
+  description?: string | null;
+  mediaValueType: string; // Corresponds to MergeFieldValueType enum
+  startTime?: string | null;
+  endTime?: string | null;
+  campaignId: string;
+  mergeFieldType?: string | null; // Corresponds to MergeFieldType enum
+  defaultValue?: string | null;
 
-    // Computed/UI fields
-    length?: string; // calculated field for UI display
-    value?: string; // current value for UI forms
-    resolved_filename?: string; // resolved filename for media asset types
-    resolved_asset_url?: string; // resolved asset URL for media asset types
-    is_resolving?: boolean; // indicates if asset reference is being resolved
+  // UI-only fields for form state
+  length?: string;
+  value?: string;
 };
 
+/**
+ * Represents a campaign, aligned with the `Campaign` Prisma model.
+ * Note: Some fields are simplified for frontend use (e.g., enums as strings).
+ */
 export type Campaign = {
-    id: string;
-    title: string;
-    objective: string;
-    narrativeContext?: string; // Optional narrative context field
-    status: 'draft' | 'active' | 'completed';
-    createdAt: string;
-    cadence: {
-        daysOfWeek: string[]; // ['monday', 'tuesday', etc.]
-        frequency: 'weekly' | 'bi-weekly'; // how often the pattern repeats
-    };
-    postType: 'image' | 'carousel' | 'video';
-    videoLength?: 30 | 45 | 60; // only relevant when postType is 'video'
-    personas: string[];
-    characters: string[]; // Legacy: character names for backward compatibility
-    postLength: string;
-    mergeFields: MergeField[]; // Updated to use structured merge fields
-    startDate?: string;
-    endDate?: string;
+  id: string;
+  title: string;
+  campaignObjective: string;
+  narrativeContext?: string | null;
+  createdAt?: string;
+  daysOfWeek: string[]; // Corresponds to Weekdays[] enum
+  frequency?: string | null; // Corresponds to EventCadence? enum
+  postType: string; // Corresponds to PostType enum
+  postCaptionLength: string; // Corresponds to CaptionLength enum
+  postVideoLength?: VideoLengthSeconds | null; // Corresponds to VideoLengthSeconds enum
+  startDate?: string | null;
+  endDate?: string | null;
+  isActive: boolean;
+  isArchived: boolean;
 
-    // New database-driven fields
-    featuredCharacters?: Character[]; // Full character objects from database
-    featuredPersonas?: Persona[]; // Full persona objects from database
+  // UI-related or computed fields
+  status: 'draft' | 'active' | 'completed' | 'archived'; // Derived from isActive/isArchived
+  characters?: Character[];
+  personas?: Persona[];
+  mergeFields?: MergeField[];
 };
 
 export interface CampaignWithCounts extends Campaign {
-    personaCount: number;
-    characterCount: number;
+  personaCount: number;
+  characterCount: number;
 }
 
+/**
+ * Represents a social media post, aligned with the `Post` Prisma model.
+ */
 export type Post = {
-    id: string;
-    campaignId: string;
-    title: string;
-    content: string;
-    hashtags: string[];
-    status: 'draft' | 'scheduled' | 'published';
-    scheduledAt?: string;
-    imageUrl?: string;
-    mergeFieldValues?: Record<string, string>;
+  id: string;
+  campaignId: string;
+  title: string;
+  content: string;
+  hashtags: string[];
+  status: 'draft' | 'scheduled' | 'published';
+  scheduledAt?: string;
+  imageUrl?: string;
+  mergeFieldValues?: Record<string, string>;
 };
 
+/**
+ * Represents a character, aligned with the `Character` Prisma model.
+ */
 export type Character = {
-    // Database fields (primary)
-    id: number; // Primary key from database
-    name: string;
-    created_at?: string;
-    updated_at?: string;
-    deleted_at?: string;
-    is_human: boolean;
-    is_trainer: boolean;
-    character_types?: string; // JSON string or comma-separated types
-    personality?: string;
-    height_centimeters?: number;
-    weight_grams?: number;
-    moral_alignment?: string;
+  id: string; // Changed from number to string to match UUID
+  name: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
+  isHuman?: boolean | null;
+  isTrainer?: boolean | null;
+  characterTypes?: string | null;
+  personality?: string | null;
+  heightCentimeters?: number | null;
+  weightGrams?: number | null;
+  moralAlignment?: string | null;
 
-    // Computed/UI fields
-    imageAssets?: string[]; // Will be populated from character_assets table
-    defaultImage?: string; // Will be computed from imageAssets
-
-    // Legacy compatibility fields (deprecated, but kept for backward compatibility)
-    type?: string; // Maps to character_types for backward compatibility
-    isTrainer?: boolean; // Maps to is_trainer
-    isHuman?: boolean; // Maps to is_human
-    character_id?: number; // Alias for id
-    default_image?: string; // Alias for defaultImage
+  // UI/Computed fields
+  assets?: { isPrimary: boolean | null; storageObject: { id: string } }[];
+  defaultImage?: string; // UI computed field
+  type?: string; // Legacy compatibility for filtering
 };
 
+/**
+ * Represents a persona, aligned with the `Persona` Prisma model.
+ */
 export type Persona = {
-    // Database fields (primary)
-    key: string; // Primary key from database
-    label: string;
-    description: string;
-    created_at?: string;
-    updated_at?: string;
-    deleted_at?: string;
-
-    // Computed/compatibility fields
-    persona_key?: string; // Alias for key
-    persona_label?: string; // Alias for label
-    persona_description?: string; // Alias for description
+  id: string; // Changed from key to id to match Prisma
+  label?: string | null;
+  description?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  deletedAt?: string | null;
 };
 
 export type WebhookSettings = {
-    environment: 'testing' | 'production';
-    testingUrl: string;
-    productionUrl: string;
+  environment: 'testing' | 'production';
+  testingUrl: string;
+  productionUrl: string;
 };
 
 export type View = 'dashboard' | 'campaign-generator' | 'campaign-details' | 'post-generator' | 'post-details' | 'settings';
 
 
+
+//region Campaign enums
+/** ********************************************************************************************************************
+ * 
+ * Enums for the different types of Campaign and Social Media Post data.
+ *
+ **********************************************************************************************************************/
+
+/**
+ * Enum for the days of the week.
+ */
+export type Weekdays = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+
+/**
+ * Enum for the event cadence.
+ */
+export type EventCadence = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+export type PostType = 'text' | 'image' | 'video';
+
+export type CaptionLength = 'short' | 'medium' | 'long';
+
+export type VideoLengthSeconds = 'THIRTY' | 'FORTY_FIVE' | 'SIXTY';
+
+export type MergeFieldType = 'text' | 'image' | 'video';
+
+export type MergeFieldValueType = 'text' | 'image' | 'video';
+
+//endregion
+
+/**
+ * Props for the Dashboard component.
+ * @param onNavigate A function to handle navigation.
+ * @param onDeleteCampaign A function to handle deleting a campaign.
+ */
 export interface DashboardProps {
     onNavigate: (view: View, campaign?: Campaign) => void;
     onDeleteCampaign: (campaignId: string) => void;
 }
+
+/**
+ * Props for the PostGenerator component.
+ * @param onNavigate A function to handle navigation. Example, `onNavigate: (view: View) => { // Navigate to another view };`
+ * @param onSavePost A function to handle saving a post. Example, `onSavePost: (post: Post) => { // Save post logic };`
+ */
+export type PostGeneratorProps = {
+    onNavigate: (view: View, campaign?: Campaign) => void;
+    onSavePost: (post: Post) => void;
+};
+
+/**
+ * Props for the CampaignGenerator component.
+ * @param onNavigate A function to handle navigation. Example, `onNavigate: (view: View) => { // Navigate to another view };`
+ * @param onSaveCampaign A function to handle saving a campaign. Example, `onSaveCampaign: (campaign: Campaign) => { // Save campaign logic };`
+ */
+export type CampaignGeneratorProps = {
+    onNavigate: (view: View, campaign?: Campaign) => void;
+    onSaveCampaign: (campaign: Campaign) => void;
+};
+
+/**
+ * Props for the CampaignDetails component.
+ * @param campaign The campaign to display details for.
+ * @param onNavigate A function to handle navigation. Example, `onNavigate: (view: View) => { // Navigate to another view };`
+ * @param onDeleteCampaign A function to handle deleting a campaign. Example, `onDeleteCampaign: (campaignId: string) => { // Delete campaign logic };`
+ */
+export type CampaignDetailsProps = {
+    campaign: Campaign;
+    onNavigate: (view: View) => void;
+    onDeleteCampaign: (campaignId: string) => void;
+};

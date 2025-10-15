@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Character, MergeField, Persona } from '@/lib/types';
-import { getCharacters } from '@/app/api/characters';
+import { getCharacters } from '@/api/characters';
 // NOTE: You would create these API services similarly to getCharacters
 // import { getPersonas } from '@/lib/api/personas';
 // import { createCampaign, CreateCampaignPayload } from '@/lib/api/campaigns';
@@ -14,9 +14,10 @@ export function useCampaignForm() {
     // Form Input State
     const [formData, setFormData] = useState({
         title: '',
-        objective: '',
+        campaignObjective: '',
         narrativeContext: '',
         postLength: '',
+        postCaptionLength: '',
         startDate: '',
         endDate: ''
     });

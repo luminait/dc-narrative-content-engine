@@ -7,6 +7,7 @@ import AppSidebar from "@/ui/layout/AppSidebar";
 import Navbar from "@/ui/layout/Navbar";
 import {cookies} from "next/headers";
 import MainContainer from "@/ui/layout/MainContainer";
+import Providers from "@/app/providers";
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -40,17 +41,19 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-            <SidebarProvider defaultOpen>
-                <AppSidebar/>
-                <MainContainer>
-                    <div className="flex h-screen flex-col">
-                        <Navbar/>
-                        <div className="flex-1 overflow-y-auto p-8">
-                            {children}
+            <Providers>
+                <SidebarProvider defaultOpen>
+                    <AppSidebar/>
+                    <MainContainer>
+                        <div className="flex h-screen flex-col">
+                            <Navbar/>
+                            <div className="flex-1 overflow-y-auto p-8">
+                                {children}
+                            </div>
                         </div>
-                    </div>
-                </MainContainer>
-            </SidebarProvider>
+                    </MainContainer>
+                </SidebarProvider>
+            </Providers>
         </ThemeProvider>
         </body>
         </html>
