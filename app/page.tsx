@@ -1,4 +1,4 @@
-import Dashboard from "@/app/dashboard/page";
+import Dashboard from "@/src/features/dashboard/Dashboard";
 
 
 type SearchProps = {
