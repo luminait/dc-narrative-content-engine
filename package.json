@@ -7,7 +7,7 @@
     "lint": "next lint"
   },
   "prisma": {
-    "schema": "./server/db/prisma/schema.prisma",
+    "schema": "./src/server/db/prisma/schema.prisma",
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} ./server/db/prisma/seed.ts"
   },
   "dependencies": {
@@ -39,7 +39,8 @@
     "react-dom": "^19.0.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.0",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

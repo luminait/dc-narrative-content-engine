@@ -1,7 +1,7 @@
 import type {Metadata} from "next";
 import {Geist} from "next/font/google";
 import {ThemeProvider} from "@/ui/providers/ThemeProvider";
-import "./globals.css";
+import "../src/styles/globals.css";
 import {SidebarProvider} from "@/ui/shadcn/sidebar";
 import AppSidebar from "@/ui/layout/AppSidebar";
 import Navbar from "@/ui/layout/Navbar";

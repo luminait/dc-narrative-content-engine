@@ -24,9 +24,9 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@/ui/*": ["./packages/ui/*"],
+      "@/types": ["./src/server/db/types"]
     }
   },
   "include": [

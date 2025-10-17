@@ -1,0 +1,261 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id                String              @id @default(uuid()) @db.Uuid
+  versionNumber     Int                 @default(1) @map("version_number")
+  title             String
+  campaignObjective String              @map("campaign_objective") // CHECK constraint: char_length(campaign_objective) > 25
+  createdBy         String?             @map("created_by") @db.Uuid
+  createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt         DateTime?           @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt         DateTime?           @map("deleted_at") @db.Timestamp()
+  daysOfWeek        Weekdays[]          @map("days_of_week")
+  frequency         EventCadence?
+  postType          PostType            @default(single_image) @map("post_type")
+  postCaptionLength CaptionLength       @default(short) @map("post_caption_length")
+  postVideoLength   VideoLengthSeconds? @map("post_video_length")
+  startDate         DateTime?           @map("start_date") @db.Date
+  endDate           DateTime?           @map("end_date") @db.Date
+  narrativeContext  String?             @map("narrative_context")
+  isActive          Boolean             @default(true) @map("is_active")
+  isArchived        Boolean             @default(false) @map("is_archived")
+
+  creator     User?                 @relation(fields: [createdBy], references: [userId])
+  characters  CampaignsCharacters[]
+  personas    CampaignsPersonas[]
+  mergeFields ShotstackMergeField[]
+  renders     ShotstackRender[]
+  // The trigger trg_enforce_archived_inactive is not representable in Prisma Schema.
+  // It runs: execute FUNCTION enforce_archived_inactive ();
+
+  @@map("campaigns")
+}
+
+model User {
+  id        BigInt    @default(autoincrement())
+  email     String    @unique
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt DateTime? @map("deleted_at") @db.Timestamp()
+  userId    String    @unique @map("user_id") @db.Uuid
+  role      UserRole  @default(client)
+
+  authUser  AuthUser   @relation(fields: [userId], references: [id])
+  campaigns Campaign[]
+
+  @@id([id, userId])
+  @@map("users_and_roles")
+}
+
+model Character {
+  id                String                @id @default(uuid()) @db.Uuid
+  name              String
+  createdAt         DateTime?             @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt         DateTime?             @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt         DateTime?             @map("deleted_at") @db.Timestamp()
+  isHuman           Boolean?              @default(false) @map("is_human")
+  isTrainer         Boolean?              @default(false) @map("is_trainer")
+  characterTypes    String?               @map("character_types")
+  personality       String?
+  heightCentimeters Int?                  @map("height_centimeters")
+  weightGrams       Int?                  @map("weight_grams")
+  moralAlignment    MoralAlignment?       @map("moral_alignment")
+  campaigns         CampaignsCharacters[]
+  assets            CharacterAsset[]
+
+  @@map("characters")
+}
+
+model CampaignsCharacters {
+  campaignId  String    @map("campaign_id") @db.Uuid
+  characterId String    @map("character_id") @db.Uuid
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, characterId])
+  @@map("campaigns_characters")
+}
+
+model Persona {
+  id          String              @id @default(uuid()) @db.Uuid
+  label       String?
+  createdAt   DateTime?           @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt   DateTime?           @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt   DateTime?           @map("deleted_at") @db.Timestamp()
+  description String?
+  campaigns   CampaignsPersonas[]
+
+  @@map("personas")
+}
+
+model CampaignsPersonas {
+  id         String  @id @default(uuid()) @db.Uuid
+  campaignId String  @map("campaign_id") @db.Uuid
+  personaKey String? @map("persona_key") @db.Uuid
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  persona  Persona? @relation(fields: [personaKey], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, personaKey], name: "unique_campaign_persona")
+  @@map("campaigns_personas")
+}
+
+model CharacterAsset {
+  id          String    @id @default(uuid()) @db.Uuid
+  characterId String?   @map("character_id") @db.Uuid
+  assetRef    String    @map("asset_ref") @db.Uuid
+  label       String?
+  attributes  Json?
+  isPrimary   Boolean?  @default(false) @map("is_primary")
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamp()
+
+  character     Character?    @relation(fields: [characterId], references: [id])
+  storageObject StorageObject @relation(fields: [assetRef], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+  @@map("character_assets")
+}
+
+// Placeholder model for Supabase (auth)
+model AuthUser {
+  id    String @id @db.Uuid
+  users User[]
+  // This table is in the '(auth)' schema. You may need to enable multi-schema support
+  // in the datasource block if you haven't already.
+  // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
+
+  @@map("users")
+}
+
+// Placeholder model for Supabase storage
+model StorageObject {
+  id     String           @id @db.Uuid
+  assets CharacterAsset[]
+  render ShotstackRender?
+  // This table is in the 'storage' schema. You may need to enable multi-schema support
+  // in the datasource block if you haven't already.
+  // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
+
+  @@map("objects")
+}
+
+model ShotstackMergeField {
+  id             String              @id @default(uuid()) @db.Uuid
+  mergeField     String              @map("merge_field")
+  description    String?
+  mediaValueType MergeFieldValueType @default(image) @map("media_value_type")
+  startTime      Decimal?            @map("start_time")
+  endTime        Decimal?            @map("end_time")
+  campaignId     String              @map("campaign_id") @db.Uuid
+  mergeFieldType MergeFieldType?     @map("merge_field_type")
+  defaultValue   String?             @map("default_value")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, mergeField])
+  @@map("shotstack_merge_fields")
+}
+
+model ShotstackRender {
+  id         String   @id @db.Uuid
+  campaignId String?  @map("campaign_id") @db.Uuid
+  url        String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  status     String?
+
+  storageObject StorageObject @relation(fields: [id], references: [id], onDelete: Cascade)
+  campaign      Campaign?     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("shotstack_renders")
+}
+
+enum UserRole {
+  client
+  admin
+}
+
+enum Weekdays {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+enum EventCadence {
+  daily
+  weekly
+  monthly
+}
+
+enum PostType {
+  single_image
+  video
+  carousel
+}
+
+enum CaptionLength {
+  short
+  medium
+  long
+}
+
+enum VideoLengthSeconds {
+  THIRTY
+  FORTY_FIVE
+  SIXTY
+}
+
+enum MoralAlignment {
+  LawfulGood     @map("Lawful Good")
+  NeutralGood    @map("Neutral Good")
+  ChaoticGood    @map("Chaotic Good")
+  LawfulNeutral  @map("Lawful Neutral")
+  TrueNeutral    @map("True Neutral")
+  ChaoticNeutral @map("Chaotic Neutral")
+  LawfulEvil     @map("Lawful Evil")
+  NeutralEvil    @map("Neutral Evil")
+  ChaoticEvil    @map("Chaotic Evil")
+}
+
+enum MergeFieldValueType {
+  image
+  text
+  video
+  audio_voice
+  audio_music
+  gen_ai_image
+  gen_ai_text
+  gen_ai_video
+  gen_ai_voice
+  gen_ai_music
+  image_or_video
+}
+
+enum MergeFieldType {
+  text
+  character
+  environment
+  music
+  voiceover
+  sfx
+  luma_matte
+}
