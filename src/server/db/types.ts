@@ -30,7 +30,12 @@ export type {
 
 export { PrismaClient } from './generated/prisma';
 
-// Prisma input types for mutations
+/** ********************************************************************************************************************
+ *
+ * Prisma input types for mutations
+ *
+ **********************************************************************************************************************/
+
 import type { Prisma } from './generated/prisma';
 
 export type CampaignCreateInput = Prisma.CampaignCreateInput;
@@ -46,6 +51,13 @@ export type PersonaCreateInput = Prisma.PersonaCreateInput;
 export type PersonaUpdateInput = Prisma.PersonaUpdateInput;
 export type PersonaWhereInput = Prisma.PersonaWhereInput;
 
+
+
+/** ********************************************************************************************************************
+ *
+ * Campaign Types
+ *
+ **********************************************************************************************************************/
 // Types with relations (for queries that include related data)
 export type CampaignWithRelations = Prisma.CampaignGetPayload<{
   include: {
@@ -55,15 +67,6 @@ export type CampaignWithRelations = Prisma.CampaignGetPayload<{
   };
 }>;
 
-export type CharacterWithAssets = Prisma.CharacterGetPayload<{
-  include: {
-    assets: {
-      include: {
-        storageObject: true;
-      };
-    };
-  };
-}>;
 
 // Computed types (add UI-specific fields)
 import type { Campaign } from "./generated/prisma";
@@ -71,3 +74,26 @@ export type CampaignWithCounts = Campaign & {
   personaCount: number;
   characterCount: number;
 } ;
+
+
+/** ********************************************************************************************************************
+ *
+ * Character Types
+ *
+ **********************************************************************************************************************/
+
+export type CharacterWithAssets = Prisma.CharacterGetPayload<{
+    include: {
+        assets: {
+            include: {
+                storageObject: true;
+            };
+        };
+    };
+}>;
+
+
+// Helper type that includes the defaultImage getter
+export type CharacterWithDefaultImage = CharacterWithAssets & {
+    readonly defaultImage: ReturnType<typeof import('./helpers/character').getDefaultImage>;
+};

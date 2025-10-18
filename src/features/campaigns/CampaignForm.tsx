@@ -9,7 +9,7 @@ import type { CampaignFormData, MergeField, Cadence } from './campaign.schema';
 import CampaignDetails from './sections/CampaignDetails';
 import ScheduleSection from './sections/ScheduleSection';
 import PersonasSection from './sections/PersonasSection';
-import CharactersSection from './sections/CharactersSection';
+import CharactersSection from './sections/CharactersSelection';
 import PostTypeSection from './sections/PostTypeSection';
 import VideoLengthSection from './sections/VideoLengthSection';
 import MergeFieldsSection from './sections/MergeFieldsSection';

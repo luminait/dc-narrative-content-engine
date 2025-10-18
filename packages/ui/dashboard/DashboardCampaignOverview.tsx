@@ -1,3 +1,4 @@
+
 'use client'
 
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/ui/shadcn/card";
@@ -5,47 +6,64 @@ import {Archive, Calendar, Eye, MoreVertical, PauseCircle, Plus, Trash2} from "l
 import {Button} from "@/ui/shadcn/button";
 import {Skeleton} from "@/ui/shadcn/skeleton";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/ui/shadcn/dropdown-menu";
-import {Badge} from "@/ui/shadcn/badge";
-import { handleCampaignAction } from "@/lib/campaignUtils";
-import { formatDate } from "@/lib/utils";
+import { CampaignAction, handleCampaignAction } from "@/src/server/actions/campaign.actions";
+import { formatDate } from "@/src/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Campaign } from "@/app/generated/prisma";
+import { Campaign } from "@/src/server/db/generated/prisma";
+import { useRouter } from "next/navigation";
 
-// Define the extended Campaign type
+// Define the extended Campaign type with counts
 interface CampaignWithCounts extends Campaign {
     personaCount: number;
     characterCount: number;
 }
 
-// Define the API fetching function to call the Supabase Edge Function
+// API fetching function using Next.js API route
 const fetchCampaigns = async (): Promise<CampaignWithCounts[]> => {
-    // IMPORTANT: Replace [YOUR-PROJECT-REF] with your actual Supabase project reference.
-    const projectId = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID;
-    const supabaseFunctionUrl = `https://${projectId}.supabase.co/functions/v1/get-campaigns`;
-    // const supabaseFunctionUrl = 'https://[YOUR-PROJECT-REF].supabase.co/functions/v1/get-campaigns';
-
-    const response = await fetch(supabaseFunctionUrl, {
+    const response = await fetch('/api/campaigns', {
+        method: 'GET',
         headers: {
-            // You may need to pass your Supabase anon key if you have row-level security enabled
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-        }
+            'Content-Type': 'application/json',
+        },
+        cache: 'no-store', // Ensure fresh data on each request
     });
 
     if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to fetch campaigns');
     }
+
     return response.json();
 };
 
-const onNavigate = (view: string) => {
-    console.log(`Navigating to ${view}`);
-};
-
 const DashboardCampaignOverview = () => {
-    const { data: campaigns, isLoading: campaignsLoading, error: campaignsError } = useQuery<CampaignWithCounts[], Error>({
+    const router = useRouter();
+
+    const {
+        data: campaigns,
+        isLoading: campaignsLoading,
+        error: campaignsError,
+        refetch
+    } = useQuery<CampaignWithCounts[], Error>({
         queryKey: ['campaigns'],
         queryFn: fetchCampaigns,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnWindowFocus: true,
     });
+
+    const handleNavigateToCampaignGenerator = () => {
+        router.push('/campaigns/new');
+    };
+
+    const handleViewCampaign = (campaignId: string) => {
+        router.push(`/campaigns/${campaignId}`);
+    };
+
+    const  handleCampaignActionWithRefetch = async (campaign: Campaign, action: CampaignAction) => {
+        await handleCampaignAction(campaign.id, action);
+        // Refetch campaigns after action to update the list
+        refetch();
+    };
 
     return (
         <Card>
@@ -82,14 +100,22 @@ const DashboardCampaignOverview = () => {
                     </div>
                 ) : campaignsError ? (
                     <div className="text-center py-12 text-red-600">
-                        <p>Error loading campaigns: {campaignsError.message}</p>
+                        <p className="font-medium mb-2">Error loading campaigns</p>
+                        <p className="text-sm text-gray-600">{campaignsError.message}</p>
+                        <Button
+                            onClick={() => refetch()}
+                            variant="outline"
+                            className="mt-4"
+                        >
+                            Try Again
+                        </Button>
                     </div>
                 ) : (campaigns ?? []).length === 0 ? (
                     <div className="text-center py-12">
                         <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-lg text-gray-900 mb-2">No campaigns yet</h3>
                         <p className="text-gray-600 mb-6">Get started by creating your first Pokémon campaign</p>
-                        <Button onClick={() => onNavigate('campaign-generator')}>
+                        <Button onClick={handleNavigateToCampaignGenerator}>
                             <Plus className="w-4 h-4 mr-2" />
                             Create Your First Campaign
                         </Button>
@@ -99,34 +125,28 @@ const DashboardCampaignOverview = () => {
                         {(campaigns ?? []).map((campaign) => (
                             <div
                                 key={campaign.id}
-                                className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                                className="border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                                onClick={() => handleViewCampaign(campaign.id)}
                             >
                                 <div className="flex items-start justify-between">
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 flex-1">
                                         <div className="flex items-center space-x-3">
-                                            <h3 className="text-lg text-gray-900">{campaign.title}</h3>
-                                            {/* The 'status' property is not in the Campaign model.*/}
-                                            {/* You may need to add it to the schema and regenerate the client */}
-                                            {/* <Badge*/}
-                                            {/*    variant="secondary"*/}
-                                            {/*    className={`flex items-center space-x-1 ${getStatusColor(campaign.status)}`}*/}
-                                            {/* >*/}
-                                            {/*    {getStatusIcon(campaign.status)}*/}
-                                            {/*    <span className="capitalize">{campaign.status}</span>*/}
-                                            {/* </Badge>*/}
+                                            <h3 className="text-lg font-semibold text-gray-900">{campaign.title}</h3>
                                         </div>
 
-                                        <p className="text-gray-600 text-sm max-w-2xl">{campaign.campaign_objective}</p>
+                                        <p className="text-gray-600 text-sm max-w-2xl line-clamp-2">
+                                            {campaign.campaignObjective}
+                                        </p>
 
                                         <div className="flex items-center space-x-4 text-xs text-gray-500">
-                                            <span>Created {formatDate(campaign.created_at)}</span>
+                                            <span>Created {formatDate(campaign.createdAt?.toString() || Date.now().toString())}</span>
                                             <span>•</span>
-                                            <span>{campaign.personaCount} personas</span>
+                                            <span>{campaign.personaCount} {campaign.personaCount === 1 ? 'persona' : 'personas'}</span>
                                             <span>•</span>
-                                            <span>{campaign.characterCount} characters</span>
+                                            <span>{campaign.characterCount} {campaign.characterCount === 1 ? 'character' : 'characters'}</span>
                                             <span>•</span>
-                                            <span className="capitalize">{campaign.post_type.replace('_', ' ')} posts</span>
-                                            {campaign.days_of_week.length === 7 ? (
+                                            <span className="capitalize">{campaign.postType.replace('_', ' ')} posts</span>
+                                            {campaign.daysOfWeek.length === 7 ? (
                                                 <>
                                                     <span>•</span>
                                                     <span>Daily posts</span>
@@ -134,13 +154,13 @@ const DashboardCampaignOverview = () => {
                                             ) : (
                                                 <>
                                                     <span>•</span>
-                                                    <span>{campaign.days_of_week.length}x per week</span>
+                                                    <span>{campaign.daysOfWeek.length}x per week</span>
                                                 </>
                                             )}
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center">
+                                    <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
@@ -154,32 +174,32 @@ const DashboardCampaignOverview = () => {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-48">
                                                 <DropdownMenuItem
-                                                    onClick={() => handleCampaignAction(campaign, 'view')}
-                                                    className="flex items-center space-x-2"
+                                                    onClick={() => handleViewCampaign(campaign.id)}
+                                                    className="flex items-center space-x-2 cursor-pointer"
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                     <span>View</span>
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    onClick={() => handleCampaignAction(campaign, 'archive')}
-                                                    className="flex items-center space-x-2"
+                                                    onClick={() => handleCampaignActionWithRefetch(campaign, 'archive')}
+                                                    className="flex items-center space-x-2 cursor-pointer"
                                                 >
                                                     <Archive className="h-4 w-4" />
                                                     <span>Archive</span>
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    onClick={() => handleCampaignAction(campaign, 'unpublish')}
-                                                    className="flex items-center space-x-2"
+                                                    onClick={() => handleCampaignActionWithRefetch(campaign, 'unpublish')}
+                                                    className="flex items-center space-x-2 cursor-pointer"
                                                 >
                                                     <PauseCircle className="h-4 w-4" />
                                                     <span>Unpublish</span>
                                                 </DropdownMenuItem>
 
                                                 <DropdownMenuItem
-                                                    onClick={() => handleCampaignAction(campaign, 'delete')}
-                                                    className="flex items-center space-x-2 text-red-600 hover:text-red-700 focus:text-red-700"
+                                                    onClick={() => handleCampaignActionWithRefetch(campaign, 'delete')}
+                                                    className="flex items-center space-x-2 text-red-600 hover:text-red-700 focus:text-red-700 cursor-pointer"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                     <span>Delete</span>
@@ -196,4 +216,5 @@ const DashboardCampaignOverview = () => {
         </Card>
     );
 };
+
 export default DashboardCampaignOverview;

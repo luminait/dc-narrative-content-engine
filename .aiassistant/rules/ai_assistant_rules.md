@@ -18,65 +18,110 @@ Your goals:
 1. Keep client/server boundaries clean. Never import server code into client components.
 2. Recommend file placement that follows this structure:
 
+
 dc-narrative-content-engine/
 ├── app/
 │   ├── (auth)/
 │   ├── campaigns/
-│   │   ├── Dashboard.tsx                       # Campaign list
-│   │   ├── new/Dashboard.tsx                   # Create campaign
+│   │   ├── page.tsx                       # Campaign list
+│   │   ├── new/page.tsx                   # Create campaign
 │   │   └── [campaignId]/                  # Campaign details scope
-│   │       ├── Dashboard.tsx                   # Campaign details (overview)
 │   │       └── posts/                     # Posts for a single campaign
-│   │           ├── Dashboard.tsx               # Posts list for campaign
-│   │           └── [postId]/Dashboard.tsx      # Post details for campaign
+│   │           ├── page.tsx               # Posts list for campaign
+│   │           └── [postId]/page.tsx      # Post details for campaign
 │   │
 │   ├── api/
+│   │   ├── campaigns/                     # Campaign API routes
 │   │   ├── generate-post/route.ts         # POST → n8n (HMAC) to generate post
-│   │   └── approve-post/route.ts          # POST → publish/approve a draft
+│   │   ├── approve-post/route.ts          # POST → publish/approve a draft
+│   │   ├── characters.ts                  # Characters API
+│   │   └── client.ts                      # API client utilities
 │   ├── layout.tsx
-│   └── Dashboard.tsx
+│   ├── page.tsx
+│   ├── providers.tsx
+│   └── favicon.ico
 │
 ├── src/
+│   ├── app/
 │   ├── features/
 │   │   ├── campaigns/
+│   │   │   ├── posts/
+│   │   │   ├── sections/                  # Campaign form sections
+│   │   │   │   ├── CampaignDetails.tsx
+│   │   │   │   ├── CharactersSelection.tsx
+│   │   │   │   ├── FormActionsSection.tsx
+│   │   │   │   ├── MergeFieldsSection.tsx
+│   │   │   │   ├── PersonasSection.tsx
+│   │   │   │   ├── PostTypeSection.tsx
+│   │   │   │   ├── ScheduleSection.tsx
+│   │   │   │   └── VideoLengthSection.tsx
 │   │   │   ├── CampaignForm.tsx
-│   │   │   ├── CampaignList.tsx
 │   │   │   └── campaign.schema.ts
-│   │   └── posts/
-│   │       ├── PostList.tsx
-│   │       ├── PostDetails.tsx
-│   │       └── post.schema.ts
+│   │   └── dashboard/
+│   │       └── Dashboard.tsx
 │   ├── lib/
-│   │   ├── actions.ts                     # server actions (create campaign, approve post)
-│   │   ├── auth.ts
-│   │   ├── fetcher.ts                     # fetch + tags
-│   │   ├── hmac.ts
-│   │   └── zod/
+│   │   ├── hooks/
+│   │   ├── mappers/
+│   │   │   └── campaignFormDataMapper.ts
+│   │   ├── types/
+│   │   │   └── ui.ts
+│   │   ├── zod/
+│   │   ├── campaigns.ts                   # Campaign utilities
+│   │   └── utils.ts                       # General utilities
 │   ├── server/
-│   │   ├── supabase/                       # Supabase functionality (server-only/admin)
-│   │   │   ├── client.ts                   # Supabase client (server-only/admin)
+│   │   ├── actions/                       # Server actions
+│   │   ├── db/                            # Database layer
+│   │   │   ├── prisma/
+│   │   │   │   ├── migrations/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── schema.prisma
+│   │   │   │   └── seed.ts
+│   │   │   ├── index.ts
+│   │   │   └── types.ts
+│   │   ├── queries/                       # Database queries
+│   │   ├── supabase/                      # Supabase functionality (server-only/admin)
+│   │   │   ├── client.ts                  # Supabase client (server-only/admin)
 │   │   │   ├── middleware.ts
 │   │   │   └── server.ts
-│   │   ├── db.ts                          
-│   │   ├── campaigns.queries.ts                   # queries/mutations
-│   │   └── posts.ts                       # queries/mutations for posts
+│   │   ├── webhooks/                      # Webhook handlers
+│   │   ├── campaigns.ts                   # Campaign server logic
+│   │   └── dataFetchingCaches.ts          # Cache utilities
 │   └── styles/
 │
-├── public/
+├── assets/
 │
-├── packages/{ui,config,types}/
+├── packages/
+│   ├── ui/                                # Shared UI components
+│   │   ├── auth/
+│   │   ├── common/
+│   │   ├── dashboard/
+│   │   ├── layout/
+│   │   ├── providers/
+│   │   ├── shadcn/                        # shadcn/ui components
+│   │   ├── src/
+│   │   └── tutorial/
+│   └── config/                            # Shared config
 │
 ├── tests/
 │
-├── next.config.mjs
+├── .aiassistant/                          # Rules for the Ai assistants to follow for building the app
+│   └── rules/
+│
+├── next.config.ts
 │
 ├── tailwind.config.ts
 │
 ├── tsconfig.json
 │
-├── .env.example
+├── components.json
 │
-└── README.md                        # Project overview & setup guide
+├── middleware.ts
+│
+├── package.json
+│
+├── pnpm-lock.yaml
+│
+└── README.md                              # Project overview & setup guide
 
 3. Always:
     - Use Zod for validation; infer types.

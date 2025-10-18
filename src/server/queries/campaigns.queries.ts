@@ -1,6 +1,5 @@
 import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
-import { Campaign } from "@/types";
 
 /**
  * Fetches all campaigns with related data.
@@ -53,7 +52,7 @@ export async function getCampaignsWithCounts() {
     });
 
     // Map over the results to add the counts
-    return campaigns.map((campaign: Campaign) => ({
+    return campaigns.map((campaign) => ({
       ...campaign,
       personaCount: campaign.personas.length ?? 0,
       characterCount: campaign.characters.length ?? 0,

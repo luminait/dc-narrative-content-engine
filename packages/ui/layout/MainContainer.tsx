@@ -1,7 +1,7 @@
 'use client';
 
 import { useSidebar } from "@/ui/shadcn/sidebar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/src/lib/utils";
 
 export default function MainContainer({ children }: { children: React.ReactNode }) {
     const { open, isMobile } = useSidebar();

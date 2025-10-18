@@ -2,40 +2,52 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Character, MergeField, Persona } from '@/lib/types';
 import { getCharacters } from '@/app/api/characters';
+import { 
+  type CampaignFormData,
+  type CharacterFormData,
+  type PersonaFormData,
+  type MergeField,
+  safeParseCampaignForm,
+  validateCampaignForm,
+} from '@/src/features/campaigns/campaign.schema';
+import { charactersToFormData } from '@/src/lib/mappers/campaignFormDataMapper';
+
 // NOTE: You would create these API services similarly to getCharacters
 // import { getPersonas } from '@/lib/api/personas';
-// import { createCampaign, CreateCampaignPayload } from '@/lib/api/campaigns';
+// import { createCampaign } from '@/lib/api/campaigns';
 
 export function useCampaignForm() {
     const router = useRouter();
 
-    // Form Input State
-    const [formData, setFormData] = useState({
+    // Form Input State - Using Zod types
+    const [formData, setFormData] = useState<Partial<CampaignFormData>>({
         title: '',
-        campaignObjective: '',
+        objective: '',
         narrativeContext: '',
         postLength: '',
-        postCaptionLength: '',
         startDate: '',
-        endDate: ''
+        endDate: '',
+        cadence: {
+            daysOfWeek: [],
+            frequency: 'weekly',
+        },
+        postType: 'image',
+        personas: [],
+        characters: [],
+        mergeFields: [],
     });
-    const [cadence, setCadence] = useState({
-        daysOfWeek: [] as string[],
-        frequency: 'weekly' as 'weekly' | 'bi-weekly'
-    });
-    const [postType, setPostType] = useState<'image' | 'carousel' | 'video'>('image');
 
-    // Data & Selection State
-    const [characters, setCharacters] = useState<Character[]>([]);
-    const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
+    // Data & Selection State - Using Zod form types
+    const [characters, setCharacters] = useState<CharacterFormData[]>([]);
+    const [personas, setPersonas] = useState<PersonaFormData[]>([]);
     const [characterSearch, setCharacterSearch] = useState('');
 
     // Loading & Error State
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
     // Debounced search effect
     useEffect(() => {
@@ -43,7 +55,10 @@ export function useCampaignForm() {
             setIsLoading(true);
             getCharacters(characterSearch)
                 .then(response => {
-                    setCharacters(response.characters);
+                    // Map Prisma types to Zod form types
+                    const formCharacters = charactersToFormData(response.characters);
+                    setCharacters(formCharacters);
+                    
                     if (response.source === 'fallback') {
                         setError(response.message || 'Using fallback character data.');
                     } else {
@@ -64,7 +79,9 @@ export function useCampaignForm() {
         // Promise.all([getCharacters(), getPersonas()])
         getCharacters()
             .then(response => {
-                setCharacters(response.characters);
+                const formCharacters = charactersToFormData(response.characters);
+                setCharacters(formCharacters);
+                
                 if (response.source === 'fallback') {
                     setError(response.message || 'Using fallback character data.');
                 }
@@ -73,49 +90,117 @@ export function useCampaignForm() {
             .finally(() => setIsLoading(false));
     }, []);
 
-    const handleCharacterToggle = useCallback((characterName: string) => {
-        setSelectedCharacters(prev =>
-            prev.includes(characterName)
-                ? prev.filter(c => c !== characterName)
-                : [...prev, characterName]
-        );
+    const handleCharacterToggle = useCallback((characterId: string) => {
+        setFormData(prev => {
+            const currentCharacters = prev.characters || [];
+            const newCharacters = currentCharacters.includes(characterId)
+                ? currentCharacters.filter(c => c !== characterId)
+                : [...currentCharacters, characterId];
+            
+            return {
+                ...prev,
+                characters: newCharacters,
+            };
+        });
+    }, []);
+
+    const handlePersonaToggle = useCallback((personaId: string) => {
+        setFormData(prev => {
+            const currentPersonas = prev.personas || [];
+            const newPersonas = currentPersonas.includes(personaId)
+                ? currentPersonas.filter(p => p !== personaId)
+                : [...currentPersonas, personaId];
+            
+            return {
+                ...prev,
+                personas: newPersonas,
+            };
+        });
+    }, []);
+
+    const handleFieldChange = useCallback(<K extends keyof CampaignFormData>(
+        field: K,
+        value: CampaignFormData[K]
+    ) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value,
+        }));
+        
+        // Clear validation error for this field
+        setValidationErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[field];
+            return newErrors;
+        });
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
+        setValidationErrors({});
 
-        // const payload: CreateCampaignPayload = { ... };
         try {
-            // const newCampaign = await createCampaign(payload);
+            // Validate with Zod
+            const validatedData = validateCampaignForm(formData);
+            
+            // TODO: Send to server action or API route
+            // const newCampaign = await createCampaign(validatedData);
             // router.push(`/campaigns/${newCampaign.id}`);
-            console.log("Form submitted!", { formData, selectedCharacters });
+            
+            console.log("Form submitted with validated data!", validatedData);
             alert("Campaign created successfully! (Simulation)");
             router.push('/');
         } catch (err) {
-            setError(`Failed to create campaign: ${(err as Error).message}`);
+            if (err instanceof Error && 'errors' in err) {
+                // Zod validation errors
+                const zodErrors = (err as any).errors;
+                const errorMap: Record<string, string> = {};
+                zodErrors.forEach((error: any) => {
+                    const path = error.path.join('.');
+                    errorMap[path] = error.message;
+                });
+                setValidationErrors(errorMap);
+                setError('Please fix the validation errors above.');
+            } else {
+                setError(`Failed to create campaign: ${(err as Error).message}`);
+            }
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    // Safe validation for real-time feedback (optional)
+    const validateField = useCallback((field: keyof CampaignFormData) => {
+        const result = safeParseCampaignForm(formData);
+        if (!result.success) {
+            const fieldError = result.error.issues.find(
+                (err) => err.path[0] === field
+            );
+            return fieldError?.message;
+        }
+        return undefined;
+    }, [formData]);
+
     return {
         // State
         formData,
         characters,
-        selectedCharacters,
+        personas,
         characterSearch,
         isLoading,
         isSubmitting,
         error,
-        postType,
+        validationErrors,
 
         // Handlers
         setFormData,
         setCharacterSearch,
         handleCharacterToggle,
-        setPostType,
+        handlePersonaToggle,
+        handleFieldChange,
         handleSubmit,
+        validateField,
     };
 }
