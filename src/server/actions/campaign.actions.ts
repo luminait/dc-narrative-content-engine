@@ -7,6 +7,114 @@ import { campaignFormSchema, type CampaignFormData } from '@/src/features/campai
 import { sendWebhookToN8n } from '@/src/server/webhooks/SendWebhookToN8n';
 import { formDataToPrismaInput } from '@/src/lib/mappers/campaignFormDataMapper';
 
+
+/**
+ * Campaign action type definition
+ */
+export type CampaignAction = 'archive' | 'unpublish' | 'delete';
+
+/**
+ * Handles campaign state changes (archive, unpublish, delete).
+ * Unified server action for common campaign status mutations.
+ */
+export async function handleCampaignAction(
+    campaignId: string,
+    action: CampaignAction
+) {
+    'use server';
+
+    try {
+        switch (action) {
+            case 'archive':
+                await prisma.campaign.update({
+                    where: { id: campaignId },
+                    data: { isArchived: true },
+                });
+                break;
+
+            case 'unpublish':
+                await prisma.campaign.update({
+                    where: { id: campaignId },
+                    data: { isActive: false },
+                });
+                break;
+
+            case 'delete':
+                await prisma.campaign.update({
+                    where: { id: campaignId },
+                    data: { deletedAt: new Date() },
+                });
+                break;
+
+            default:
+                throw new Error(`Unknown campaign action: ${action}`);
+        }
+
+        // Revalidate caches
+        revalidateTag('campaigns');
+        revalidateTag(`campaign-${campaignId}`);
+
+        return { success: true, action };
+    } catch (error) {
+        console.error(`Campaign ${action} error:`, error);
+        throw new Error(`Failed to ${action} campaign`);
+    }
+}
+
+
+
+/**
+ * Fetches all campaigns.
+ * Server Action for retrieving campaigns with related data.
+ */
+export async function getCampaignsAction() {
+    'use server';
+
+    try {
+        const campaigns = await prisma.campaign.findMany({
+            where: { deletedAt: null },
+            include: {
+                personas: { include: { persona: true } },
+                characters: { include: { character: true } },
+            },
+            orderBy: { updatedAt: 'desc' },
+        });
+
+        return { success: true, campaigns };
+    } catch (error) {
+        console.error('Campaign fetch error:', error);
+        throw new Error('Failed to fetch campaigns');
+    }
+}
+
+/**
+ * Fetches a single campaign by ID.
+ * Server Action for retrieving a specific campaign with full details.
+ */
+export async function getCampaignByIdAction(campaignId: string) {
+    'use server';
+
+    try {
+        const campaign = await prisma.campaign.findUnique({
+            where: { id: campaignId, deletedAt: null },
+            include: {
+                personas: { include: { persona: true } },
+                characters: { include: { character: true } },
+                mergeFields: true,
+            },
+        });
+
+        if (!campaign) {
+            throw new Error('Campaign not found');
+        }
+
+        return { success: true, campaign };
+    } catch (error) {
+        console.error('Campaign fetch error:', error);
+        throw new Error('Failed to fetch campaign');
+    }
+}
+
 /**
  * Creates a new campaign.
  * Server Action for campaign creation with validation, database persistence, and webhook notification.

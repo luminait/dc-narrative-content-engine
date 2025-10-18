@@ -48,9 +48,6 @@ const Navbar = () => {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-
-
-
             </div>
         </nav>
     );
