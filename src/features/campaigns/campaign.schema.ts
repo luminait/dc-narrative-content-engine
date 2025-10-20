@@ -72,6 +72,7 @@ export type Cadence = z.infer<typeof cadenceSchema>;
 export type MergeField = z.infer<typeof mergeFieldSchema>;
 export type CharacterFormData = z.infer<typeof characterFormSchema>;
 export type PersonaFormData = z.infer<typeof personaFormSchema>;
+export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
 
 // ============================================================================
 // Validation Helpers

@@ -6,14 +6,14 @@ import { toast } from 'sonner';
 import type { Persona, Character } from '@/src/server/db/types';
 import { createCampaignAction } from '@/src/server/actions/campaign.actions';
 import type { CampaignFormData, MergeField, Cadence } from './campaign.schema';
-import CampaignDetails from './sections/CampaignDetails';
-import ScheduleSection from './sections/ScheduleSection';
-import PersonasSection from './sections/PersonasSection';
-import CharactersSection from './sections/CharactersSelection';
-import PostTypeSection from './sections/PostTypeSection';
-import VideoLengthSection from './sections/VideoLengthSection';
-import MergeFieldsSection from './sections/MergeFieldsSection';
-import FormActionsSection from './sections/FormActionsSection';
+import CampaignDetails from '@/src/features/campaigns/new/sections/CampaignDetails';
+import ScheduleSection from '@/src/features/campaigns/new/sections/ScheduleSection';
+import PersonasSection from '@/src/features/campaigns/new/sections/PersonasSection';
+import CharactersSection from '@/src/features/campaigns/new/sections/CharactersSelection';
+import PostTypeSection from '@/src/features/campaigns/new/sections/PostTypeSection';
+import VideoLengthSection from '@/src/features/campaigns/new/sections/VideoLengthSection';
+import MergeFieldsSection from '@/src/features/campaigns/new/sections/MergeFieldsSection';
+import FormActionsSection from '@/src/features/campaigns/new/sections/FormActionsSection';
 
 interface CampaignFormProps {
   personas: Persona[];

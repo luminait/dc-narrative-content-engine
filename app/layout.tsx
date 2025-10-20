@@ -1,11 +1,11 @@
-import type {Metadata} from "next";
-import {Geist} from "next/font/google";
-import {ThemeProvider} from "@/ui/providers/ThemeProvider";
+import type { Metadata } from "next";
+import { Geist } from "next/font/google";
+import { ThemeProvider } from "@/ui/providers/ThemeProvider";
 import "../src/styles/globals.css";
-import {SidebarProvider} from "@/ui/shadcn/sidebar";
+import { SidebarInset, SidebarProvider } from "@/ui/shadcn/sidebar";
 import AppSidebar from "@/ui/layout/AppSidebar";
 import Navbar from "@/ui/layout/Navbar";
-import {cookies} from "next/headers";
+import { cookies } from "next/headers";
 import MainContainer from "@/ui/layout/MainContainer";
 import Providers from "@/app/providers";
 
@@ -14,24 +14,24 @@ const defaultUrl = process.env.VERCEL_URL
     : "http://localhost:3000";
 
 export const metadata: Metadata = {
-    metadataBase: new URL(defaultUrl),
+    metadataBase: new URL( defaultUrl ),
     title: "Pokémon Content Engine",
     description: "A narrative content generation engine powered by luminAIt.",
 };
 
-const geistSans = Geist({
+const geistSans = Geist( {
     variable: "--font-geist-sans",
     display: "swap",
-    subsets: ["latin"],
-});
+    subsets: [ "latin" ],
+} );
 
-export default async function RootLayout({
-                                       children,
-                                   }: Readonly<{
+export default async function RootLayout( {
+                                              children,
+                                          }: Readonly<{
     children: React.ReactNode;
-}>) {
+}> ) {
     const cookiesStore = await cookies();
-    const defaultOpen = cookiesStore.get("sidebar_state")?.value === "open";
+    const defaultOpen = cookiesStore.get( "sidebar_state" )?.value === "open";
     return (
         <html lang="en" suppressHydrationWarning>
         <body className={`${geistSans.className} antialiased`}>
@@ -43,14 +43,16 @@ export default async function RootLayout({
         >
             <Providers>
                 <SidebarProvider defaultOpen>
-                    <AppSidebar/>
                     <MainContainer>
-                        <div className="flex h-screen flex-col">
-                            <Navbar/>
-                            <div className="flex-1 overflow-y-auto p-8">
-                                {children}
-                            </div>
-                        </div>
+                    <AppSidebar/>
+                        {/*<div className="flex h-screen flex-col">*/}
+                            <SidebarInset>
+                                <Navbar/>
+                                <main className="flex-1 overflow-y-auto p-8">
+                                    {children}
+                                </main>
+                            </SidebarInset>
+                        {/*</div>*/}
                     </MainContainer>
                 </SidebarProvider>
             </Providers>

@@ -8,7 +8,7 @@ import { Input } from '@/ui/shadcn/input';
 import { Label } from '@/ui/shadcn/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { FileText, ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import type { MergeField } from '../campaign.schema';
+import type { MergeField } from '../../campaign.schema';
 
 interface MergeFieldsSectionProps {
   mergeFields: MergeField[];

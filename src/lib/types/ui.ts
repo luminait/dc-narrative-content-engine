@@ -8,8 +8,10 @@ import type { Campaign, Character, Persona } from '@/src/server/db/types';
 /**
  * Campaign with computed status field for UI display.
  */
+export type CampaignStatus = 'draft' | 'active' | 'completed' | 'archived';
+
 export type CampaignWithStatus = Campaign & {
-  status: 'draft' | 'active' | 'completed' | 'archived';
+  status: CampaignStatus;
 };
 
 /**
@@ -63,6 +65,7 @@ export interface PostGeneratorProps {
   onSavePost: (post: Post) => void;
 }
 
+export type PostStatus = 'draft' | 'scheduled' | 'published';
 /**
  * Post type for social media content.
  */
@@ -72,7 +75,7 @@ export interface Post {
   title: string;
   content: string;
   hashtags: string[];
-  status: 'draft' | 'scheduled' | 'published';
+  status: PostStatus;
   scheduledAt?: string;
   imageUrl?: string;
   mergeFieldValues?: Record<string, string>;

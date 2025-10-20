@@ -8,7 +8,7 @@ import { Label } from '@/ui/shadcn/label';
 import { Checkbox } from '@/ui/shadcn/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Calendar, ChevronDown, ChevronRight } from 'lucide-react';
-import type { Cadence } from '../campaign.schema';
+import type { Cadence } from '../../campaign.schema';
 
 interface ScheduleSectionProps {
   cadence: Cadence;
