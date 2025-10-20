@@ -26,7 +26,8 @@
     "paths": {
       "@/*": ["./*"],
       "@/ui/*": ["./packages/ui/*"],
-      "@/types": ["./src/server/db/types"]
+      "@/src/*": ["./src/*"],
+      "@/config/*": ["./packages/config/*"]
     }
   },
   "include": [

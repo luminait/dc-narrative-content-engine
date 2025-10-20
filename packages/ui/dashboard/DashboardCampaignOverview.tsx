@@ -1,16 +1,14 @@
+'use client';
 
-'use client'
-
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/ui/shadcn/card";
-import {Archive, Calendar, Eye, MoreVertical, PauseCircle, Plus, Trash2} from "lucide-react";
-import {Button} from "@/ui/shadcn/button";
-import {Skeleton} from "@/ui/shadcn/skeleton";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/ui/shadcn/dropdown-menu";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/shadcn/card";
+import { Archive, Calendar, Eye, MoreVertical, PauseCircle, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/ui/shadcn/button";
+import { Skeleton } from "@/ui/shadcn/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/ui/shadcn/dropdown-menu";
 import { CampaignAction, handleCampaignAction } from "@/src/server/actions/campaign.actions";
 import { formatDate } from "@/src/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { Campaign } from "@/src/server/db/generated/prisma";
 import { useRouter } from "next/navigation";
+import { Campaign } from "@/src/server/db/generated/prisma";
 
 // Define the extended Campaign type with counts
 interface CampaignWithCounts extends Campaign {
@@ -18,38 +16,15 @@ interface CampaignWithCounts extends Campaign {
     characterCount: number;
 }
 
-// API fetching function using Next.js API route
-const fetchCampaigns = async (): Promise<CampaignWithCounts[]> => {
-    const response = await fetch('/api/campaigns', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        cache: 'no-store', // Ensure fresh data on each request
-    });
+interface DashboardCampaignOverviewProps {
+    campaigns: CampaignWithCounts[] | undefined;
+    isLoading: boolean;
+    error: Error | null;
+    refetch: () => void;
+}
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Failed to fetch campaigns');
-    }
-
-    return response.json();
-};
-
-const DashboardCampaignOverview = () => {
+const DashboardCampaignOverview = ({ campaigns, isLoading, error, refetch }: DashboardCampaignOverviewProps) => {
     const router = useRouter();
-
-    const {
-        data: campaigns,
-        isLoading: campaignsLoading,
-        error: campaignsError,
-        refetch
-    } = useQuery<CampaignWithCounts[], Error>({
-        queryKey: ['campaigns'],
-        queryFn: fetchCampaigns,
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: true,
-    });
 
     const handleNavigateToCampaignGenerator = () => {
         router.push('/campaigns/new');
@@ -59,7 +34,7 @@ const DashboardCampaignOverview = () => {
         router.push(`/campaigns/${campaignId}`);
     };
 
-    const  handleCampaignActionWithRefetch = async (campaign: Campaign, action: CampaignAction) => {
+    const handleCampaignActionWithRefetch = async (campaign: Campaign, action: CampaignAction) => {
         await handleCampaignAction(campaign.id, action);
         // Refetch campaigns after action to update the list
         refetch();
@@ -74,7 +49,7 @@ const DashboardCampaignOverview = () => {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                {campaignsLoading ? (
+                {isLoading ? (
                     <div className="space-y-4">
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="border rounded-lg p-4">
@@ -98,10 +73,10 @@ const DashboardCampaignOverview = () => {
                             </div>
                         ))}
                     </div>
-                ) : campaignsError ? (
+                ) : error ? (
                     <div className="text-center py-12 text-red-600">
                         <p className="font-medium mb-2">Error loading campaigns</p>
-                        <p className="text-sm text-gray-600">{campaignsError.message}</p>
+                        <p className="text-sm text-gray-600">{error.message}</p>
                         <Button
                             onClick={() => refetch()}
                             variant="outline"

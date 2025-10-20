@@ -1,3 +1,5 @@
+'use client';
+
 import {
     Sidebar,
     SidebarContent,
@@ -17,7 +19,9 @@ import Link from "next/link";
 import Image from "next/image";
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/ui/shadcn/collapsible";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/ui/shadcn/dropdown-menu";
-
+import { useSession } from "@/src/providers";
+import { createClient } from "@/src/server/supabase/client";
+import { useRouter } from "next/navigation";
 
 // Menu items.
 const applicationMenuItems = [
@@ -57,6 +61,19 @@ const campaigns = [
 ]
 
 const AppSidebar = () => {
+    const { session } = useSession();
+    const supabase = createClient();
+    const router = useRouter();
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+    };
+
+    const handleSignIn = () => {
+        router.push('/login');
+    };
+
     return (
         <Sidebar collapsible={"offcanvas"} side={"left"}>
             <SidebarHeader className={"py-4"}>
@@ -136,13 +153,19 @@ const AppSidebar = () => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuButton>
-                                    <User2/> John Doe <ChevronUp className="ml-auto h-4 w-4"/>
+                                    <User2/> {session ? session.user.email : "Sign In"} <ChevronUp className="ml-auto h-4 w-4"/>
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Account</DropdownMenuItem>
-                                <DropdownMenuItem>Settings</DropdownMenuItem>
-                                <DropdownMenuItem>Sign out</DropdownMenuItem>
+                                {session ? (
+                                    <>
+                                        <DropdownMenuItem>Account</DropdownMenuItem>
+                                        <DropdownMenuItem>Settings</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
+                                    </>
+                                ) : (
+                                    <DropdownMenuItem onClick={handleSignIn}>Sign in</DropdownMenuItem>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </SidebarMenuItem>

@@ -1,6 +1,6 @@
 'use client'
-import Link from "next/link";
-import {LogOut, Moon, Settings, SquareMenu, User} from "lucide-react";
+
+import {LogOut, Settings, User} from "lucide-react";
 import {Avatar, AvatarFallback, AvatarImage} from "@/ui/shadcn/avatar";
 import {
     DropdownMenu,
@@ -9,7 +9,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/ui/shadcn/dropdown-menu";
-import {Button} from "@/ui/shadcn/button";
 import ThemeModeToggle from "@/ui/common/ThemeModeToggle";
 import {SidebarTrigger, useSidebar} from "@/ui/shadcn/sidebar";
 
@@ -27,10 +26,10 @@ const Navbar = () => {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger>
-                        <Avatar>
-                            <AvatarImage src="https://github.com/shadcn.png"/>
-                            <AvatarFallback>CN</AvatarFallback>
-                        </Avatar>
+                        {/*<Avatar className={"h-2 w-2"}>*/}
+                        {/*    <AvatarImage src="https://github.com/shadcn.png"/>*/}
+                        {/*    <AvatarFallback>CN</AvatarFallback>*/}
+                        {/*</Avatar>*/}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent sideOffset={10} align={"end"}>
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>

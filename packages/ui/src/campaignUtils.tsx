@@ -1,7 +1,7 @@
 import { CheckCircle, Clock } from "lucide-react";
-import { Campaign } from "@/packages/types";
+import { CampaignStatus, CampaignWithStatus } from "@/src/lib/types/ui";
 
-export const getStatusIcon = ( status: Campaign['status'] ) => {
+export const getStatusIcon = ( status: CampaignStatus ) => {
     switch ( status ) {
         case 'active':
             return <CheckCircle className="w-4 h-4 text-green-600"/>;
@@ -12,7 +12,7 @@ export const getStatusIcon = ( status: Campaign['status'] ) => {
     }
 };
 
-export const getStatusColor = ( status: Campaign['status'] ) => {
+export const getStatusColor = ( status: CampaignStatus ) => {
     switch ( status ) {
         case 'active':
             return 'bg-green-100 text-green-800';
@@ -20,5 +20,7 @@ export const getStatusColor = ( status: Campaign['status'] ) => {
             return 'bg-yellow-100 text-yellow-800';
         case 'completed':
             return 'bg-gray-100 text-gray-800';
+        case "archived":
+            return 'bg-amber-500 text-gray-800';
     }
 };
