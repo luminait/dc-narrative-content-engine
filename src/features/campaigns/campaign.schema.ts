@@ -48,7 +48,7 @@ export const personaFormSchema = z.object({
 /**
  * Main campaign form schema
  */
-export const campaignFormSchema = z.object({
+export const campaignSchema = z.object({
     title: z.string().min(1, 'Title is required'),
     objective: z.string().min(1, 'Objective is required'),
     narrativeContext: z.string().optional(),
@@ -61,18 +61,11 @@ export const campaignFormSchema = z.object({
     personas: z.array(z.string()).min(1, 'Select at least one persona'),
     characters: z.array(z.string()).min(1, 'Select at least one character'),
     mergeFields: z.array(mergeFieldSchema).optional(),
+    isArchived: z.boolean().optional(),
+    isActive: z.boolean().optional(),
+    isDraft: z.boolean().optional(),
 });
 
-// ============================================================================
-// Inferred Types (For Form Hook)
-// ============================================================================
-
-export type CampaignFormData = z.infer<typeof campaignFormSchema>;
-export type Cadence = z.infer<typeof cadenceSchema>;
-export type MergeField = z.infer<typeof mergeFieldSchema>;
-export type CharacterFormData = z.infer<typeof characterFormSchema>;
-export type PersonaFormData = z.infer<typeof personaFormSchema>;
-export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
 
 // ============================================================================
 // Validation Helpers
@@ -82,15 +75,15 @@ export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
  * Validates campaign form data and returns parsed result
  * @throws ZodError if validation fails
  */
-export function validateCampaignForm(data: unknown): CampaignFormData {
-    return campaignFormSchema.parse(data);
+export function validateCampaignForm(data: unknown): CampaignData {
+    return campaignSchema.parse(data);
 }
 
 /**
  * Safe validation that returns success/error result
  */
 export function safeParseCampaignForm(data: unknown) {
-    return campaignFormSchema.safeParse(data);
+    return campaignSchema.safeParse(data);
 }
 
 // ============================================================================
@@ -102,8 +95,8 @@ export function safeParseCampaignForm(data: unknown) {
  * Represents a simplified view of character images/assets
  */
 export const characterAssetUISchema = z.object({
-    id: z.string().uuid(),
-    url: z.string().url().optional(),
+    id: z.uuid(),
+    url: z.url().optional(),
     isPrimary: z.boolean().optional(),
     label: z.string().optional(),
 });
@@ -113,9 +106,20 @@ export const characterAssetUISchema = z.object({
  * This is the type that should be passed to CharactersSelection component
  */
 export const characterSelectionSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string(),
     characterTypes: z.string().optional().nullable(),
     imageUrl: z.string().optional(), // Pre-computed default image URL
 });
 
+// ============================================================================
+// Inferred Types (For Form Hook)
+// ============================================================================
+
+export type CampaignData = z.infer<typeof campaignSchema>;
+export type Cadence = z.infer<typeof cadenceSchema>;
+export type MergeField = z.infer<typeof mergeFieldSchema>;
+export type CharacterData = z.infer<typeof characterFormSchema>;
+export type PersonaData = z.infer<typeof personaFormSchema>;
+export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
+export type CharacterAssetUI = z.infer<typeof characterAssetUISchema>;

@@ -1,6 +1,6 @@
 import { getCampaignById } from "@/src/server/queries/campaigns.queries";
 import { Badge } from "@/ui/shadcn/badge";
-import { getStatusColor } from "@/ui/src/campaignUtils";
+import { getStatusColor } from "@/ui/src/utils";
 import { getCampaignWithStatus } from "@/src/lib/utils/campaigns";
 import { CampaignWithStatus } from "@/src/lib/types/ui";
 import CampaignDetails from "@/src/features/campaigns/details/sections/CampaignDetails";

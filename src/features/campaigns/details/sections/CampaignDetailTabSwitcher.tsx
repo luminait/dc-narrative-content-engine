@@ -1,18 +1,31 @@
 'use client';
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 
 const CampaignDetailTabSwitcher = () => {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const tab = searchParams.get('tab') || 'overview';
+
+    const handleTabChange = (value: string) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('tab', value);
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
     return (
         <>
             {/* Tabs */}
-            <Tabs value={"overview"} onValueChange={() => {}} className="w-full">
+            <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="posts">Posts</TabsTrigger>
                     <TabsTrigger value="merge-fields">Merge Fields</TabsTrigger>
                 </TabsList>
 
+                {/* Ensure the pressing a tab upates the URL with the new tab value */}
                 <TabsContent value="overview" className="space-y-6">
                     {/*<OverviewTab*/}
                     {/*    campaign={campaign}*/}

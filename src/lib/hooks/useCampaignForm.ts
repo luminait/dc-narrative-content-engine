@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCharacters } from '@/app/api/characters';
 import { 
-  type CampaignFormData,
-  type CharacterFormData,
-  type PersonaFormData,
+  type CampaignData,
+  type CharacterData,
+  type PersonaData,
   type MergeField,
   safeParseCampaignForm,
   validateCampaignForm,
@@ -21,7 +21,7 @@ export function useCampaignForm() {
     const router = useRouter();
 
     // Form Input State - Using Zod types
-    const [formData, setFormData] = useState<Partial<CampaignFormData>>({
+    const [formData, setFormData] = useState<Partial<CampaignData>>({
         title: '',
         objective: '',
         narrativeContext: '',
@@ -39,8 +39,8 @@ export function useCampaignForm() {
     });
 
     // Data & Selection State - Using Zod form types
-    const [characters, setCharacters] = useState<CharacterFormData[]>([]);
-    const [personas, setPersonas] = useState<PersonaFormData[]>([]);
+    const [characters, setCharacters] = useState<CharacterData[]>([]);
+    const [personas, setPersonas] = useState<PersonaData[]>([]);
     const [characterSearch, setCharacterSearch] = useState('');
 
     // Loading & Error State
@@ -118,9 +118,9 @@ export function useCampaignForm() {
         });
     }, []);
 
-    const handleFieldChange = useCallback(<K extends keyof CampaignFormData>(
+    const handleFieldChange = useCallback(<K extends keyof CampaignData>(
         field: K,
-        value: CampaignFormData[K]
+        value: CampaignData[K]
     ) => {
         setFormData(prev => ({
             ...prev,
@@ -172,7 +172,7 @@ export function useCampaignForm() {
     };
 
     // Safe validation for real-time feedback (optional)
-    const validateField = useCallback((field: keyof CampaignFormData) => {
+    const validateField = useCallback((field: keyof CampaignData) => {
         const result = safeParseCampaignForm(formData);
         if (!result.success) {
             const fieldError = result.error.issues.find(
