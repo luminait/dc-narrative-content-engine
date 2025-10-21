@@ -66,8 +66,9 @@ dc-narrative-content-engine/
 │   │   ├── types/
 │   │   │   └── ui.ts
 │   │   ├── zod/
-│   │   ├── campaigns.ts                   # Campaign utilities
-│   │   └── utils.ts                       # General utilities
+│   │   └── utils/                          
+│   │       ├── campaigns.ts                # Campaign utilities
+│   │       └── utils.ts                    # General utilities
 │   ├── server/
 │   │   ├── actions/                       # Server actions
 │   │   ├── db/                            # Database layer

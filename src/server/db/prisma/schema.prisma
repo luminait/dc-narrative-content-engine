@@ -33,12 +33,14 @@ model Campaign {
   narrativeContext  String?             @map("narrative_context")
   isActive          Boolean             @default(true) @map("is_active")
   isArchived        Boolean             @default(false) @map("is_archived")
+  isDraft           Boolean             @default(false) @map("is_draft")
 
   creator     User?                 @relation(fields: [createdBy], references: [userId])
   characters  CampaignsCharacters[]
   personas    CampaignsPersonas[]
   mergeFields ShotstackMergeField[]
   renders     ShotstackRender[]
+  posts       Post[]
   // The trigger trg_enforce_archived_inactive is not representable in Prisma Schema.
   // It runs: execute FUNCTION enforce_archived_inactive ();
 
@@ -144,14 +146,56 @@ model AuthUser {
 
 // Placeholder model for Supabase storage
 model StorageObject {
-  id     String           @id @db.Uuid
-  assets CharacterAsset[]
-  render ShotstackRender?
+  id         String           @id @db.Uuid
+  assets     CharacterAsset[]
+  render     ShotstackRender?
+  postImages PostImage[]
   // This table is in the 'storage' schema. You may need to enable multi-schema support
   // in the datasource block if you haven't already.
   // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
 
   @@map("objects")
+}
+
+// ... existing code ...
+
+model Post {
+  id          String    @id @default(uuid()) @db.Uuid
+  campaignId  String?   @map("campaign_id") @db.Uuid
+  postType    PostType? @map("post_type")
+  title       String?
+  content     String?
+  hashtags    String?
+  isActive    Boolean   @default(false) @map("is_active")
+  isDraft     Boolean   @default(true) @map("is_draft")
+  isArchived  Boolean   @default(false) @map("is_archived")
+  scheduledAt DateTime? @map("scheduled_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  campaign Campaign?   @relation(fields: [campaignId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  images   PostImage[]
+  // The CHECK constraint chk_posts_exactly_one_status_true is not representable in Prisma Schema.
+  // The trigger trg_posts_normalize_status is not representable in Prisma Schema.
+
+  @@map("posts")
+}
+
+model PostImage {
+  postId    String   @map("post_id") @db.Uuid
+  objectId  String   @map("object_id") @db.Uuid
+  position  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  storageObject StorageObject @relation(fields: [objectId], references: [id], onDelete: Restrict)
+
+  @@id([postId, objectId])
+  @@index([postId])
+  @@index([objectId])
+  @@index([postId, position], name: "idx_posts_images_post_order")
+  @@map("posts_images")
 }
 
 model ShotstackMergeField {

@@ -3,21 +3,23 @@
  * These types are safe for client-side use and add computed/display fields.
  */
 
-import type { Campaign, Character, Persona } from '@/src/server/db/types';
+import type { CampaignData, PersonaData, CharacterData } from "@/src/features/campaigns/campaign.schema";
+import type { PostWithImages } from '@/src/features/campaigns/posts/post.schema';
+import type { PostImageRecord } from '@/src/features/campaigns/posts/postImages.schema';
 
 /**
  * Campaign with computed status field for UI display.
  */
-export type CampaignStatus = 'draft' | 'active' | 'completed' | 'archived';
+export type CampaignStatus = 'draft' | 'active' | 'completed' | 'archived' | 'scheduled';
 
-export type CampaignWithStatus = Campaign & {
+export type CampaignWithStatus = CampaignData & {
   status: CampaignStatus;
 };
 
 /**
  * Campaign with relation counts for list views.
  */
-export type CampaignWithCounts = Campaign & {
+export type CampaignWithCounts = CampaignData & {
   personaCount: number;
   characterCount: number;
 };
@@ -25,7 +27,7 @@ export type CampaignWithCounts = Campaign & {
 /**
  * Character with computed default image for UI display.
  */
-export type CharacterWithImage = Character & {
+export type CharacterWithImage = CharacterData & {
   defaultImage?: string;
   type?: string; // Legacy compatibility for filtering
 };
@@ -45,41 +47,38 @@ export type View =
  * Component props types.
  */
 export interface DashboardProps {
-  onNavigate: (view: View, campaign?: Campaign) => void;
+  onNavigate: (view: View, campaign?: CampaignData) => void;
   onDeleteCampaign: (campaignId: string) => void;
 }
 
 export interface CampaignGeneratorProps {
-  onNavigate: (view: View, campaign?: Campaign) => void;
-  onSaveCampaign: (campaign: Campaign) => void;
+  onNavigate: (view: View, campaign?: CampaignData) => void;
+  onSaveCampaign: (campaign: CampaignData) => void;
 }
 
 export interface CampaignDetailsProps {
-  campaign: Campaign;
+  campaign: CampaignData;
   onNavigate: (view: View) => void;
   onDeleteCampaign: (campaignId: string) => void;
 }
 
 export interface PostGeneratorProps {
-  onNavigate: (view: View, campaign?: Campaign) => void;
+  onNavigate: (view: View, campaign?: CampaignData) => void;
   onSavePost: (post: Post) => void;
 }
 
-export type PostStatus = 'draft' | 'scheduled' | 'published';
+export type PostStatus = 'draft' | 'active' | 'archived';
+
 /**
- * Post type for social media content.
+ * Post type alias derived from Zod schema to avoid redefinition.
+ * Note: Uses snake_case and Date types as defined in the schema.
  */
-export interface Post {
-  id: string;
-  campaignId: string;
-  title: string;
-  content: string;
-  hashtags: string[];
-  status: PostStatus;
-  scheduledAt?: string;
-  imageUrl?: string;
-  mergeFieldValues?: Record<string, string>;
-}
+export type Post = PostWithImages;
+
+/**
+ * Post image relationship type alias derived from Zod schema.
+ */
+export type PostImage = PostImageRecord;
 
 /**
  * Webhook settings type.

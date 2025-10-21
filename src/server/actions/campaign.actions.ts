@@ -3,7 +3,7 @@
 
 import { revalidateTag } from 'next/cache';
 import { prisma } from '@/src/server/db';
-import { campaignFormSchema, type CampaignFormData } from '@/src/features/campaigns/campaign.schema';
+import { campaignSchema, type CampaignData } from '@/src/features/campaigns/campaign.schema';
 import { sendWebhookToN8n } from '@/src/server/webhooks/SendWebhookToN8n';
 import { formDataToPrismaInput } from '@/src/lib/mappers/campaignFormDataMapper';
 
@@ -119,9 +119,9 @@ export async function getCampaignByIdAction(campaignId: string) {
  * Creates a new campaign.
  * Server Action for campaign creation with validation, database persistence, and webhook notification.
  */
-export async function createCampaignAction(formData: CampaignFormData) {
+export async function createCampaignAction(formData: CampaignData) {
     // 1. Validate with Zod
-    const validatedData = campaignFormSchema.parse(formData);
+    const validatedData = campaignSchema.parse(formData);
 
     try {
         // 2. Transform to Prisma input

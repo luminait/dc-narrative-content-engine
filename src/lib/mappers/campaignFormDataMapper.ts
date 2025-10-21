@@ -1,9 +1,9 @@
 import type { Campaign, Prisma, Character, Persona } from '@/src/server/db/types';
 import type {
-    CampaignFormData,
-    CharacterFormData,
+    CampaignData,
+    CharacterData,
     CharacterSelectionData,
-    PersonaFormData
+    PersonaData
 } from '@/src/features/campaigns/campaign.schema';
 import type { CampaignWithStatus } from '@/src/lib/types/ui';
 import { getDefaultImage } from '@/src/server/db/helpers/character';
@@ -21,7 +21,7 @@ import { getDefaultImage } from '@/src/server/db/helpers/character';
  * @returns Prisma input for campaign creation
  */
 export function formDataToPrismaInput(
-    formData: CampaignFormData,
+    formData: CampaignData,
     userId: string
 ): Prisma.CampaignCreateInput {
     return {
@@ -73,7 +73,7 @@ export function formDataToPrismaInput(
  * @param character - Full Prisma Character type from database
  * @returns Simplified character data for form consumption
  */
-export function characterToFormData(character: Character): CharacterFormData {
+export function characterToFormData(character: Character): CharacterData {
     return {
         id: character.id,
         name: character.name,
@@ -85,7 +85,7 @@ export function characterToFormData(character: Character): CharacterFormData {
 /**
  * Maps array of Prisma Characters to form-friendly data.
  */
-export function charactersToFormData(characters: Character[]): CharacterFormData[] {
+export function charactersToFormData(characters: Character[]): CharacterData[] {
     return characters.map(characterToFormData);
 }
 
@@ -96,7 +96,7 @@ export function charactersToFormData(characters: Character[]): CharacterFormData
  * @param persona - Full Prisma Persona type from database
  * @returns Simplified persona data for form consumption
  */
-export function personaToFormData(persona: Persona): PersonaFormData {
+export function personaToFormData(persona: Persona): PersonaData {
     return {
         id: persona.id,
         name: persona.label || 'persona',
@@ -107,7 +107,7 @@ export function personaToFormData(persona: Persona): PersonaFormData {
 /**
  * Maps array of Prisma Personas to form-friendly data.
  */
-export function personasToFormData(personas: Persona[]): PersonaFormData[] {
+export function personasToFormData(personas: Persona[]): PersonaData[] {
     return personas.map(personaToFormData);
 }
 
@@ -122,7 +122,7 @@ export function campaignToFormData(campaign: Campaign & {
     personas?: Array<{ personaId: string }>;
     characters?: Array<{ characterId: string }>;
     mergeFields?: Array<any>;
-}): Partial<CampaignFormData> {
+}): Partial<CampaignData> {
     return {
         title: campaign.title,
         objective: campaign.campaignObjective,
@@ -158,7 +158,7 @@ export function campaignToFormData(campaign: Campaign & {
  * Computes campaign status from database fields.
  */
 export function getCampaignStatus(
-    campaign: Campaign
+    campaign: CampaignData
 ): 'draft' | 'active' | 'completed' | 'archived' {
     if (campaign.isArchived) return 'archived';
     if (!campaign.isActive) return 'draft';
@@ -169,7 +169,7 @@ export function getCampaignStatus(
 /**
  * Adds computed status to campaign.
  */
-export function addStatusToCampaign(campaign: Campaign): CampaignWithStatus {
+export function addStatusToCampaign(campaign: CampaignData) : CampaignWithStatus {
     return {
         ...campaign,
         status: getCampaignStatus(campaign),

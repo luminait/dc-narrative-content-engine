@@ -6,7 +6,7 @@ import { Button } from "@/ui/shadcn/button";
 import { Skeleton } from "@/ui/shadcn/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/ui/shadcn/dropdown-menu";
 import { CampaignAction, handleCampaignAction } from "@/src/server/actions/campaign.actions";
-import { formatDate } from "@/src/lib/utils";
+import { formatDate } from "@/src/lib/utils/utils";
 import { useRouter } from "next/navigation";
 import { Campaign } from "@/src/server/db/generated/prisma";
 

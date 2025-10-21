@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { Persona, Character } from '@/src/server/db/types';
 import { createCampaignAction } from '@/src/server/actions/campaign.actions';
-import type { CampaignFormData, MergeField, Cadence } from './campaign.schema';
+import type { CampaignData, MergeField, Cadence } from './campaign.schema';
 import CampaignDetails from '@/src/features/campaigns/new/sections/CampaignDetails';
 import ScheduleSection from '@/src/features/campaigns/new/sections/ScheduleSection';
 import PersonasSection from '@/src/features/campaigns/new/sections/PersonasSection';
@@ -67,7 +67,7 @@ export default function CampaignForm({ personas, characters, valueTypes }: Campa
 
     startTransition(async () => {
       try {
-        const payload: CampaignFormData = {
+        const payload: CampaignData = {
           ...formData,
           cadence,
           postType,
