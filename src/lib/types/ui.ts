@@ -3,9 +3,14 @@
  * These types are safe for client-side use and add computed/display fields.
  */
 
-import type { CampaignData, PersonaData, CharacterData } from "@/src/features/campaigns/campaign.schema";
-import type { PostWithImages } from '@/src/features/campaigns/posts/post.schema';
+import type { CampaignData, PersonaData } from "@/src/features/campaigns/campaign.schema";
+import type { CharacterDbData } from "@/src/features/characters/character.schema";
+import type { PostBase, PostWithImages } from '@/src/features/campaigns/posts/post.schema';
 import type { PostImageRecord } from '@/src/features/campaigns/posts/postImages.schema';
+
+/*********************************************************************************************************************
+ * CAMPAIGNS
+ *********************************************************************************************************************/
 
 /**
  * Campaign with computed status field for UI display.
@@ -24,56 +29,53 @@ export type CampaignWithCounts = CampaignData & {
   characterCount: number;
 };
 
+export type Campaign = CampaignWithStatus & CampaignWithCounts;
+
+
+/*********************************************************************************************************************
+* CHARACTERS
+*********************************************************************************************************************/
+
+
 /**
  * Character with computed default image for UI display.
  */
-export type CharacterWithImage = CharacterData & {
+export type CharacterWithImage = CharacterDbData & {
   defaultImage?: string;
   type?: string; // Legacy compatibility for filtering
 };
 
-/**
- * Navigation view types for the application.
- */
-export type View = 
-  | 'dashboard' 
-  | 'campaign-generator' 
-  | 'campaign-details' 
-  | 'post-generator' 
-  | 'post-details' 
-  | 'settings';
 
 /**
- * Component props types.
+ * Character with Image and Character data
  */
-export interface DashboardProps {
-  onNavigate: (view: View, campaign?: CampaignData) => void;
-  onDeleteCampaign: (campaignId: string) => void;
-}
+export type Character = CharacterWithImage;
 
-export interface CampaignGeneratorProps {
-  onNavigate: (view: View, campaign?: CampaignData) => void;
-  onSaveCampaign: (campaign: CampaignData) => void;
-}
 
-export interface CampaignDetailsProps {
-  campaign: CampaignData;
-  onNavigate: (view: View) => void;
-  onDeleteCampaign: (campaignId: string) => void;
-}
+/*********************************************************************************************************************
+ * PERSONAS
+ *********************************************************************************************************************/
+export type Persona = PersonaData;
+
+/*********************************************************************************************************************
+ * POSTS
+ *********************************************************************************************************************/
 
 export interface PostGeneratorProps {
   onNavigate: (view: View, campaign?: CampaignData) => void;
   onSavePost: (post: Post) => void;
 }
 
-export type PostStatus = 'draft' | 'active' | 'archived';
+export type PostStatus = 'draft' | 'published' | 'scheduled' | 'archived';
+
+export type PostWithStatus = PostBase & {
+    status: PostStatus
+};
 
 /**
  * Post type alias derived from Zod schema to avoid redefinition.
- * Note: Uses snake_case and Date types as defined in the schema.
  */
-export type Post = PostWithImages;
+export type Post = PostWithImages & PostWithStatus;
 
 /**
  * Post image relationship type alias derived from Zod schema.
@@ -87,4 +89,39 @@ export interface WebhookSettings {
   environment: 'testing' | 'production';
   testingUrl: string;
   productionUrl: string;
+}
+
+
+/*********************************************************************************************************************
+ * DASHBOARD
+ *********************************************************************************************************************/
+
+/**
+ * Navigation view types for the application.
+ */
+export type View =
+    | 'dashboard'
+    | 'campaign-generator'
+    | 'campaign-details'
+    | 'post-generator'
+    | 'post-details'
+    | 'settings';
+
+/**
+ * Component props types.
+ */
+export interface DashboardProps {
+    onNavigate: (view: View, campaign?: CampaignData) => void;
+    onDeleteCampaign: (campaignId: string) => void;
+}
+
+export interface CampaignGeneratorProps {
+    onNavigate: (view: View, campaign?: CampaignData) => void;
+    onSaveCampaign: (campaign: CampaignData) => void;
+}
+
+export interface CampaignDetailsProps {
+    campaign: CampaignData;
+    onNavigate: (view: View) => void;
+    onDeleteCampaign: (campaignId: string) => void;
 }

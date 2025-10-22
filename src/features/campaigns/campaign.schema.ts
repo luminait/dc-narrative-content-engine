@@ -20,20 +20,6 @@ export const mergeFieldSchema = z.object({
     length: z.string().optional(),
 });
 
-// ============================================================================
-// Zod Schemas for Form Data (UI Layer)
-// ============================================================================
-
-/**
- * Character schema for UI consumption
- * Simplified version focusing on what the form needs
- */
-export const characterFormSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    tagline: z.string().optional(),
-    imageUrl: z.string().optional(),
-});
 
 /**
  * Persona schema for UI consumption
@@ -41,14 +27,18 @@ export const characterFormSchema = z.object({
  */
 export const personaFormSchema = z.object({
     id: z.string(),
-    name: z.string(),
-    description: z.string().optional(),
+    label: z.string(),
+    description: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+    deletedAt: z.string().optional(),
 });
 
 /**
  * Main campaign form schema
  */
 export const campaignSchema = z.object({
+    id: z.uuid(),
     title: z.string().min(1, 'Title is required'),
     objective: z.string().min(1, 'Objective is required'),
     narrativeContext: z.string().optional(),
@@ -56,7 +46,7 @@ export const campaignSchema = z.object({
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     cadence: cadenceSchema,
-    postType: z.enum(['image', 'carousel', 'video']),
+    postType: z.enum(['single_image', 'carousel', 'video']),
     videoLength: z.union([z.literal(30), z.literal(45), z.literal(60)]).optional(),
     personas: z.array(z.string()).min(1, 'Select at least one persona'),
     characters: z.array(z.string()).min(1, 'Select at least one character'),
@@ -64,6 +54,7 @@ export const campaignSchema = z.object({
     isArchived: z.boolean().optional(),
     isActive: z.boolean().optional(),
     isDraft: z.boolean().optional(),
+    createdAt: z.date(),
 });
 
 
@@ -86,31 +77,7 @@ export function safeParseCampaignForm(data: unknown) {
     return campaignSchema.safeParse(data);
 }
 
-// ============================================================================
-// Character UI Schema (Extended for Selection Component)
-// ============================================================================
 
-/**
- * Character asset schema for UI consumption
- * Represents a simplified view of character images/assets
- */
-export const characterAssetUISchema = z.object({
-    id: z.uuid(),
-    url: z.url().optional(),
-    isPrimary: z.boolean().optional(),
-    label: z.string().optional(),
-});
-
-/**
- * Extended character schema for selection UI with image support
- * This is the type that should be passed to CharactersSelection component
- */
-export const characterSelectionSchema = z.object({
-    id: z.uuid(),
-    name: z.string(),
-    characterTypes: z.string().optional().nullable(),
-    imageUrl: z.string().optional(), // Pre-computed default image URL
-});
 
 // ============================================================================
 // Inferred Types (For Form Hook)
@@ -119,7 +86,4 @@ export const characterSelectionSchema = z.object({
 export type CampaignData = z.infer<typeof campaignSchema>;
 export type Cadence = z.infer<typeof cadenceSchema>;
 export type MergeField = z.infer<typeof mergeFieldSchema>;
-export type CharacterData = z.infer<typeof characterFormSchema>;
 export type PersonaData = z.infer<typeof personaFormSchema>;
-export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
-export type CharacterAssetUI = z.infer<typeof characterAssetUISchema>;

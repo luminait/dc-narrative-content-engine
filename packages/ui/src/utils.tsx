@@ -15,6 +15,7 @@ export const getCampaignStatusIcon = ( status: CampaignStatus ) => {
             return <Clock className="w-4 h-4 text-gray-600"/>;
     }
 };
+
 export const getPostStatusIcon = ( status: PostStatus ) => {
     switch ( status ) {
         case 'published':
@@ -23,13 +24,16 @@ export const getPostStatusIcon = ( status: PostStatus ) => {
             return <NotebookPen className="w-4 h-4 text-yellow-600"/>;
         case "scheduled":
             return <Clock className="w-4 h-4 text-gray-600"/>;
+        case "archived":
+            return <Archive className="w-4 h-4 text-amber-600"/>;
     }
 };
 
 
-export const getStatusColor = ( status: CampaignStatus ) => {
+export const getStatusColor = ( status: CampaignStatus | PostStatus ) => {
     switch ( status ) {
-        case 'active':
+        case "active":
+        case "published":
             return 'bg-green-100 text-green-800';
         case 'draft':
             return 'bg-yellow-100 text-yellow-800';

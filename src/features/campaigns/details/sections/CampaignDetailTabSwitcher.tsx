@@ -2,17 +2,31 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
+import { OverviewTab } from "@/src/features/campaigns/details/sections/OverviewTab";
+import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 
-const CampaignDetailTabSwitcher = () => {
+interface CampaignDetailTabSwitcherProps {
+    campaign: Campaign;
+    posts: Post[];
+    campaignCharacters: Character[];
+    campaignPersonas: Persona[];
+}
+
+const CampaignDetailTabSwitcher = ( {
+                                        campaign,
+                                        posts,
+                                        campaignCharacters,
+                                        campaignPersonas,
+                                    }: CampaignDetailTabSwitcherProps ) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const tab = searchParams.get('tab') || 'overview';
+    const tab = searchParams.get( 'tab' ) || 'overview';
 
-    const handleTabChange = (value: string) => {
-        const params = new URLSearchParams(searchParams);
-        params.set('tab', value);
-        router.push(`${pathname}?${params.toString()}`);
+    const handleTabChange = ( value: string ) => {
+        const params = new URLSearchParams( searchParams );
+        params.set( 'tab', value );
+        router.push( `${pathname}?${params.toString()}` );
     };
 
     return (
@@ -37,7 +51,16 @@ const CampaignDetailTabSwitcher = () => {
                     {/*    charactersError={charactersError}*/}
                     {/*    personasError={personasError}*/}
                     {/*/>*/}
-                    OverviewTabContent
+                    <OverviewTab
+                        campaign={campaign}
+                        posts={posts}
+                        campaignCharacters={campaignCharacters}
+                        campaignPersonas={campaignPersonas}
+                        charactersLoading={false}
+                        personasLoading={false}
+                        charactersError={null}
+                        personasError={null}
+                    />
                 </TabsContent>
 
                 <TabsContent value="posts" className="space-y-6">
