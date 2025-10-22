@@ -1,11 +1,16 @@
 import { getCampaignById } from "@/src/server/queries/campaigns.queries";
 import { Badge } from "@/ui/shadcn/badge";
 import { getStatusColor } from "@/ui/src/utils";
-import { getCampaignWithStatus } from "@/src/lib/utils/campaigns";
-import { CampaignWithStatus } from "@/src/lib/types/ui";
+import { buildCampaign } from "@/src/lib/utils/campaigns";
+import { CampaignData, campaignSchema } from "@/src/features/campaigns/campaign.schema";
+import { Campaign, Post, CharacterWithImage, Persona } from "@/src/lib/types/ui";
 import CampaignDetails from "@/src/features/campaigns/details/sections/CampaignDetails";
 import CampaignDetailTabSwitcher from "@/src/features/campaigns/details/sections/CampaignDetailTabSwitcher";
-
+import { getPostsForCampaign } from "@/src/server/queries/posts.queries";
+import { getCharactersForCampaign } from "@/src/server/queries/characters.queries";
+import { getPersonasForCampaign } from "@/src/server/queries/personas.queries";
+import { toUiPosts } from "@/src/lib/utils/posts";
+import { toUiCharacters } from "@/src/lib/utils/characters";
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
 // Typing `params` as a Promise keeps TypeScript correct for the new behavior.
@@ -15,24 +20,41 @@ type CampaignDetailsPageProps = {
     }>;
 };
 
-
-
 // Make the component async to fetch data on the server
-const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
+const CampaignDetailsPage = async ({ params }: CampaignDetailsPageProps) => {
     // Destructure campaignId from params to make access explicit
     const { campaignId } = await params;
 
     // Fetch the campaign data
-    const campaign = await getCampaignById( campaignId );
+    const response = await getCampaignById(campaignId);
 
     // Handle case where campaign is not found
-    if ( !campaign ) {
+    if (!response) {
         return <div>Campaign not found</div>;
     }
 
-    // Convert this into a CampaignWithStatus
+    // Validate the raw data against the Zod schema
+    const parsedResult = campaignSchema.safeParse(response);
 
-    const campaignWithStatus: CampaignWithStatus = getCampaignWithStatus( campaign );
+    if (!parsedResult.success) {
+        console.error("Campaign data validation failed:", parsedResult.error);
+        return <div>Invalid campaign data.</div>;
+    }
+
+    // At this point, we have type-safe data conforming to CampaignData
+    const campaignData: CampaignData = parsedResult.data;
+
+    const campaign: Campaign = buildCampaign(campaignData);
+
+    // Fetch raw data. The return types are now strictly enforced in the query functions.
+    const rawPosts = await getPostsForCampaign(campaign.id);
+    const rawCharacters = await getCharactersForCampaign(campaign.id);
+    const rawPersonas = await getPersonasForCampaign(campaign.id);
+
+    // Convert to UI types using the centralized utility functions
+    const posts: Post[] = toUiPosts(rawPosts);
+    const characters: CharacterWithImage[] = toUiCharacters(rawCharacters);
+    const personas: Persona[] = rawPersonas; // Direct assignment
 
     // Render the campaign details
     return (
@@ -41,11 +63,11 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl">{campaign.title}</h1>
-                        <Badge className={getStatusColor( campaignWithStatus.status )}>
-                            {campaignWithStatus.status}
+                        <Badge className={getStatusColor(campaign.status)}>
+                            {campaign.status}
                         </Badge>
                     </div>
-                    <p className="text-gray-600">{campaign.campaignObjective}</p>
+                    <p className="text-gray-600">{campaign.objective}</p>
                     {campaign.narrativeContext && (
                         <p className="text-sm text-gray-500 italic">
                             {campaign.narrativeContext}
@@ -54,7 +76,12 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 </div>
             </div>
             <CampaignDetails />
-            <CampaignDetailTabSwitcher />
+            <CampaignDetailTabSwitcher
+                campaign={campaign}
+                posts={posts}
+                campaignCharacters={characters}
+                campaignPersonas={personas}
+            />
         </div>
     );
 };

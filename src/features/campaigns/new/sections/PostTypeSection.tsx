@@ -7,19 +7,19 @@ import { Image, Images, Video, ChevronDown, ChevronRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface PostTypeSectionProps {
-  postType: 'image' | 'carousel' | 'video';
-  setPostType: React.Dispatch<React.SetStateAction<'image' | 'carousel' | 'video'>>;
+  postType: 'single_image' | 'carousel' | 'video';
+  setPostType: React.Dispatch<React.SetStateAction<'single_image' | 'carousel' | 'video'>>;
 }
 
 interface PostTypeOption {
-  id: 'image' | 'carousel' | 'video';
+  id: 'single_image' | 'carousel' | 'video';
   icon: LucideIcon;
   label: string;
   description: string;
 }
 
 const postTypeOptions: PostTypeOption[] = [
-  { id: 'image', icon: Image, label: 'Single Image', description: 'Single photo posts' },
+  { id: 'single_image', icon: Image, label: 'Single Image', description: 'Single photo posts' },
   { id: 'carousel', icon: Images, label: 'Image Carousel', description: 'Multiple image slides' },
   { id: 'video', icon: Video, label: 'Video', description: 'Video content' },
 ];

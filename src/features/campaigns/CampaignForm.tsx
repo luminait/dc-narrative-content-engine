@@ -40,7 +40,7 @@ export default function CampaignForm({ personas, characters, valueTypes }: Campa
     frequency: 'weekly',
   });
 
-  const [postType, setPostType] = useState<'image' | 'carousel' | 'video'>('image');
+  const [postType, setPostType] = useState<'single_image' | 'carousel' | 'video'>('image');
   const [videoLength, setVideoLength] = useState<30 | 45 | 60>(30);
   const [selectedPersonas, setSelectedPersonas] = useState<string[]>([]);
   const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);

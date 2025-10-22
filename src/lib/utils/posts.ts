@@ -1,26 +1,107 @@
-import { Post } from "@/src/lib/types/ui";
+import { Post, PostStatus, PostWithStatus } from "@/src/lib/types/ui";
+import {
+    PostBase,
+    PostImage,
+    PostWithImages,
+} from "@/src/features/campaigns/posts/post.schema";
+import { getPublicUrl } from "./supabase";
+
+// Type representing the raw image relation returned by Prisma
+export type RawPostImageFromPrisma = {
+    postId: string;
+    objectId: string;
+    createdAt: Date;
+    position: number;
+};
+
+// Type representing the entire post object returned by the campaign posts query
+export type RawPostFromQuery = PostBase & {
+    images: RawPostImageFromPrisma[];
+};
 
 /// Filter posts by derived status based on Zod-backed fields
-/// - published: is_active && !is_archived && (no future scheduled_at)
-/// - scheduled: scheduled_at in future and not archived
-/// - draft: is_draft and not archived
-/// @param posts - Array of posts to filter
-/// @returns An object containing filtered posts by status `published`, `scheduled`, and `draft`
 export const filterPostsByStatus = (posts: Post[]) => {
     const now = new Date();
 
-    const published = posts.filter((post) => {
-        const scheduledAt = post.scheduled_at ?? null;
-        const scheduledInFuture = scheduledAt ? scheduledAt.getTime() > now.getTime() : false;
-        return post.is_active === true && post.is_archived !== true && !scheduledInFuture;
+    const published = posts.filter(post => {
+        const scheduledAt = post.scheduledAt ?? null;
+        const scheduledInFuture = scheduledAt
+            ? scheduledAt.getTime() > now.getTime()
+            : false;
+        return (
+            post.isActive === true && post.isArchived !== true && !scheduledInFuture
+        );
     });
 
-    const scheduled = posts.filter((post) => {
-        const scheduledAt = post.scheduled_at ?? null;
-        return post.is_archived !== true && !!scheduledAt && scheduledAt.getTime() > now.getTime();
+    const scheduled = posts.filter(post => {
+        const scheduledAt = post.scheduledAt ?? null;
+        return (
+            post.isArchived !== true &&
+            !!scheduledAt &&
+            scheduledAt.getTime() > now.getTime()
+        );
     });
 
-    const draft = posts.filter((post) => post.is_draft === true && post.is_archived !== true);
+    const draft = posts.filter(
+        post => post.isDraft === true && post.isArchived !== true,
+    );
 
     return { published, scheduled, draft };
+};
+
+export const getPostWithStatus = (
+    post: PostWithImages | PostBase,
+): PostWithStatus => {
+    let status: PostStatus = getPostStatus(post);
+
+    return { ...post, status };
+};
+
+export const getPostStatus = (post: PostBase): PostStatus => {
+    let status: PostStatus;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = post.scheduledAt ? new Date(post.scheduledAt) : null;
+    if (startDate) startDate.setHours(0, 0, 0, 0);
+
+    if (post.isArchived) {
+        status = "archived";
+    } else if (post.isActive && (!startDate || today >= startDate)) {
+        status = "published";
+    } else if (startDate && today < startDate) {
+        status = "scheduled";
+    } else {
+        status = "draft";
+    }
+    return status;
+};
+
+/**
+ * Transforms raw post data from a Prisma query into the UI-specific `Post` type.
+ * This function computes the `status` and transforms the `images` array to include public URLs.
+ *
+ * @param rawPosts - The raw post data from the database query.
+ * @returns An array of posts conforming to the UI `Post` type.
+ */
+export const toUiPosts = (rawPosts: RawPostFromQuery[]): Post[] => {
+    return rawPosts.map(rawPost => {
+        const uiImages: PostImage[] = rawPost.images.map(image => ({
+            object_id: image.objectId,
+            created_at: image.createdAt,
+            position: image.position,
+            url: getPublicUrl("posts", image.objectId),
+        }));
+
+        const postWithUiImages = {
+            ...rawPost,
+            images: uiImages,
+        };
+
+        return {
+            ...postWithUiImages,
+            status: getPostStatus(postWithUiImages),
+        };
+    });
 };

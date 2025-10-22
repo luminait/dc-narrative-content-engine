@@ -32,7 +32,7 @@ export function useCampaignForm() {
             daysOfWeek: [],
             frequency: 'weekly',
         },
-        postType: 'image',
+        postType: 'single_image',
         personas: [],
         characters: [],
         mergeFields: [],

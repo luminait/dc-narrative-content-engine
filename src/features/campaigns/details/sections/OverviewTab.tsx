@@ -4,13 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/
 import { Badge } from '@/ui/shadcn/badge';
 import { Skeleton } from '@/ui/shadcn/skeleton';
 import { Alert, AlertDescription } from '@/ui/shadcn/alert';
-import type { Campaign, Character, Post } from '@/src/server/db/types';
-import  { CampaignWithStatus, Post, PostImage } from "@/src/lib/types/ui";
+import  { CampaignWithStatus, Post, PostImage, Character } from "@/src/lib/types/ui";
 import { getStatusColor } from '@/ui/src/utils';
 import { filterPostsByStatus } from "@/src/lib/utils/posts";
+import { CampaignData } from "@/src/features/campaigns/campaign.schema";
 
 interface OverviewTabProps {
-    campaign: Campaign;
+    campaign: CampaignData;
     posts: Post[];
     campaignCharacters: Character[];
     campaignPersonas: any[];
@@ -103,21 +103,21 @@ export function OverviewTab({
                                             <div className="flex items-center justify-between">
                                                 <span className="font-medium">{character.name}</span>
                                                 <Badge variant="outline">
-                                                    {character.character_types || character.type || 'Unknown'}
+                                                    {character.characterTypes || character.isTrainer || 'Unknown'}
                                                 </Badge>
                                             </div>
                                             {character.personality && (
                                                 <p className="text-sm text-gray-600 mt-1">{character.personality}</p>
                                             )}
                                             <div className="flex items-center space-x-4 text-xs text-gray-500 mt-1">
-                                                {character.is_human && (
+                                                {character.isHuman && (
                                                     <Badge variant="outline" className="text-xs">Human</Badge>
                                                 )}
-                                                {character.is_trainer && (
+                                                {character.isTrainer && (
                                                     <Badge variant="outline" className="text-xs">Trainer</Badge>
                                                 )}
-                                                {character.moral_alignment && (
-                                                    <span>Alignment: {character.moral_alignment}</span>
+                                                {character.moralAlignment && (
+                                                    <span>Alignment: {character.moralAlignment}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -160,7 +160,7 @@ export function OverviewTab({
                                         <div className="flex items-center space-x-2 text-xs text-gray-500 mt-2">
                                             <span>Key: {persona.key || persona.persona_key}</span>
                                             {persona.created_at && (
-                                                <span>Created: {new Date(persona.created_at).toLocaleDateString()}</span>
+                                                <span>Created: {new Date(persona.createdAt).toLocaleDateString()}</span>
                                             )}
                                         </div>
                                     </div>

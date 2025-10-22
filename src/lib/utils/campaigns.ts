@@ -1,6 +1,6 @@
-import { Campaign } from "@/src/server/db/types";
-import { CampaignWithStatus } from "@/src/lib/types/ui";
-import { CampaignStatus } from "@/src/lib/types/ui";
+import { Campaign, CampaignWithStatus, CampaignStatus } from "@/src/lib/types/ui";
+import { CampaignData } from "@/src/features/campaigns/campaign.schema";
+
 
 
 /**
@@ -23,7 +23,7 @@ export const normalizeCampaign = (campaign: any): Campaign => {
 };
 
 
-export const getCampaignWithStatus = (campaign: Campaign): CampaignWithStatus => {
+export const getCampaignWithStatus = (campaign: CampaignData): CampaignWithStatus => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -51,4 +51,24 @@ export const getCampaignWithStatus = (campaign: Campaign): CampaignWithStatus =>
     }
 
     return { ...campaign, status };
+};
+
+/**
+ * Constructs a complete `Campaign` object from `CampaignData`.
+ * This function computes derived UI fields like `status` and relation counts.
+ *
+ * @param campaignData - The base campaign data, typically from a form or database query.
+ * @returns A `Campaign` object with `status`, `personaCount`, and `characterCount`.
+ */
+export const buildCampaign = (campaignData: CampaignData): Campaign => {
+    const campaignWithStatus = getCampaignWithStatus(campaignData);
+
+    const personaCount = campaignData.personas?.length ?? 0;
+    const characterCount = campaignData.characters?.length ?? 0;
+
+    return {
+        ...campaignWithStatus,
+        personaCount,
+        characterCount,
+    };
 };
