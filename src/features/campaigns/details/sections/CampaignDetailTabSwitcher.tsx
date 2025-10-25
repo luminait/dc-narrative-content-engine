@@ -4,24 +4,28 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import { OverviewTab } from "@/src/features/campaigns/details/sections/OverviewTab";
 import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
+import { PostsTab } from "@/src/features/campaigns/details/sections/PostsTab";
 
 interface CampaignDetailTabSwitcherProps {
-    campaign: Campaign;
-    posts: Post[];
-    campaignCharacters: Character[];
-    campaignPersonas: Persona[];
+    campaignPersonas: Persona[],
+    campaign: Campaign,
+    characters: Character[],
+    posts: Post[]
 }
 
 const CampaignDetailTabSwitcher = ( {
+                                        campaignPersonas,
                                         campaign,
                                         posts,
-                                        campaignCharacters,
-                                        campaignPersonas,
+                                        characters,
                                     }: CampaignDetailTabSwitcherProps ) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const tab = searchParams.get( 'tab' ) || 'overview';
+
+    // Consume campaign data from the context
+
 
     const handleTabChange = ( value: string ) => {
         const params = new URLSearchParams( searchParams );
@@ -41,20 +45,10 @@ const CampaignDetailTabSwitcher = ( {
 
                 {/* Ensure the pressing a tab upates the URL with the new tab value */}
                 <TabsContent value="overview" className="space-y-6">
-                    {/*<OverviewTab*/}
-                    {/*    campaign={campaign}*/}
-                    {/*    posts={posts}*/}
-                    {/*    campaignCharacters={campaignCharacters}*/}
-                    {/*    campaignPersonas={campaignPersonas}*/}
-                    {/*    charactersLoading={charactersLoading}*/}
-                    {/*    personasLoading={personasLoading}*/}
-                    {/*    charactersError={charactersError}*/}
-                    {/*    personasError={personasError}*/}
-                    {/*/>*/}
                     <OverviewTab
                         campaign={campaign}
                         posts={posts}
-                        campaignCharacters={campaignCharacters}
+                        campaignCharacters={characters} // Use characters from context
                         campaignPersonas={campaignPersonas}
                         charactersLoading={false}
                         personasLoading={false}
@@ -64,12 +58,11 @@ const CampaignDetailTabSwitcher = ( {
                 </TabsContent>
 
                 <TabsContent value="posts" className="space-y-6">
-                    {/*<PostsTab*/}
-                    {/*    campaign={campaign}*/}
-                    {/*    posts={posts}*/}
-                    {/*    onNavigate={onNavigate}*/}
-                    {/*/>*/}
-                    Posts Tab Content
+                    <PostsTab
+                        campaign={campaign}
+                        posts={posts}
+                        onNavigate={() => {}}
+                    />
                 </TabsContent>
 
                 <TabsContent value="merge-fields" className="space-y-6">

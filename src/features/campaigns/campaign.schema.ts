@@ -5,18 +5,19 @@ import { z } from 'zod';
 // ============================================================================
 
 export const cadenceSchema = z.object({
-    daysOfWeek: z.array(z.string()).min(1, 'Select at least one day'),
+    daysOfWeek: z.array(z.enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])).min(1, 'Select at least one day'),
     frequency: z.enum(['weekly', 'bi-weekly']),
 });
 
 export const mergeFieldSchema = z.object({
-    id: z.string(),
-    mergeField: z.string().min(1),
+    id: z.string().optional(),
+    name: z.string().min(1),
     description: z.string().optional(),
-    valueType: z.string(),
-    value: z.string(),
-    startTime: z.string(),
-    endTime: z.string(),
+    mediaValueType: z.enum(['image', 'text', 'video', 'audio_voice', 'audio_music', 'gen_ai_image', 'gen_ai_text', 'gen_ai_video', 'gen_ai_voice', 'gen_ai_music', 'image_or_video']).optional(),
+    value: z.string().optional(),
+    type: z.enum(['text', 'character', 'environment', 'music', 'voiceover', 'sfx', 'luma_matte']).optional(),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
     length: z.string().optional(),
 });
 
@@ -27,7 +28,7 @@ export const mergeFieldSchema = z.object({
  */
 export const personaFormSchema = z.object({
     id: z.string(),
-    label: z.string(),
+    name: z.string(),
     description: z.string(),
     createdAt: z.string(),
     updatedAt: z.string(),
@@ -38,24 +39,30 @@ export const personaFormSchema = z.object({
  * Main campaign form schema
  */
 export const campaignSchema = z.object({
-    id: z.uuid(),
-    title: z.string().min(1, 'Title is required'),
-    objective: z.string().min(1, 'Objective is required'),
+    id: z.string(),
+    title: z.string(),
+    objective: z.string(),
     narrativeContext: z.string().optional(),
-    postLength: z.string().min(1, 'Post length is required'),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    cadence: cadenceSchema,
-    postType: z.enum(['single_image', 'carousel', 'video']),
-    videoLength: z.union([z.literal(30), z.literal(45), z.literal(60)]).optional(),
-    personas: z.array(z.string()).min(1, 'Select at least one persona'),
-    characters: z.array(z.string()).min(1, 'Select at least one character'),
-    mergeFields: z.array(mergeFieldSchema).optional(),
-    isArchived: z.boolean().optional(),
-    isActive: z.boolean().optional(),
-    isDraft: z.boolean().optional(),
-    createdAt: z.date(),
+    postCaptionLength: z.string(),
+    startDate: z.coerce.date().nullable().optional(),
+    endDate: z.coerce.date().nullable().optional(),
+    cadence: z.object({
+        daysOfWeek: z.array(z.string()),
+        frequency: z.string().optional(),
+    }),
+    postType: z.string(),
+    videoLength: z.number().optional(),
+    personas: z.array(z.string()),
+    characters: z.array(z.string()),
+    mergeFields: z.array(mergeFieldSchema),
+    isActive: z.boolean(),
+    isArchived: z.boolean(),
+    isDraft: z.boolean(),
+    createdAt: z.coerce.date().nullable().optional(),
+    updatedAt: z.coerce.date().nullable().optional(),
+    deletedAt: z.coerce.date().nullable().optional(),
 });
+
 
 
 // ============================================================================

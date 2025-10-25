@@ -1,10 +1,9 @@
 import type { Campaign, Prisma, Character, Persona } from '@/src/server/db/types';
 import type {
     CampaignData,
-    CharacterData,
-    CharacterSelectionData,
     PersonaData
 } from '@/src/features/campaigns/campaign.schema';
+import { CharacterSelectionData, CharacterData } from "@/src/features/characters/character.schema";
 import type { CampaignWithStatus } from '@/src/lib/types/ui';
 import { getDefaultImage } from '@/src/server/db/helpers/character';
 
@@ -33,7 +32,7 @@ export function formDataToPrismaInput(
         endDate: formData.endDate ? new Date(formData.endDate) : null,
         daysOfWeek: formData.cadence.daysOfWeek as any[], // TODO: Map to Weekdays enum
         frequency: formData.cadence.frequency === 'weekly' ? 'weekly' : 'monthly',
-        postType: formData.postType === 'image' ? 'single_image' : (formData.postType as any),
+        postType: formData.postType === 'single_image' ? 'single_image' : (formData.postType as any),
         postVideoLength: formData.videoLength as any,
         creator: {
             connect: { userId },
@@ -99,8 +98,10 @@ export function charactersToFormData(characters: Character[]): CharacterData[] {
 export function personaToFormData(persona: Persona): PersonaData {
     return {
         id: persona.id,
-        name: persona.label || 'persona',
-        description: persona.description || undefined,
+        name: persona.name || 'persona',
+        description: persona.description ?? '',
+        createdAt: persona.createdAt?.toISOString() || '',
+        updatedAt: persona.updatedAt?.toISOString() || '',
     };
 }
 

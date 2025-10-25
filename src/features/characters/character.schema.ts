@@ -73,7 +73,7 @@ export const characterFormSchema = z.object({
 // Inferred Types
 // ============================================================================
 
-export type CharacterDbData = z.infer<typeof characterDbSchema>;
+export type CharacterData = z.infer<typeof characterDbSchema>;
 export type CharacterFormData = z.infer<typeof characterFormSchema>;
 export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
 export type CharacterAssetUI = z.infer<typeof characterAssetUISchema>;

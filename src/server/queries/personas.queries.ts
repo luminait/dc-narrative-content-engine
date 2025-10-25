@@ -49,7 +49,7 @@ export const getPersonasForCampaign = unstable_cache(
         },
       },
       orderBy: {
-        label: 'asc',
+        name: 'asc',
       },
     });
   },

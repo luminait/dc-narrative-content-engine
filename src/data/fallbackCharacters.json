@@ -1,0 +1,597 @@
+[
+  {
+    "id": "01883ec0-0c29-4dbd-bedb-9fcce303ab32",
+    "name": "sharpedo",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "01e96cf4-541c-4bee-8a83-06a1b1035fb3",
+    "name": "starmie",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "044b0ea3-54d8-4b23-bc91-7cc8906283c3",
+    "name": "sandygast",
+    "type": "ghost",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "04b47ace-79e5-4e9d-9065-65a263d907de",
+    "name": "gyarados",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "08144bbf-2e5c-4276-a39a-59803090579e",
+    "name": "swampert",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "084b1344-aa78-4cf4-ac23-9c2723052adf",
+    "name": "charizard",
+    "type": "fire",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "09f8fee2-8537-4a2c-988b-012133afe4cf",
+    "name": "arceus",
+    "type": "normal",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "0b17b745-bede-4f0c-9286-e848661d2fa6",
+    "name": "gyarados-shiny",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "0e046f4a-fb08-4eed-9080-7a2f982862dd",
+    "name": "slowbro",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "0e57bc54-6d85-46ab-8070-ee9f216834e0",
+    "name": "lapras",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "0f0894f1-0a6e-468b-b452-dc4a36f25428",
+    "name": "chinchou",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "136f1c0d-7cc9-4d41-ba84-863a859a6ef9",
+    "name": "empoleon",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "13a357ca-fd39-4c5a-a3c6-f88003cf51a8",
+    "name": "greninja",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "1434b1d2-26c5-4346-9fad-2ee33c4e1f05",
+    "name": "barboach",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "14acb69a-10f4-47f8-a58e-e399a1258a82",
+    "name": "wingull",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "15e40cbf-fea7-4603-abf6-a3adb8084baa",
+    "name": "seismitoad",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "1ea6f400-6c2a-465f-a2f7-c34d8003f792",
+    "name": "eevee",
+    "type": "normal",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "1fcc8fe3-791e-4494-8263-6b5fc06b4b95",
+    "name": "dialga",
+    "type": "steel",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "21854863-0070-4660-b5db-11101f832648",
+    "name": "caterpie",
+    "type": "bug",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "266c6749-34bf-49bb-8aab-87bcad181577",
+    "name": "qwilfish",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "26adc98f-39c0-428f-9a2f-c5ebd4a6ec1f",
+    "name": "snorlax",
+    "type": "normal",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "27612cec-ff7b-4c1c-8de9-56fd20862c7b",
+    "name": "poliwhirl",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "278f0a28-aab4-4449-a674-23b8f5351ec1",
+    "name": "giovanni",
+    "type": "human",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "2afa0d0b-a7fe-4784-ae93-f94a7669e471",
+    "name": "ash",
+    "type": "human",
+    "is_human": true,
+    "is_trainer": true
+  },
+  {
+    "id": "3631b290-6170-4057-8cb1-dd137ce08f9c",
+    "name": "mewtwo",
+    "type": "psychic",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "3635ac17-500a-40d0-bee4-218441cfea51",
+    "name": "slowpoke",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "39ef92cf-1bd2-48d9-b28e-cd662f634f01",
+    "name": "giratina",
+    "type": "ghost",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "3cc8e859-dac4-45a5-b6a8-9898f3197a52",
+    "name": "carvanha",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "3d7a2519-1074-4d33-9d2b-8a520b497871",
+    "name": "carracosta",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "3eb4ec65-bf7c-44c6-9f9d-3f0e5674ae11",
+    "name": "cassidy",
+    "type": "human",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "40f94ea6-a5d4-4797-876b-65944ef33db1",
+    "name": "quagsire",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "43533623-b9ff-4064-8a78-a0a0c57c60f6",
+    "name": "lanturn",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "441b54d9-08c9-4734-90b0-072fb5a1f9c6",
+    "name": "pelipper",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "4879c705-3ccd-4505-9a42-faf130563d97",
+    "name": "james",
+    "type": "human",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "4ada8343-6594-4947-9f12-0261f329ffa6",
+    "name": "kingdra",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "4fa14d0a-6b8e-4d85-949d-705ae8c96753",
+    "name": "cloyster",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "4ff5ca3d-5e6d-4862-b90c-c06cab04f0ea",
+    "name": "marill",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "511e858f-bf46-4d0f-bc38-94616292e7c4",
+    "name": "rayquaza",
+    "type": "dragon",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "51619d71-311f-4f4e-a23a-7c0655b95cb3",
+    "name": "marshtomp",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "5f5d3dd9-cf17-4636-9837-e82d5d9c68f0",
+    "name": "azumarill",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "606eb493-8582-4363-95af-d2d63dd77b03",
+    "name": "jellicent",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "63693e5f-89b7-4aea-9033-11863099febe",
+    "name": "mantine",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "6ea45f44-2c43-45e4-a724-45705d15c38c",
+    "name": "raichu",
+    "type": "electric",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "7693b38a-2a43-48bf-a0ac-be82e155a158",
+    "name": "jessie",
+    "type": "human",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "78dda104-0e85-41f9-b0ea-ad5a6fe9e4b4",
+    "name": "relicanth",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "7b1819cb-6baa-465d-bfc3-6cbb33c6ffe2",
+    "name": "lombre",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "881c969f-21e2-4af1-9e1c-eef0c705b210",
+    "name": "swanna",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "89b23c74-c031-4394-87b6-01276135a668",
+    "name": "squirtle",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "8cf64bf7-8cdc-4f2c-8dab-002427b73060",
+    "name": "crawdaunt",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "8df215ac-575b-4c32-a77d-0282bdbcc650",
+    "name": "frillish",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "8e4e4cc3-29d3-4c19-bc20-307ff316dc01",
+    "name": "garchomp",
+    "type": "dragon",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "8fcddfd3-af82-49ab-85ed-e0c71d3044af",
+    "name": "sylveon",
+    "type": "fairy",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "8fd0d62a-8872-477f-ad5b-c837f9fe2e71",
+    "name": "dragonite",
+    "type": "dragon",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "9639a7cb-89ca-4249-ac35-3e56bb6dd30e",
+    "name": "scientist-female",
+    "type": "human",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "96581e28-a04c-464a-8808-82a30c064cc6",
+    "name": "ducklett",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "999fb07f-911b-428e-bb9a-824870b35599",
+    "name": "tentacruel",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "99c2bd81-7912-4206-be63-5f30b5632f23",
+    "name": "bulbasaur",
+    "type": "grass",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "9a9af159-59ab-4e8f-b362-8464cfdf1bbd",
+    "name": "psyduck",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "9c3499c1-b533-4f76-ae6d-99f37b67fd7c",
+    "name": "dewgong",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "9c710185-a0b8-4b7d-979f-ef87af076a85",
+    "name": "meowth",
+    "type": "normal",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "9c921713-0dd1-4202-b476-ce5d6e8088b0",
+    "name": "ho-oh",
+    "type": "fire",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "9e9e51fc-9643-4910-869a-a3937f06f4ae",
+    "name": "tirtouga",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "a39e68b3-4a79-4f8a-a732-c15ea929b906",
+    "name": "whiscash",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "a42aa1a9-d897-4220-a3fe-015ce8c13d5b",
+    "name": "corsola",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "a51b579d-be7f-4da6-876d-06bbc3226476",
+    "name": "shellder",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "acccc68d-6aff-4a46-99ee-3f0fe0bdd529",
+    "name": "palkia",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "aebad9f0-6c6e-4b20-b2b1-11d4c92cb190",
+    "name": "poliwrath",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "b152eb70-4749-47ce-82d3-10c77f9c04ec",
+    "name": "gengar",
+    "type": "ghost",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "b87e7bcf-6837-4a6b-b830-faee99ea71ac",
+    "name": "pikachu",
+    "type": "electric",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "b8a44a20-88c3-43fd-ba1c-24b016e47715",
+    "name": "weedle",
+    "type": "bug",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "b97c2e82-926c-45da-a4f9-bf609bad038b",
+    "name": "wooper",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "bbcb17a5-ee04-4a19-aa60-370315e3c1ef",
+    "name": "lucario",
+    "type": "fighting",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "cc6ba32e-0b98-4946-9caf-36d6a18b0ee4",
+    "name": "lugia",
+    "type": "psychic",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "cc87fb98-bb29-4893-a8ab-ed747e3ffd74",
+    "name": "keldeo",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "d045fa09-0234-4666-827f-399286dc015d",
+    "name": "slowking",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "d588723f-d2d8-466e-ae33-b59469611aa4",
+    "name": "butch",
+    "type": "human",
+    "is_human": true,
+    "is_trainer": false
+  },
+  {
+    "id": "d7b2c001-4ef6-4c0a-9f67-10641306b8da",
+    "name": "jigglypuff",
+    "type": "normal",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "d8a98467-15f5-42e9-b5a1-b0405084e7d6",
+    "name": "lotad",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "da7972d6-8403-4ce8-93e0-1b85345e7e91",
+    "name": "scientist-male",
+    "type": "human",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "decad1b0-e5f9-467e-af75-79e5f4645241",
+    "name": "gastrodon",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "f1dd429a-58a2-40b0-8a61-6af32f3bc923",
+    "name": "mew",
+    "type": "psychic",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "f344be1d-aad8-4ecd-a097-2d8d9dd01865",
+    "name": "palkia",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "f76a1f65-b82c-4434-90d2-f4052bac1d65",
+    "name": "palpitoad",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "fa8254c3-c613-4679-bc50-8a6064637214",
+    "name": "tentacool",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  },
+  {
+    "id": "febf2e6e-6f5f-46ac-a5b6-cd1eef3ed49d",
+    "name": "ludicolo",
+    "type": "water",
+    "is_human": false,
+    "is_trainer": false
+  }
+]

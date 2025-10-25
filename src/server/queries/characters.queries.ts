@@ -18,7 +18,7 @@ export const getCharacters = unstable_cache(
           },
         },
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { name: 'asc' },
     });
   },
   ['characters'],
