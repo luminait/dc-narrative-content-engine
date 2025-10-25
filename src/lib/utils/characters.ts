@@ -1,4 +1,4 @@
-import { CharacterDbData } from "@/src/features/characters/character.schema";
+import { CharacterData } from "@/src/features/characters/character.schema";
 import { CharacterWithImage } from "@/src/lib/types/ui";
 import { getPublicUrl } from "./supabase";
 
@@ -13,7 +13,7 @@ export type RawCharacterAssetFromPrisma = {
 
 // This is the complete shape of a character object returned by our data-fetching functions.
 // It is built from the DB-aligned schema and includes the `assets` relation.
-export type RawCharacterFromQuery = CharacterDbData & {
+export type RawCharacterFromQuery = CharacterData & {
     assets: RawCharacterAssetFromPrisma[];
 };
 

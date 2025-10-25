@@ -18,7 +18,7 @@ import {
 
 interface MergeFieldsTabProps {
     campaign: Campaign;
-    campaignMergeFields: any[];
+    campaignMergeFields: MergeField[];
     mergeFieldsLoading: boolean;
     mergeFieldsError: string | null;
     campaignPersonas: any[];

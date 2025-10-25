@@ -5,7 +5,7 @@ export const getPersonas = unstable_cache(
   async () => {
     return prisma.persona.findMany({
       where: { deletedAt: null },
-      orderBy: { label: 'asc' },
+      orderBy: { name: 'asc' },
     });
   },
   ['personas'],

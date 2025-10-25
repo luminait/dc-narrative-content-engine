@@ -4,7 +4,7 @@
  */
 
 import type { CampaignData, PersonaData } from "@/src/features/campaigns/campaign.schema";
-import type { CharacterDbData } from "@/src/features/characters/character.schema";
+import type { CharacterData } from "@/src/features/characters/character.schema";
 import type { PostBase, PostWithImages } from '@/src/features/campaigns/posts/post.schema';
 import type { PostImageRecord } from '@/src/features/campaigns/posts/postImages.schema';
 
@@ -40,7 +40,7 @@ export type Campaign = CampaignWithStatus & CampaignWithCounts;
 /**
  * Character with computed default image for UI display.
  */
-export type CharacterWithImage = CharacterDbData & {
+export type CharacterWithImage = CharacterData & {
   defaultImage?: string;
   type?: string; // Legacy compatibility for filtering
 };
@@ -125,3 +125,13 @@ export interface CampaignDetailsProps {
     onNavigate: (view: View) => void;
     onDeleteCampaign: (campaignId: string) => void;
 }
+
+/*********************************************************************************************************************
+ * MERGE FIELDS
+ *********************************************************************************************************************/
+
+export type MediaValueType = 'image' | 'text' | 'video' | 'audio_voice' | 'audio_music' | 'gen_ai_image' | 'gen_ai_text' | 'gen_ai_video' | 'gen_ai_voice' | 'gen_ai_music' | 'image_or_video';
+
+export type MergeFieldType = 'text' | 'character' | 'environment' | 'music' | 'voiceover' | 'sfx' | 'luma_matte';
+
+

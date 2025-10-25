@@ -12,6 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["public", "storage", "auth"]
 }
 
 model Campaign {
@@ -24,7 +25,7 @@ model Campaign {
   updatedAt         DateTime?           @updatedAt @map("updated_at") @db.Timestamp()
   deletedAt         DateTime?           @map("deleted_at") @db.Timestamp()
   daysOfWeek        Weekdays[]          @map("days_of_week")
-  frequency         EventCadence?
+  frequency         EventCadence        @default(weekly)
   postType          PostType            @default(single_image) @map("post_type")
   postCaptionLength CaptionLength       @default(short) @map("post_caption_length")
   postVideoLength   VideoLengthSeconds? @map("post_video_length")
@@ -45,6 +46,7 @@ model Campaign {
   // It runs: execute FUNCTION enforce_archived_inactive ();
 
   @@map("campaigns")
+  @@schema("public")
 }
 
 model User {
@@ -61,6 +63,7 @@ model User {
 
   @@id([id, userId])
   @@map("users_and_roles")
+  @@schema("public")
 }
 
 model Character {
@@ -80,6 +83,7 @@ model Character {
   assets            CharacterAsset[]
 
   @@map("characters")
+  @@schema("public")
 }
 
 model CampaignsCharacters {
@@ -90,11 +94,12 @@ model CampaignsCharacters {
 
   @@id([campaignId, characterId])
   @@map("campaigns_characters")
+  @@schema("public")
 }
 
 model Persona {
   id          String              @id @default(uuid()) @db.Uuid
-  label       String?
+  name        String?
   createdAt   DateTime?           @default(now()) @map("created_at") @db.Timestamp()
   updatedAt   DateTime?           @updatedAt @map("updated_at") @db.Timestamp()
   deletedAt   DateTime?           @map("deleted_at") @db.Timestamp()
@@ -102,6 +107,7 @@ model Persona {
   campaigns   CampaignsPersonas[]
 
   @@map("personas")
+  @@schema("public")
 }
 
 model CampaignsPersonas {
@@ -114,13 +120,14 @@ model CampaignsPersonas {
 
   @@unique([campaignId, personaKey], name: "unique_campaign_persona")
   @@map("campaigns_personas")
+  @@schema("public")
 }
 
 model CharacterAsset {
   id          String    @id @default(uuid()) @db.Uuid
   characterId String?   @map("character_id") @db.Uuid
   assetRef    String    @map("asset_ref") @db.Uuid
-  label       String?
+  name        String?
   attributes  Json?
   isPrimary   Boolean?  @default(false) @map("is_primary")
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp()
@@ -131,17 +138,19 @@ model CharacterAsset {
   storageObject StorageObject @relation(fields: [assetRef], references: [id], onUpdate: Cascade, onDelete: SetNull)
 
   @@map("character_assets")
+  @@schema("public")
 }
 
 // Placeholder model for Supabase (auth)
 model AuthUser {
   id    String @id @db.Uuid
   users User[]
+
+  @@map("users")
   // This table is in the '(auth)' schema. You may need to enable multi-schema support
   // in the datasource block if you haven't already.
   // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
-
-  @@map("users")
+  @@schema("auth")
 }
 
 // Placeholder model for Supabase storage
@@ -155,9 +164,8 @@ model StorageObject {
   // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
 
   @@map("objects")
+  @@schema("storage")
 }
-
-// ... existing code ...
 
 model Post {
   id          String    @id @default(uuid()) @db.Uuid
@@ -165,7 +173,7 @@ model Post {
   postType    PostType? @map("post_type")
   title       String?
   content     String?
-  hashtags    String?
+  hashtags    String[]
   isActive    Boolean   @default(false) @map("is_active")
   isDraft     Boolean   @default(true) @map("is_draft")
   isArchived  Boolean   @default(false) @map("is_archived")
@@ -180,6 +188,7 @@ model Post {
   // The trigger trg_posts_normalize_status is not representable in Prisma Schema.
 
   @@map("posts")
+  @@schema("public")
 }
 
 model PostImage {
@@ -196,23 +205,25 @@ model PostImage {
   @@index([objectId])
   @@index([postId, position], name: "idx_posts_images_post_order")
   @@map("posts_images")
+  @@schema("public")
 }
 
 model ShotstackMergeField {
   id             String              @id @default(uuid()) @db.Uuid
-  mergeField     String              @map("merge_field")
+  name           String              @map("merge_field")
   description    String?
   mediaValueType MergeFieldValueType @default(image) @map("media_value_type")
   startTime      Decimal?            @map("start_time")
   endTime        Decimal?            @map("end_time")
   campaignId     String              @map("campaign_id") @db.Uuid
-  mergeFieldType MergeFieldType?     @map("merge_field_type")
-  defaultValue   String?             @map("default_value")
+  type           MergeFieldType?     @map("merge_field_type")
+  value          String?             @map("value")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
-  @@unique([campaignId, mergeField])
+  @@unique([campaignId, name])
   @@map("shotstack_merge_fields")
+  @@schema("public")
 }
 
 model ShotstackRender {
@@ -227,11 +238,14 @@ model ShotstackRender {
   campaign      Campaign?     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@map("shotstack_renders")
+  @@schema("public")
 }
 
 enum UserRole {
   client
   admin
+
+  @@schema("public")
 }
 
 enum Weekdays {
@@ -242,30 +256,40 @@ enum Weekdays {
   friday
   saturday
   sunday
+
+  @@schema("public")
 }
 
 enum EventCadence {
   daily
   weekly
   monthly
+
+  @@schema("public")
 }
 
 enum PostType {
   single_image
   video
   carousel
+
+  @@schema("public")
 }
 
 enum CaptionLength {
   short
   medium
   long
+
+  @@schema("public")
 }
 
 enum VideoLengthSeconds {
   THIRTY
   FORTY_FIVE
   SIXTY
+
+  @@schema("public")
 }
 
 enum MoralAlignment {
@@ -278,6 +302,8 @@ enum MoralAlignment {
   LawfulEvil     @map("Lawful Evil")
   NeutralEvil    @map("Neutral Evil")
   ChaoticEvil    @map("Chaotic Evil")
+
+  @@schema("public")
 }
 
 enum MergeFieldValueType {
@@ -292,6 +318,8 @@ enum MergeFieldValueType {
   gen_ai_voice
   gen_ai_music
   image_or_video
+
+  @@schema("public")
 }
 
 enum MergeFieldType {
@@ -302,4 +330,6 @@ enum MergeFieldType {
   voiceover
   sfx
   luma_matte
+
+  @@schema("public")
 }

@@ -8,6 +8,11 @@ import Navbar from "@/ui/layout/Navbar";
 import { cookies } from "next/headers";
 import MainContainer from "@/ui/layout/MainContainer";
 import Providers from "@/app/providers";
+import { CampaignProvider } from "@/src/features/campaigns/providers/CampaignProvider";
+import { Campaign, Character, Post } from "@/src/lib/types/ui";
+import { getPosts } from "@/src/server/queries/posts.queries";
+import { getCampaigns, getCampaignsWithCounts } from "@/src/server/queries/campaigns.queries";
+import { getCharacters } from "@/src/server/queries/characters.queries";
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -25,6 +30,14 @@ const geistSans = Geist( {
     subsets: [ "latin" ],
 } );
 
+
+// Define the extended Campaign type with counts
+interface CampaignWithCounts extends Campaign {
+    personaCount: number;
+    characterCount: number;
+}
+
+
 export default async function RootLayout( {
                                               children,
                                           }: Readonly<{
@@ -32,6 +45,18 @@ export default async function RootLayout( {
 }> ) {
     const cookiesStore = await cookies();
     const defaultOpen = cookiesStore.get( "sidebar_state" )?.value === "open";
+
+
+    const campaigns = await getCampaignsWithCounts();
+    const characters = await getCharacters();
+
+
+
+    const posts: Post[] = await getPosts();
+
+    console.log( 'campaigns: ', campaigns );
+
+
     return (
         <html lang="en" suppressHydrationWarning>
         <body className={`${geistSans.className} antialiased`}>
@@ -42,19 +67,23 @@ export default async function RootLayout( {
             disableTransitionOnChange
         >
             <Providers>
-                <SidebarProvider defaultOpen>
-                    <MainContainer>
-                    <AppSidebar/>
-                        {/*<div className="flex h-screen flex-col">*/}
+                <CampaignProvider
+                    campaigns={campaigns}
+                    characters={characters}
+                    posts={[] as Post[]}
+                >
+                    <SidebarProvider defaultOpen>
+                        <MainContainer>
+                            <AppSidebar/>
                             <SidebarInset>
                                 <Navbar/>
                                 <main className="flex-1 overflow-y-auto p-8">
                                     {children}
                                 </main>
                             </SidebarInset>
-                        {/*</div>*/}
-                    </MainContainer>
-                </SidebarProvider>
+                        </MainContainer>
+                    </SidebarProvider>
+                </CampaignProvider>
             </Providers>
         </ThemeProvider>
         </body>

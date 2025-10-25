@@ -19,7 +19,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/ui/shadcn/collapsible";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/ui/shadcn/dropdown-menu";
-import { useSession } from "@/src/providers";
+import { useSession } from "@/src/server/supabase/providers";
 import { createClient } from "@/src/server/supabase/client";
 import { useRouter } from "next/navigation";
 
