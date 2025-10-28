@@ -6,12 +6,14 @@ import { OverviewTab } from "@/src/features/campaigns/details/sections/OverviewT
 import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 import { PostsTab } from "@/src/features/campaigns/details/sections/PostsTab";
 import { MergeFieldsTab } from "@/src/features/campaigns/details/sections/MergeFieldsTab";
+import { MergeField } from "@/src/features/campaigns/campaign.schema";
 
 interface CampaignDetailTabSwitcherProps {
     campaignPersonas: Persona[],
     campaign: Campaign,
     characters: Character[],
-    posts: Post[]
+    posts: Post[],
+    campaignMergeFields: MergeField[];
 }
 
 const CampaignDetailTabSwitcher = ( {
@@ -19,14 +21,12 @@ const CampaignDetailTabSwitcher = ( {
                                         campaign,
                                         posts,
                                         characters,
+                                        campaignMergeFields,
                                     }: CampaignDetailTabSwitcherProps ) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const tab = searchParams.get( 'tab' ) || 'overview';
-
-    // Consume campaign data from the context
-
 
     const handleTabChange = ( value: string ) => {
         const params = new URLSearchParams( searchParams );
@@ -49,7 +49,7 @@ const CampaignDetailTabSwitcher = ( {
                     <OverviewTab
                         campaign={campaign}
                         posts={posts}
-                        campaignCharacters={characters} // Use characters from context
+                        campaignCharacters={characters}
                         campaignPersonas={campaignPersonas}
                         charactersLoading={false}
                         personasLoading={false}
@@ -69,30 +69,11 @@ const CampaignDetailTabSwitcher = ( {
                 <TabsContent value="merge-fields" className="space-y-6">
                     <MergeFieldsTab
                         campaign={campaign}
-                        campaignMergeFields={campaign.mergeFields}
+                        campaignMergeFields={campaignMergeFields}
                         mergeFieldsLoading={false}
                         mergeFieldsError={null}
                         campaignPersonas={campaignPersonas}
                         campaignCharacters={characters}
-                        // assetPools={Record<string, string[]>[]}
-                        // activeInputs={activeInputs}
-                        // inputValues={inputValues}
-                        // assetRefNames={assetRefNames}
-                        // loadingAssetRefs={loadingAssetRefs}
-                        // modalOpen={modalOpen}
-                        // selectedMergeField={selectedMergeField}
-                        // onOpenAssetModal={openAssetModal}
-                        // onCloseModal={handleModalClose}
-                        // onAddAssetFromModal={handleAddAssetFromModal}
-                        // onAddInputAsset={(mergeFieldId) => addInputAsset(mergeFieldId, handleResolveAssetReference)}
-                        // onRemoveAssetFromPool={removeAssetFromPool}
-                        // onSetActiveInputs={setActiveInputs}
-                        // onSetInputValues={setInputValues}
-                        // onHandleAssetClick={handleAssetClick}
-                        // onHandleResolveAssetReference={handleResolveAssetReference}
-                        // getMergeFieldDefaultDisplayValue={getMergeFieldDefaultDisplayValue}
-                        // handleAssetUrlClick={handleAssetUrlClick}
-                        // getAssetPoolDisplayInfo={getAssetPoolDisplayInfo}
                     />
                 </TabsContent>
             </Tabs>
