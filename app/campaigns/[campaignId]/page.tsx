@@ -11,6 +11,7 @@ import { getCharactersForCampaign } from "@/src/server/queries/characters.querie
 import { getPersonasForCampaign } from "@/src/server/queries/personas.queries";
 import { toUiPosts } from "@/src/lib/utils/posts.utils";
 import { toUiCharacters } from "@/src/lib/utils/characters.utils";
+import { getMergeFieldsForCampaignId } from "@/src/server/queries/mergefields.queries";
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
 // Typing `params` as a Promise keeps TypeScript correct for the new behavior.
@@ -24,13 +25,9 @@ type CampaignDetailsPageProps = {
 const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     // Destructure campaignId from params to make access explicit
     const { campaignId } = await params;
-    console.log( 'campaignId: ', campaignId );
-
 
     // Fetch the campaign data
     const response = await getCampaignById( campaignId );
-
-    console.log('response: ', response);
 
     // Handle case where campaign is not found
     if ( !response ) {
@@ -51,9 +48,12 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     const campaign: Campaign = buildCampaign( campaignData );
 
     // Fetch raw data. The return types are now strictly enforced in the query functions.
-    const rawPosts = await getPostsForCampaign( campaign.id );
-    const rawCharacters = await getCharactersForCampaign( campaign.id );
-    const rawPersonas = await getPersonasForCampaign( campaign.id );
+    const [rawPosts, rawCharacters, rawPersonas, mergeFields] = await Promise.all([
+        getPostsForCampaign( campaign.id ),
+        getCharactersForCampaign( campaign.id ),
+        getPersonasForCampaign( campaign.id ),
+        getMergeFieldsForCampaignId( campaign.id )
+    ]);
 
     // Convert to UI types using the centralized utility functions
     const posts: Post[] = toUiPosts( rawPosts );
@@ -97,6 +97,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 posts={posts}
                 campaignPersonas={personas}
                 characters={characters}
+                campaignMergeFields={mergeFields}
             />
         </div>
     );
