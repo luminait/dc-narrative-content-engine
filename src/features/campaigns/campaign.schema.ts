@@ -12,13 +12,13 @@ export const cadenceSchema = z.object({
 export const mergeFieldSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(1),
-    description: z.string().optional(),
+    description: z.string().nullable().optional(),
     mediaValueType: z.enum(['image', 'text', 'video', 'audio_voice', 'audio_music', 'gen_ai_image', 'gen_ai_text', 'gen_ai_video', 'gen_ai_voice', 'gen_ai_music', 'image_or_video']).optional(),
-    value: z.string().optional(),
+    value: z.string().nullable().optional(),
     type: z.enum(['text', 'character', 'environment', 'music', 'voiceover', 'sfx', 'luma_matte']).optional(),
-    startTime: z.string().optional(),
-    endTime: z.string().optional(),
-    length: z.string().optional(),
+    startTime: z.string().nullable().optional(),
+    endTime: z.string().nullable().optional(),
+    length: z.string().nullable().optional(),
 });
 
 

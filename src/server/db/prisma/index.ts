@@ -1,14 +1,25 @@
+import "server-only";
 import { PrismaClient } from "@/src/server/db/generated/prisma";
 
-// Prevent multiple instances of PrismaClient in development
-declare global { 
+// Declare a global variable to hold the Prisma client instance
+declare global {
+  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
-export const prisma = global.prisma || new PrismaClient({
-  log: process.env.NODE_ENV === "development" ? ['query', 'error', 'warn'] : ['error'],
-});
+// Initialize Prisma Client
+const prisma =
+  global.prisma ||
+  new PrismaClient({
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
+  });
 
-if (process.env.NODE_ENV !== 'production') {
+// In development, assign the Prisma client to the global variable
+if (process.env.NODE_ENV !== "production") {
   global.prisma = prisma;
 }
+
+export { prisma };
