@@ -11,7 +11,7 @@ import Providers from "@/app/providers";
 import { CampaignProvider } from "@/src/features/campaigns/providers/CampaignProvider";
 import { Campaign, Character, Post } from "@/src/lib/types/ui";
 import { getPosts } from "@/src/server/queries/posts.queries";
-import { getCampaigns, getCampaignsWithCounts } from "@/src/server/queries/campaigns.queries";
+import { getCampaigns, getCampaignsForUI } from "@/src/server/queries/campaigns.queries";
 import { getCharacters } from "@/src/server/queries/characters.queries";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -47,7 +47,7 @@ export default async function RootLayout( {
     const defaultOpen = cookiesStore.get( "sidebar_state" )?.value === "open";
 
 
-    const campaigns = await getCampaignsWithCounts();
+    const campaigns = await getCampaigns();
     const characters = await getCharacters();
 
 

@@ -1,5 +1,4 @@
-const projectId = process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID;
-const publicAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_ANON_KEY;
+import { projectId, publicAnonKey } from "@/src/config/supabase.public";
 
 if (!projectId || !publicAnonKey) {
     console.error("Supabase configuration missing in environment variables. API calls may fail.");

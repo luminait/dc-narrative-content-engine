@@ -30,6 +30,8 @@ export const personaFormSchema = z.object({
     id: z.string(),
     name: z.string(),
     description: z.string(),
+    personaKey: z.string(),
+    isPrimaryPersona: z.boolean().default(true),
     createdAt: z.string(),
     updatedAt: z.string(),
     deletedAt: z.string().optional(),
@@ -53,6 +55,7 @@ export const campaignSchema = z.object({
     postType: z.string(),
     videoLength: z.number().optional(),
     personas: z.array(z.string()),
+    primaryPersonaKey: z.string().optional(),
     characters: z.array(z.string()),
     mergeFields: z.array(mergeFieldSchema),
     isActive: z.boolean(),
@@ -61,7 +64,14 @@ export const campaignSchema = z.object({
     createdAt: z.coerce.date().nullable().optional(),
     updatedAt: z.coerce.date().nullable().optional(),
     deletedAt: z.coerce.date().nullable().optional(),
-});
+}).refine(
+    (data) => {
+        if (data.primaryPersonaKey && !data.personas.includes(data.primaryPersonaKey)) {
+            return false;
+        }
+        return true;
+    }
+);
 
 
 

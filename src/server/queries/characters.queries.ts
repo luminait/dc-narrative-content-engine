@@ -1,6 +1,6 @@
 import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
-import { RawCharacterFromQuery } from '@/src/lib/utils/characters';
+import { RawCharacterFromQuery } from '@/src/lib/utils/characters.utils';
 
 /**
  * Fetches all characters with their associated campaigns and assets.
