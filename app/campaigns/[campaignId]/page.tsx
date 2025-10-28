@@ -1,7 +1,7 @@
 import { getCampaignById } from "@/src/server/queries/campaigns.queries";
 import { Badge } from "@/ui/shadcn/badge";
 import { getStatusColor } from "@/ui/src/utils";
-import { buildCampaign } from "@/src/lib/utils/campaigns";
+import { buildCampaign } from "@/src/lib/utils/campaigns.utils";
 import { CampaignData, campaignSchema } from "@/src/features/campaigns/campaign.schema";
 import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 import CampaignDetails from "@/src/features/campaigns/details/sections/CampaignDetails";
@@ -9,8 +9,8 @@ import CampaignDetailTabSwitcher from "@/src/features/campaigns/details/sections
 import { getPostsForCampaign } from "@/src/server/queries/posts.queries";
 import { getCharactersForCampaign } from "@/src/server/queries/characters.queries";
 import { getPersonasForCampaign } from "@/src/server/queries/personas.queries";
-import { toUiPosts } from "@/src/lib/utils/posts";
-import { toUiCharacters } from "@/src/lib/utils/characters";
+import { toUiPosts } from "@/src/lib/utils/posts.utils";
+import { toUiCharacters } from "@/src/lib/utils/characters.utils";
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
 // Typing `params` as a Promise keeps TypeScript correct for the new behavior.

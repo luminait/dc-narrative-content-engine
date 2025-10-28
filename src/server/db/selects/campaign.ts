@@ -32,20 +32,95 @@ export const campaignCharactersSelect = Prisma.validator<Prisma.CampaignSelect>(
 });
 
 export const campaignPersonasSelect = Prisma.validator<Prisma.CampaignSelect>()({
-    personas: { include: { persona: true } },
+    personas: {
+        select: {
+            id: true,
+            campaignId: true,
+            personaKey: true,
+            isPrimaryPersona: true, // <-- join-table scalar
+            persona: {
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    deletedAt: true,
+                },
+            },
+        },
+    },
 });
 
 export const campaignMergeFieldsSelect = Prisma.validator<Prisma.CampaignSelect>()({
-    mergeFields: { select: { name: true } },
+    mergeFields: { select: {
+        name: true,
+        description: true,
+        mediaValueType: true,
+        startTime: true,
+        endTime: true,
+        type: true,
+        value: true,
+        campaignId: true,
+    } },
 });
 
-// Ready-to-use composite shapes
+// Manually constructed composite shape to avoid spread operator issues with Prisma validators.
 export const campaignWithAllSelect = Prisma.validator<Prisma.CampaignSelect>()({
-    ...campaignSelect,
-    ...campaignCharactersSelect,
-    ...campaignPersonasSelect,
-    ...campaignMergeFieldsSelect,
+    id: true,
+    title: true,
+    campaignObjective: true,
+    narrativeContext: true,
+    postCaptionLength: true,
+    startDate: true,
+    endDate: true,
+    daysOfWeek: true,
+    frequency: true,
+    postType: true,
+    postVideoLength: true,
+    isActive: true,
+    isArchived: true,
+    isDraft: true,
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
+    characters: {
+        select: {
+            character: { select: { name: true } },
+        },
+    },
+    personas: {
+        select: {
+            id: true,
+            campaignId: true,
+            personaKey: true,
+            isPrimaryPersona: true,
+            persona: {
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    deletedAt: true,
+                },
+            },
+        },
+    },
+    mergeFields: {
+        select: {
+            name: true,
+            description: true,
+            mediaValueType: true,
+            startTime: true,
+            endTime: true,
+            type: true,
+            value: true,
+            campaignId: true,
+        }
+    },
 });
+
 
 // Inferred types from each shape
 export type DbCampaignBase = Prisma.CampaignGetPayload<{ select: typeof campaignSelect }>;

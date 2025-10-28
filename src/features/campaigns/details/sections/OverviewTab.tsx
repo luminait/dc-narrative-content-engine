@@ -1,12 +1,11 @@
 import React from 'react';
-import { Users, Target, AlertCircle } from 'lucide-react';
+import { AlertCircle, Target, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Badge } from '@/ui/shadcn/badge';
 import { Skeleton } from '@/ui/shadcn/skeleton';
 import { Alert, AlertDescription } from '@/ui/shadcn/alert';
-import  { CampaignWithStatus, Post, PostImage, Character } from "@/src/lib/types/ui";
-import { getStatusColor } from '@/ui/src/utils';
-import { filterPostsByStatus } from "@/src/lib/utils/posts";
+import { Character, Post } from "@/src/lib/types/ui";
+import { filterPostsByStatus } from "@/src/lib/utils/posts.utils";
 import { CampaignData } from "@/src/features/campaigns/campaign.schema";
 
 interface OverviewTabProps {
@@ -20,17 +19,17 @@ interface OverviewTabProps {
     personasError: string | null;
 }
 
-export function OverviewTab({
-                                campaign,
-                                posts,
-                                campaignCharacters,
-                                campaignPersonas,
-                                charactersLoading,
-                                personasLoading,
-                                charactersError,
-                                personasError
-                            }: OverviewTabProps) {
-    const { published: publishedPosts, scheduled: scheduledPosts, draft: draftPosts } = filterPostsByStatus(posts);
+export function OverviewTab( {
+                                 campaign,
+                                 posts,
+                                 campaignCharacters,
+                                 campaignPersonas,
+                                 charactersLoading,
+                                 personasLoading,
+                                 charactersError,
+                                 personasError
+                             }: OverviewTabProps ) {
+    const { published: publishedPosts, scheduled: scheduledPosts, draft: draftPosts } = filterPostsByStatus( posts );
 
     return (
         <div className="space-y-6">
@@ -51,7 +50,7 @@ export function OverviewTab({
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm">Characters</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <Users className="h-4 w-4 text-muted-foreground"/>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl">{charactersLoading ? '-' : campaignCharacters.length}</div>
@@ -64,7 +63,7 @@ export function OverviewTab({
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm">Personas</CardTitle>
-                        <Target className="h-4 w-4 text-muted-foreground" />
+                        <Target className="h-4 w-4 text-muted-foreground"/>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl">{personasLoading ? '-' : campaignPersonas.length}</div>
@@ -86,19 +85,20 @@ export function OverviewTab({
                     <CardContent className="space-y-4">
                         {charactersLoading ? (
                             <div className="space-y-2">
-                                {[...Array(3)].map((_, i) => (
-                                    <Skeleton key={i} className="h-4 w-full" />
-                                ))}
+                                {[ ...Array( 3 ) ].map( ( _, i ) => (
+                                    <Skeleton key={i} className="h-4 w-full"/>
+                                ) )}
                             </div>
                         ) : charactersError ? (
                             <Alert>
-                                <AlertCircle className="h-4 w-4" />
+                                <AlertCircle className="h-4 w-4"/>
                                 <AlertDescription>{charactersError}</AlertDescription>
                             </Alert>
                         ) : campaignCharacters.length > 0 ? (
                             <div className="space-y-2">
-                                {campaignCharacters.map((character, index) => (
-                                    <div key={character.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                {campaignCharacters.map( ( character, index ) => (
+                                    <div key={character.id || index}
+                                         className="flex items-center justify-between p-3 bg-gray-50 rounded">
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between">
                                                 <span className="font-medium">{character.name}</span>
@@ -122,7 +122,7 @@ export function OverviewTab({
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                ) )}
                             </div>
                         ) : (
                             <p className="text-gray-500 text-sm">No characters assigned to this campaign.</p>
@@ -139,32 +139,34 @@ export function OverviewTab({
                     <CardContent className="space-y-4">
                         {personasLoading ? (
                             <div className="space-y-2">
-                                {[...Array(3)].map((_, i) => (
-                                    <Skeleton key={i} className="h-4 w-full" />
-                                ))}
+                                {[ ...Array( 3 ) ].map( ( _, i ) => (
+                                    <Skeleton key={i} className="h-4 w-full"/>
+                                ) )}
                             </div>
                         ) : personasError ? (
                             <Alert>
-                                <AlertCircle className="h-4 w-4" />
+                                <AlertCircle className="h-4 w-4"/>
                                 <AlertDescription>{personasError}</AlertDescription>
                             </Alert>
                         ) : campaignPersonas.length > 0 ? (
                             <div className="space-y-2">
-                                {campaignPersonas.map((persona, index) => (
-                                    <div key={persona.key || persona.persona_key || index} className="p-3 bg-gray-50 rounded">
+                                {campaignPersonas.map( ( persona, index ) => (
+                                    <div key={persona.key || persona.persona_key || index}
+                                         className="p-3 bg-gray-50 rounded">
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="font-medium">{persona.label || persona.persona_label}</span>
+                                            <span
+                                                className="font-medium">{persona.label || persona.persona_label}</span>
                                             <Badge variant="outline">{persona.key || persona.persona_key}</Badge>
                                         </div>
                                         <p className="text-sm text-gray-600">{persona.description || persona.persona_description}</p>
                                         <div className="flex items-center space-x-2 text-xs text-gray-500 mt-2">
                                             <span>Key: {persona.key || persona.persona_key}</span>
                                             {persona.created_at && (
-                                                <span>Created: {new Date(persona.createdAt).toLocaleDateString()}</span>
+                                                <span>Created: {new Date( persona.createdAt ).toLocaleDateString()}</span>
                                             )}
                                         </div>
                                     </div>
-                                ))}
+                                ) )}
                             </div>
                         ) : (
                             <p className="text-gray-500 text-sm">No personas assigned to this campaign.</p>
@@ -184,11 +186,11 @@ export function OverviewTab({
                         <div>
                             <label className="text-sm text-gray-600">Days of Week</label>
                             <div className="flex flex-wrap gap-1 mt-1">
-                                {campaign.cadence.daysOfWeek.map((day) => (
+                                {campaign.cadence.daysOfWeek.map( ( day ) => (
                                     <Badge key={day} variant="outline" className="text-xs">
-                                        {day.charAt(0).toUpperCase() + day.slice(1)}
+                                        {day.charAt( 0 ).toUpperCase() + day.slice( 1 )}
                                     </Badge>
-                                ))}
+                                ) )}
                             </div>
                         </div>
                         <div>

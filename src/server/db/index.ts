@@ -1,9 +1,16 @@
-import {PrismaClient} from "@/src/server/db/generated/prisma";
+import { PrismaClient } from "@/src/server/db/generated/prisma";
 
 // Prevent multiple instances of PrismaClient in development
-declare global { var prisma: PrismaClient | undefined; }
+declare global {
+    var prisma: PrismaClient | undefined;
+}
 
 export const prisma = global.prisma || new PrismaClient({
+    datasources: {
+        db: {
+            url: process.env.DATABASE_URL,
+        },
+    },
     log: process.env.NODE_ENV === "development" ? ['query', 'error', 'warn'] : ['error'],
 });
 

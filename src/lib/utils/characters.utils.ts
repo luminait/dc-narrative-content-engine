@@ -1,6 +1,6 @@
 import { CharacterData } from "@/src/features/characters/character.schema";
 import { CharacterWithImage } from "@/src/lib/types/ui";
-import { getPublicUrl } from "./supabase";
+import { getPublicUrl } from "./supabase.utils";
 
 // Based on schema.prisma: This defines the shape of the `assets` relation
 // as returned by our Prisma query.

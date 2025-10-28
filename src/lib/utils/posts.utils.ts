@@ -4,7 +4,7 @@ import {
     PostImage,
     PostWithImages,
 } from "@/src/features/campaigns/posts/post.schema";
-import { getPublicUrl } from "./supabase";
+import { getPublicUrl } from "./supabase.utils";
 
 // Type representing the raw image relation returned by Prisma
 export type RawPostImageFromPrisma = {

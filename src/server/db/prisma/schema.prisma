@@ -111,9 +111,10 @@ model Persona {
 }
 
 model CampaignsPersonas {
-  id         String  @id @default(uuid()) @db.Uuid
-  campaignId String  @map("campaign_id") @db.Uuid
-  personaKey String? @map("persona_key") @db.Uuid
+  id               String  @id @default(uuid()) @db.Uuid
+  campaignId       String  @map("campaign_id") @db.Uuid
+  personaKey       String? @map("persona_key") @db.Uuid
+  isPrimaryPersona Boolean @default(true) @map("is_primary_persona")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   persona  Persona? @relation(fields: [personaKey], references: [id], onDelete: Cascade)

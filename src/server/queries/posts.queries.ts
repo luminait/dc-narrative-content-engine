@@ -1,6 +1,6 @@
 import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
-import { RawPostFromQuery } from '@/src/lib/utils/posts';
+import { RawPostFromQuery } from '@/src/lib/utils/posts.utils';
 
 /**
  * Fetches all posts with related data.

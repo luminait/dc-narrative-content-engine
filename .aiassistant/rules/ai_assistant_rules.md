@@ -45,29 +45,46 @@ dc-narrative-content-engine/
 │   ├── app/
 │   ├── features/
 │   │   ├── campaigns/
+│   │   │   ├── details/
+│   │   │   │   └── sections/
+│   │   │   │       ├── CampaignDetails.tsx
+│   │   │   │       ├── CampaignDetailTabSwitcher.tsx
+│   │   │   │       ├── MergeFieldsTabl.tsx
+│   │   │   │       ├── OverviewTab.tsx
+│   │   │   │       └── PostsTab.tsx
 │   │   │   ├── posts/
-│   │   │   ├── sections/                  # Campaign form sections
-│   │   │   │   ├── CampaignDetails.tsx
-│   │   │   │   ├── CharactersSelection.tsx
-│   │   │   │   ├── FormActionsSection.tsx
-│   │   │   │   ├── MergeFieldsSection.tsx
-│   │   │   │   ├── PersonasSection.tsx
-│   │   │   │   ├── PostTypeSection.tsx
-│   │   │   │   ├── ScheduleSection.tsx
-│   │   │   │   └── VideoLengthSection.tsx
+│   │   │   │   ├── post.schema.ts
+│   │   │   │   └── postImages.schema.ts
+│   │   │   ├── new/
+│   │   │   │   └── sections/                        # Campaign form sections
+│   │   │   │       ├── CampaignDetails.tsx
+│   │   │   │       ├── CharactersSelection.tsx
+│   │   │   │       ├── FormActionsSection.tsx
+│   │   │   │       ├── MergeFieldsSection.tsx
+│   │   │   │       ├── PersonasSection.tsx
+│   │   │   │       ├── PostTypeSection.tsx
+│   │   │   │       ├── ScheduleSection.tsx
+│   │   │   │       └── VideoLengthSection.tsx
 │   │   │   ├── CampaignForm.tsx
 │   │   │   └── campaign.schema.ts
 │   │   └── dashboard/
 │   │       └── Dashboard.tsx
 │   ├── lib/
 │   │   ├── hooks/
+│   │   │   ├── use-mobile.ts
+│   │   │   └── useCampaignForm.ts
 │   │   ├── mappers/
 │   │   │   └── campaignFormDataMapper.ts
 │   │   ├── types/
 │   │   │   └── ui.ts
 │   │   ├── zod/
-│   │   └── utils/                          
-│   │       ├── campaigns.ts                # Campaign utilities
+│   │   └── utils/
+│   │       ├── assets.utils.ts             # Asset utilities
+│   │       ├── campaigns.utils.ts          # Campaign utilities
+│   │       ├── characters.utils.ts         # Character utilities
+│   │       ├── persona.utils.ts            # Persona utilities
+│   │       ├── posts.utils.ts              # Post utilities
+│   │       ├── supabase.utils.ts           # Supabase utilities
 │   │       └── utils.ts                    # General utilities
 │   ├── server/
 │   │   ├── actions/                       # Server actions

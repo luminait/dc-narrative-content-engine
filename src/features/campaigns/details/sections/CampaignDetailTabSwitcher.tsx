@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import { OverviewTab } from "@/src/features/campaigns/details/sections/OverviewTab";
 import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 import { PostsTab } from "@/src/features/campaigns/details/sections/PostsTab";
+import { MergeFieldsTab } from "@/src/features/campaigns/details/sections/MergeFieldsTab";
 
 interface CampaignDetailTabSwitcherProps {
     campaignPersonas: Persona[],
@@ -66,34 +67,33 @@ const CampaignDetailTabSwitcher = ( {
                 </TabsContent>
 
                 <TabsContent value="merge-fields" className="space-y-6">
-                    {/*<MergeFieldsTab*/}
-                    {/*    campaign={campaign}*/}
-                    {/*    campaignMergeFields={campaignMergeFields}*/}
-                    {/*    mergeFieldsLoading={mergeFieldsLoading}*/}
-                    {/*    mergeFieldsError={mergeFieldsError}*/}
-                    {/*    campaignPersonas={campaignPersonas}*/}
-                    {/*    campaignCharacters={campaignCharacters}*/}
-                    {/*    assetPools={assetPools}*/}
-                    {/*    activeInputs={activeInputs}*/}
-                    {/*    inputValues={inputValues}*/}
-                    {/*    assetRefNames={assetRefNames}*/}
-                    {/*    loadingAssetRefs={loadingAssetRefs}*/}
-                    {/*    modalOpen={modalOpen}*/}
-                    {/*    selectedMergeField={selectedMergeField}*/}
-                    {/*    onOpenAssetModal={openAssetModal}*/}
-                    {/*    onCloseModal={handleModalClose}*/}
-                    {/*    onAddAssetFromModal={handleAddAssetFromModal}*/}
-                    {/*    onAddInputAsset={(mergeFieldId) => addInputAsset(mergeFieldId, handleResolveAssetReference)}*/}
-                    {/*    onRemoveAssetFromPool={removeAssetFromPool}*/}
-                    {/*    onSetActiveInputs={setActiveInputs}*/}
-                    {/*    onSetInputValues={setInputValues}*/}
-                    {/*    onHandleAssetClick={handleAssetClick}*/}
-                    {/*    onHandleResolveAssetReference={handleResolveAssetReference}*/}
-                    {/*    getMergeFieldDefaultDisplayValue={getMergeFieldDefaultDisplayValue}*/}
-                    {/*    handleAssetUrlClick={handleAssetUrlClick}*/}
-                    {/*    getAssetPoolDisplayInfo={getAssetPoolDisplayInfo}*/}
-                    {/*/>*/}
-                    MergeField Tab Content
+                    <MergeFieldsTab
+                        campaign={campaign}
+                        campaignMergeFields={campaign.mergeFields}
+                        mergeFieldsLoading={false}
+                        mergeFieldsError={null}
+                        campaignPersonas={campaignPersonas}
+                        campaignCharacters={characters}
+                        // assetPools={Record<string, string[]>[]}
+                        // activeInputs={activeInputs}
+                        // inputValues={inputValues}
+                        // assetRefNames={assetRefNames}
+                        // loadingAssetRefs={loadingAssetRefs}
+                        // modalOpen={modalOpen}
+                        // selectedMergeField={selectedMergeField}
+                        // onOpenAssetModal={openAssetModal}
+                        // onCloseModal={handleModalClose}
+                        // onAddAssetFromModal={handleAddAssetFromModal}
+                        // onAddInputAsset={(mergeFieldId) => addInputAsset(mergeFieldId, handleResolveAssetReference)}
+                        // onRemoveAssetFromPool={removeAssetFromPool}
+                        // onSetActiveInputs={setActiveInputs}
+                        // onSetInputValues={setInputValues}
+                        // onHandleAssetClick={handleAssetClick}
+                        // onHandleResolveAssetReference={handleResolveAssetReference}
+                        // getMergeFieldDefaultDisplayValue={getMergeFieldDefaultDisplayValue}
+                        // handleAssetUrlClick={handleAssetUrlClick}
+                        // getAssetPoolDisplayInfo={getAssetPoolDisplayInfo}
+                    />
                 </TabsContent>
             </Tabs>
         </>
