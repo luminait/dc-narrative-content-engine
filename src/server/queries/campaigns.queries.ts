@@ -4,6 +4,7 @@ import { campaignSelect, campaignWithAllSelect, DbCampaignWithAll } from "@/src/
 import { toUiCampaign } from "@/src/lib/utils/campaigns.utils";
 import { CampaignData } from "@/src/features/campaigns/campaign.schema";
 
+
 /**
  * Fetches all campaigns with related data using the standardized select.
  */

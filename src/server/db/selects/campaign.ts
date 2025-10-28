@@ -52,18 +52,32 @@ export const campaignPersonasSelect = Prisma.validator<Prisma.CampaignSelect>()(
     },
 });
 
+/// Used when selected the mergefields directly from the Campaign object.
 export const campaignMergeFieldsSelect = Prisma.validator<Prisma.CampaignSelect>()({
     mergeFields: { select: {
-        name: true,
-        description: true,
-        mediaValueType: true,
-        startTime: true,
-        endTime: true,
-        type: true,
-        value: true,
-        campaignId: true,
-    } },
+            name: true,
+            description: true,
+            mediaValueType: true,
+            startTime: true,
+            endTime: true,
+            type: true,
+            value: true,
+            campaignId: true,
+        } },
 });
+
+/// Used to select MergeField fields directly.
+export const mergeFieldSelect = Prisma.validator<Prisma.ShotstackMergeFieldSelect>()({
+    id: true,
+    name: true,
+    description: true,
+    mediaValueType: true,
+    startTime: true,
+    endTime: true,
+    campaignId: true,
+    type: true,
+    value: true,
+})
 
 // Manually constructed composite shape to avoid spread operator issues with Prisma validators.
 export const campaignWithAllSelect = Prisma.validator<Prisma.CampaignSelect>()({
