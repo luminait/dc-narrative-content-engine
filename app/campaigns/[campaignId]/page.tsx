@@ -12,6 +12,14 @@ import { getPersonasForCampaign } from "@/src/server/queries/personas.queries";
 import { toUiPosts } from "@/src/lib/utils/posts.utils";
 import { toUiCharacters } from "@/src/lib/utils/characters.utils";
 import { getMergeFieldsForCampaignId } from "@/src/server/queries/mergefields.queries";
+import { useCallback } from "react";
+import { buildAssetUrl, canOpenAsset, isMediaAssetType, useAssetResolution } from "@/src/features/assets";
+// helper on the server
+import { getAssetUrl } from "@/src/server/actions/assets";
+import type { MergeField } from "@/src/features/campaigns/campaign.schema";
+import type { AssetData } from "@/src/features/assets/assets.schema";
+
+
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
 // Typing `params` as a Promise keeps TypeScript correct for the new behavior.
@@ -47,6 +55,31 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
 
     const campaign: Campaign = buildCampaign( campaignData );
 
+    type MergeFieldAsset = { type: string } & AssetData;
+
+    async function resolveMergeFieldValues(
+        fields: MergeField[]
+    ): Promise<Record<string, MergeFieldAsset>> {
+        const entries = await Promise.all(
+            fields.map(async (f) => {
+                if (!f.value || !f.mediaValueType) return null;
+                console.log(`f.value: ${f.value}`);
+                if (isMediaAssetType(f.mediaValueType)) {
+                    const assetData = await getAssetUrl(f.value);
+                    console.log(`assetData: ${assetData}`);
+                    return [f.value, { type: String(f.mediaValueType), ...assetData }] as const;
+                }
+                return [f.value, { type: String(f.mediaValueType),
+                    asset_ref: null,
+                    name: f.name,
+                    path_tokens: null,
+                    bucket_id: null,
+                    asset_url: null } as const]
+            })
+        );
+        return Object.fromEntries(entries.filter((e): e is readonly [string, MergeFieldAsset] => !!e));
+    }
+
     // Fetch raw data. The return types are now strictly enforced in the query functions.
     const [rawPosts, rawCharacters, rawPersonas, mergeFields] = await Promise.all([
         getPostsForCampaign( campaign.id ),
@@ -54,6 +87,8 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
         getPersonasForCampaign( campaign.id ),
         getMergeFieldsForCampaignId( campaign.id )
     ]);
+
+    const mergeFieldValues = await resolveMergeFieldValues(mergeFields);
 
     // Convert to UI types using the centralized utility functions
     const posts: Post[] = toUiPosts( rawPosts );
@@ -70,8 +105,13 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
             }
         }
     ); // Direct assignment
+    // const refNames = mergeFields.map( field => field.mediaValueType );
+    // const refUrls = mergeFields.map( field => await canOpenAsset( field ) && await buildAssetUrl(field.value, field, campaign.title, {}) );
+    // const [assetRefNames, setAssetRefNames, setAssetUrls, setLoadingAssetRefs] = useAssetResolution()
 
     // Render the campaign details
+
+
     return (
 
         <div className="max-w-7xl mx-auto space-y-8">
@@ -98,6 +138,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 campaignPersonas={personas}
                 characters={characters}
                 campaignMergeFields={mergeFields}
+                campaignMergeFieldValues={mergeFieldValues}
             />
         </div>
     );

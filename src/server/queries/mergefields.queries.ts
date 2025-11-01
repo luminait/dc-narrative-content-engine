@@ -11,7 +11,7 @@ export const getMergeFieldsForCampaignId: (id: string) => Promise<MergeField[]> 
             select: mergeFieldSelect,
         });
 
-        const sanitizes =  sanitizeMergeFields(mergeFields);
-        return sanitizes;
+        const sanitizedMergeFields =  sanitizeMergeFields(mergeFields);
+        return sanitizedMergeFields;
     }
 )
