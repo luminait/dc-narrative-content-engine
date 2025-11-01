@@ -7,6 +7,11 @@ import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 import { PostsTab } from "@/src/features/campaigns/details/sections/PostsTab";
 import { MergeFieldsTab } from "@/src/features/campaigns/details/sections/MergeFieldsTab";
 import { MergeField } from "@/src/features/campaigns/campaign.schema";
+import type { AssetData } from "@/src/features/assets/assets.schema";
+
+// Mapping of merge field types to their corresponding asset types and values
+type MergeFieldEntry = [ string, MergeFieldAsset ];
+type MergeFieldAsset = { type: string } & AssetData;
 
 interface CampaignDetailTabSwitcherProps {
     campaignPersonas: Persona[],
@@ -14,6 +19,7 @@ interface CampaignDetailTabSwitcherProps {
     characters: Character[],
     posts: Post[],
     campaignMergeFields: MergeField[];
+    campaignMergeFieldValues: Record<string, MergeFieldAsset>;
 }
 
 const CampaignDetailTabSwitcher = ( {
@@ -22,6 +28,7 @@ const CampaignDetailTabSwitcher = ( {
                                         posts,
                                         characters,
                                         campaignMergeFields,
+                                        campaignMergeFieldValues,
                                     }: CampaignDetailTabSwitcherProps ) => {
     const router = useRouter();
     const pathname = usePathname();
@@ -74,6 +81,7 @@ const CampaignDetailTabSwitcher = ( {
                         mergeFieldsError={null}
                         campaignPersonas={campaignPersonas}
                         campaignCharacters={characters}
+                        campaignMergeFieldValues={campaignMergeFieldValues}
                     />
                 </TabsContent>
             </Tabs>

@@ -1,4 +1,4 @@
-import { projectId } from '@/src/config/supabase.public';
+import { projectId, publicAnonKey } from '@/src/config/supabase.public';
 import { isMediaAssetType, isAssetReferenceId } from '@/src/lib/utils/assets.utils';
 import { getAssetUrlFromRef } from './asset-resolver.client';
 
@@ -50,3 +50,4 @@ export async function buildAssetUrl(
     }
     return null;
 }
+
