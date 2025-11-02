@@ -1,32 +1,30 @@
 'use client';
 
 import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import type { Persona } from '@/src/server/db/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
 import { Checkbox } from '@/ui/shadcn/checkbox';
-import { Label } from '@/ui/shadcn/label';
 import { Badge } from '@/ui/shadcn/badge';
+import {
+  Field,
+  FieldControl,
+  FieldLabel,
+  FieldError,
+  FieldSet
+} from '@/ui/shadcn/field'; // Assuming new components are here
 import { Users, ChevronDown, ChevronRight, X } from 'lucide-react';
+import type { CampaignFormData } from '../../campaign.schema';
 
 interface PersonasSectionProps {
   personas: Persona[];
-  selectedPersonas: string[];
-  setSelectedPersonas: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export default function PersonaSelection( {
-  personas,
-  selectedPersonas,
-  setSelectedPersonas,
-}: PersonasSectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleToggle = (personaId: string) => {
-    setSelectedPersonas((prev) =>
-      prev.includes(personaId) ? prev.filter((id) => id !== personaId) : [...prev, personaId]
-    );
-  };
+export default function PersonaSelection({ personas }: PersonasSectionProps) {
+  const { watch, setValue } = useFormContext<CampaignFormData>();
+  const [isOpen, setIsOpen] = useState(true);
+  const selectedPersonas = watch('personas');
 
   return (
     <Card>
@@ -44,32 +42,38 @@ export default function PersonaSelection( {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              {personas.map((persona) => (
-                <div
-                  key={persona.id}
-                  className={`cursor-pointer rounded-lg border p-4 transition-colors ${
-                    selectedPersonas.includes(persona.id)
-                      ? 'border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950'
-                      : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
-                  }`}
-                  onClick={() => handleToggle(persona.id)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Checkbox checked={selectedPersonas.includes(persona.id)} />
-                    <h3 className="text-sm font-medium">{persona.label}</h3>
-                  </div>
-                  {persona.description && (
-                    <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">{persona.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
+          <CardContent className="space-y-4 pt-4">
+            <FieldSet name="personas">
+              <FieldLabel>Personas *</FieldLabel>
+              <div className="space-y-3 pt-2">
+                {personas.map((persona) => (
+                  <Field
+                    key={persona.id}
+                    name="personas"
+                    type="checkbox"
+                    value={persona.id}
+                    className={`cursor-pointer rounded-lg border p-4 transition-colors data-[checked]:border-blue-300 data-[checked]:bg-blue-50 dark:data-[checked]:border-blue-700 dark:data-[checked]:bg-blue-950`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <FieldControl>
+                        <Checkbox />
+                      </FieldControl>
+                      <h3 className="text-sm font-medium">{persona.label}</h3>
+                    </div>
+                    {persona.description && (
+                      <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                        {persona.description}
+                      </p>
+                    )}
+                  </Field>
+                ))}
+              </div>
+              <FieldError />
+            </FieldSet>
 
             {selectedPersonas.length > 0 && (
               <div className="mt-4">
-                <Label>Selected Personas ({selectedPersonas.length})</Label>
+                <FieldLabel>Selected Personas ({selectedPersonas.length})</FieldLabel>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {selectedPersonas.map((personaId) => {
                     const persona = personas.find((p) => p.id === personaId);
@@ -80,7 +84,8 @@ export default function PersonaSelection( {
                           className="h-3 w-3 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleToggle(personaId);
+                            const newValue = selectedPersonas?.filter((id) => id !== personaId);
+                            setValue('personas', newValue);
                           }}
                         />
                       </Badge>

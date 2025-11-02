@@ -1,11 +1,16 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { SetStateAction, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import type { Persona, Character } from '@/src/server/db/types';
 import { createCampaignAction } from '@/src/server/actions/campaign.actions';
-import type { CampaignData, MergeField, Cadence } from './campaign.schema';
+import {
+    campaignFormSchema,
+    type CampaignFormData,
+} from '@/src/features/campaigns/campaign.schema';
 import CampaignDetails from '@/src/features/campaigns/new/sections/CampaignDetails';
 import ScheduleSection from '@/src/features/campaigns/new/sections/ScheduleSection';
 import PersonasSection from '@/src/features/campaigns/new/sections/PersonasSection';
@@ -16,113 +21,74 @@ import MergeFieldsSection from '@/src/features/campaigns/new/sections/MergeField
 import FormActionsSection from '@/src/features/campaigns/new/sections/FormActionsSection';
 
 interface CampaignFormProps {
-  personas: Persona[];
-  characters: Character[];
-  valueTypes: string[];
+    personas: Persona[];
+    characters: Character[];
+    valueTypes: string[];
 }
 
-export default function CampaignForm({ personas, characters, valueTypes }: CampaignFormProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+export default function CampaignForm( {
+                                          personas,
+                                          characters,
+                                          valueTypes,
+                                      }: CampaignFormProps ) {
+    const router = useRouter();
+    const [ isPending, startTransition ] = useTransition();
 
-  // Form state
-  const [formData, setFormData] = useState({
-    title: '',
-    objective: '',
-    narrativeContext: '',
-    postLength: '',
-    startDate: '',
-    endDate: '',
-  });
+    const form = useForm<CampaignFormData>( {
+        resolver: zodResolver( campaignFormSchema ),
+        defaultValues: {
+            title: '',
+            objective: '',
+            narrativeContext: '',
+            postLength: '',
+            cadence: {
+                daysOfWeek: [],
+                frequency: 'weekly',
+            },
+            postType: 'single_image',
+            personas: [],
+            characters: [],
+            mergeFields: [],
+        },
+    } );
 
-  const [cadence, setCadence] = useState<Cadence>({
-    daysOfWeek: [],
-    frequency: 'weekly',
-  });
+    const { handleSubmit, control, watch } = form;
+    const postType = watch( 'postType' );
 
-  const [postType, setPostType] = useState<'single_image' | 'carousel' | 'video'>('image');
-  const [videoLength, setVideoLength] = useState<30 | 45 | 60>(30);
-  const [selectedPersonas, setSelectedPersonas] = useState<string[]>([]);
-  const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
-  const [mergeFields, setMergeFields] = useState<MergeField[]>([]);
+    const onSubmit = ( values: CampaignFormData ) => {
+        startTransition( async () => {
+            const result = await createCampaignAction( values );
 
-  const isFormValid = () => {
+            if ( result.success ) {
+                toast.success( 'Campaign created successfully!' );
+                router.push( `/campaigns/${result.campaignId}` );
+            } else {
+                toast.error( 'Please check the form for errors.' );
+                // Handle and display specific field errors from result.error
+                console.error( 'Validation errors:', result.error );
+            }
+        } );
+    };
+
     return (
-      formData.title.trim() !== '' &&
-      formData.objective.trim() !== '' &&
-      formData.postLength.trim() !== '' &&
-      cadence.daysOfWeek.length > 0 &&
-      selectedPersonas.length > 0 &&
-      selectedCharacters.length > 0
-    );
-  };
+        <form onSubmit={handleSubmit( onSubmit )} className="space-y-6 mt-6">
+            <CampaignDetails/>
+            <ScheduleSection/>
+            <PersonasSection personas={personas}/>
+            <CharactersSection characters={characters} selectedCharacters={[]}
+                               setSelectedCharacters={function ( value: SetStateAction<string[]> ): void {
+                                   throw new Error( "Function not implemented." );
+                               }} />
+      <PostTypeSection  />
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isFormValid()) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    startTransition(async () => {
-      try {
-        const payload: CampaignData = {
-          ...formData,
-          cadence,
-          postType,
-          videoLength: postType === 'video' ? videoLength : undefined,
-          personas: selectedPersonas,
-          characters: selectedCharacters,
-          mergeFields: postType === 'video' ? mergeFields : undefined,
-        };
-
-        const result = await createCampaignAction(payload);
-
-        if (result.success) {
-          toast.success('Campaign created successfully!');
-          router.push(`/campaigns/${result.campaignId}`);
-        }
-      } catch (error) {
-        console.error('Campaign creation error:', error);
-        toast.error('Failed to create campaign. Please try again.');
-      }
-    });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-      <CampaignDetails formData={formData} setFormData={setFormData} />
-      
-      <ScheduleSection cadence={cadence} setCadence={setCadence} />
-      
-      <PersonasSection
-        personas={personas}
-        selectedPersonas={selectedPersonas}
-        setSelectedPersonas={setSelectedPersonas}
-      />
-      
-      <CharactersSection
-        characters={characters}
-        selectedCharacters={selectedCharacters}
-        setSelectedCharacters={setSelectedCharacters}
-      />
-      
-      <PostTypeSection postType={postType} setPostType={setPostType} />
-      
       {postType === 'video' && (
         <>
-          <VideoLengthSection videoLength={videoLength} setVideoLength={setVideoLength} />
-          <MergeFieldsSection
-            mergeFields={mergeFields}
-            setMergeFields={setMergeFields}
-            valueTypes={valueTypes}
-          />
+          <VideoLengthSection />
+          <MergeFieldsSection valueTypes={valueTypes} />
         </>
       )}
 
       <FormActionsSection
-        isValid={isFormValid()}
         isPending={isPending}
         onCancel={() => router.push('/campaigns')}
       />

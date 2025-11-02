@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
 import { Image, Images, Video, ChevronDown, ChevronRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-
-interface PostTypeSectionProps {
-  postType: 'single_image' | 'carousel' | 'video';
-  setPostType: React.Dispatch<React.SetStateAction<'single_image' | 'carousel' | 'video'>>;
-}
+import {
+  Field,
+  FieldControl,
+  FieldError,
+  FieldSet
+} from '@/ui/shadcn/field'; // Assuming new components are here
+import type { CampaignFormData } from '../../campaign.schema';
 
 interface PostTypeOption {
   id: 'single_image' | 'carousel' | 'video';
@@ -24,8 +27,10 @@ const postTypeOptions: PostTypeOption[] = [
   { id: 'video', icon: Video, label: 'Video', description: 'Video content' },
 ];
 
-export default function PostTypeSection({ postType, setPostType }: PostTypeSectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function PostTypeSection() {
+  const { watch } = useFormContext<CampaignFormData>();
+  const [isOpen, setIsOpen] = useState(true);
+  const postType = watch('postType');
 
   return (
     <Card>
@@ -43,35 +48,36 @@ export default function PostTypeSection({ postType, setPostType }: PostTypeSecti
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {postTypeOptions.map((option) => {
-                const IconComponent = option.icon;
-                return (
-                  <div
-                    key={option.id}
-                    className={`cursor-pointer rounded-lg border p-4 transition-colors ${
-                      postType === option.id
-                        ? 'border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950'
-                        : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
-                    }`}
-                    onClick={() => setPostType(option.id)}
-                  >
-                    <div className="text-center">
-                      <IconComponent
-                        className={`mx-auto mb-2 h-8 w-8 ${
-                          postType === option.id ? 'text-blue-600' : 'text-gray-400'
-                        }`}
-                      />
-                      <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {option.label}
-                      </h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{option.description}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <CardContent className="pt-4">
+            <FieldSet name="postType">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {postTypeOptions.map((option) => {
+                  const IconComponent = option.icon;
+                  return (
+                    <Field
+                      key={option.id}
+                      name="postType"
+                      type="radio"
+                      value={option.id}
+                      className={`cursor-pointer rounded-lg border p-4 transition-colors data-[state=checked]:border-blue-300 data-[state=checked]:bg-blue-50 dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-950`}
+                    >
+                      <FieldControl>
+                        <div className="text-center">
+                          <IconComponent
+                            className={`mx-auto mb-2 h-8 w-8 data-[state=checked]:text-blue-600 text-gray-400`}
+                          />
+                          <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {option.label}
+                          </h3>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{option.description}</p>
+                        </div>
+                      </FieldControl>
+                    </Field>
+                  );
+                })}
+              </div>
+              <FieldError />
+            </FieldSet>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

@@ -11,8 +11,9 @@ import Providers from "@/app/providers";
 import { CampaignProvider } from "@/src/features/campaigns/providers/CampaignProvider";
 import { Campaign, Character, Post } from "@/src/lib/types/ui";
 import { getPosts } from "@/src/server/queries/posts.queries";
-import { getCampaigns, getCampaignsForUI } from "@/src/server/queries/campaigns.queries";
+import { getCampaigns } from "@/src/server/queries/campaigns.queries";
 import { getCharacters } from "@/src/server/queries/characters.queries";
+import { buildCampaign } from "@/src/lib/utils/campaigns.utils";
 
 const defaultUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
@@ -47,12 +48,14 @@ export default async function RootLayout( {
     const defaultOpen = cookiesStore.get( "sidebar_state" )?.value === "open";
 
 
-    const campaigns = await getCampaigns();
+    // Turn this into a Campaign type with counts
+    const baseCampaigns = await getCampaigns();
+    const campaigns = baseCampaigns.map( (campaign) => buildCampaign(campaign) );
     const characters = await getCharacters();
 
 
 
-    const posts: Post[] = await getPosts();
+    // const posts: Post[] = await getPosts();
 
     console.log( 'campaigns: ', campaigns );
 
