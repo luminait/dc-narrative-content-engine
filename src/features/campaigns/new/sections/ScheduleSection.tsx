@@ -1,19 +1,20 @@
-
 'use client';
 
 import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
-import { Label } from '@/ui/shadcn/label';
 import { Checkbox } from '@/ui/shadcn/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
+import {
+  Field, 
+  FieldContent, 
+  FieldLabel, 
+  FieldError,
+  FieldSet
+} from '@/ui/shadcn/field'; // Assuming new components are here
 import { Calendar, ChevronDown, ChevronRight } from 'lucide-react';
-import type { Cadence } from '../../campaign.schema';
-
-interface ScheduleSectionProps {
-  cadence: Cadence;
-  setCadence: React.Dispatch<React.SetStateAction<Cadence>>;
-}
+import type { CampaignFormData } from '../../campaign.schema';
 
 const daysOptions = [
   { id: 'monday', label: 'Monday' },
@@ -23,21 +24,13 @@ const daysOptions = [
   { id: 'friday', label: 'Friday' },
   { id: 'saturday', label: 'Saturday' },
   { id: 'sunday', label: 'Sunday' },
-];
+] as const;
 
-export default function ScheduleSection({ cadence, setCadence }: ScheduleSectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleDayToggle = (dayId: string, checked: boolean) => {
-    if (checked) {
-      setCadence((prev) => ({ ...prev, daysOfWeek: [...prev.daysOfWeek, dayId] }));
-    } else {
-      setCadence((prev) => ({
-        ...prev,
-        daysOfWeek: prev.daysOfWeek.filter((d) => d !== dayId),
-      }));
-    }
-  };
+export default function ScheduleSection() {
+  const { watch } = useFormContext<CampaignFormData>();
+  const [isOpen, setIsOpen] = useState(true);
+  const selectedDays = watch('cadence.daysOfWeek');
+  const frequency = watch('cadence.frequency');
 
   return (
     <Card>
@@ -55,50 +48,43 @@ export default function ScheduleSection({ cadence, setCadence }: ScheduleSection
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Days of the Week *</Label>
-              <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <CardContent className="space-y-4 pt-4">
+            <FieldSet name="cadence.daysOfWeek">
+              <FieldLabel>Days of the Week *</FieldLabel>
+              <div className="grid grid-cols-2 gap-3 pt-2 md:grid-cols-4">
                 {daysOptions.map((day) => (
-                  <div key={day.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={day.id}
-                      checked={cadence.daysOfWeek.includes(day.id)}
-                      onCheckedChange={(checked) => handleDayToggle(day.id, checked as boolean)}
-                    />
-                    <Label htmlFor={day.id} className="text-sm font-normal">
-                      {day.label}
-                    </Label>
-                  </div>
+                  <Field title="cadence.daysOfWeek"  defaultValue={day.id} key={day.id}>
+                     <FieldContent>
+                        <Checkbox />
+                     </FieldContent>
+                     <FieldLabel className="font-normal">{day.label}</FieldLabel>
+                  </Field>
                 ))}
               </div>
-            </div>
+              <FieldError />
+            </FieldSet>
 
-            <div>
-              <Label>Frequency</Label>
-              <Select
-                value={cadence.frequency}
-                onValueChange={(value: 'weekly' | 'bi-weekly') =>
-                  setCadence((prev) => ({ ...prev, frequency: value }))
-                }
-              >
-                <SelectTrigger className="mt-1 max-w-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Field title="cadence.frequency">
+              <FieldLabel>Frequency</FieldLabel>
+              <FieldContent>
+                <Select>
+                  <SelectTrigger className="max-w-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FieldContent>
+              <FieldError />
+            </Field>
 
-            {cadence.daysOfWeek.length > 0 && (
+            {selectedDays.length > 0 && (
               <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                 <strong>Schedule Preview:</strong> Posts will be published{' '}
-                {cadence.daysOfWeek.length === 7
-                  ? 'daily'
-                  : `on ${cadence.daysOfWeek.join(', ')}`}{' '}
-                {cadence.frequency === 'bi-weekly' ? 'every two weeks' : 'every week'}
+                {selectedDays.length === 7 ? 'daily' : `on ${selectedDays.join(', ')}`}{' '}
+                {frequency === 'bi-weekly' ? 'every two weeks' : 'every week'}
               </div>
             )}
           </CardContent>

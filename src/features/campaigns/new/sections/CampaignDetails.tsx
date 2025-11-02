@@ -1,25 +1,18 @@
 'use client';
 
+import { useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Input } from '@/ui/shadcn/input';
-import { Label } from '@/ui/shadcn/label';
 import { Textarea } from '@/ui/shadcn/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
+import {
+  Field, 
+  FieldContent,
+  FieldLabel, 
+  FieldError
+} from '@/ui/shadcn/field'; // Assuming new components are here
 import { Target } from 'lucide-react';
-
-interface FormData {
-  title: string;
-  objective: string;
-  narrativeContext: string;
-  postLength: string;
-  startDate: string;
-  endDate: string;
-}
-
-interface CampaignDetailsSectionProps {
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
-}
+import type { CampaignFormData } from '@/src/features/campaigns/campaign.schema';
 
 const postLengthOptions = [
   { value: 'short', label: 'Short (50-100 words)' },
@@ -27,7 +20,9 @@ const postLengthOptions = [
   { value: 'long', label: 'Long (200+ words)' },
 ];
 
-export default function CampaignDetails( { formData, setFormData }: CampaignDetailsSectionProps) {
+export default function CampaignDetails() {
+  const { control } = useFormContext<CampaignFormData>();
+
   return (
     <Card>
       <CardHeader>
@@ -38,84 +33,71 @@ export default function CampaignDetails( { formData, setFormData }: CampaignDeta
         <CardDescription>Define the core objective and messaging for your campaign</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="title">Campaign Title *</Label>
-          <Input
-            id="title"
-            value={formData.title}
-            onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-            placeholder="e.g., Holiday Pokémon Card Collection Showcase"
-            className="mt-1"
-            required
-          />
-        </div>
+        <Field title="title">
+          <FieldLabel>Campaign Title *</FieldLabel>
+          <FieldContent>
+            <Input placeholder="e.g., Holiday Pokémon Card Collection Showcase" />
+          </FieldContent>
+          <FieldError />
+        </Field>
 
-        <div>
-          <Label htmlFor="objective">Campaign Objective *</Label>
-          <Textarea
-            id="objective"
-            value={formData.objective}
-            onChange={(e) => setFormData((prev) => ({ ...prev, objective: e.target.value }))}
-            placeholder="What do you want to achieve with this campaign?"
-            className="mt-1"
-            rows={3}
-            required
-          />
-        </div>
+        <Field title="objective">
+          <FieldLabel>Campaign Objective *</FieldLabel>
+          <FieldContent>
+            <Textarea
+              placeholder="What do you want to achieve with this campaign?"
+              rows={3}
+            />
+          </FieldContent>
+          <FieldError />
+        </Field>
 
-        <div>
-          <Label htmlFor="narrativeContext">Narrative Context (Optional)</Label>
-          <Textarea
-            id="narrativeContext"
-            value={formData.narrativeContext}
-            onChange={(e) => setFormData((prev) => ({ ...prev, narrativeContext: e.target.value }))}
-            placeholder="Additional context or storytelling elements"
-            className="mt-1"
-            rows={2}
-          />
-        </div>
+        <Field title="narrativeContext">
+          <FieldLabel>Narrative Context (Optional)</FieldLabel>
+          <FieldContent>
+            <Textarea
+              placeholder="Additional context or storytelling elements"
+              rows={2}
+            />
+          </FieldContent>
+          <FieldError />
+        </Field>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div>
-            <Label htmlFor="postLength">Post Length *</Label>
-            <Select
-              value={formData.postLength}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, postLength: value }))}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select post length" />
-              </SelectTrigger>
-              <SelectContent>
-                {postLengthOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Field title="postLength">
+            <FieldLabel>Post Length *</FieldLabel>
+            <FieldContent>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select post length" />
+                </SelectTrigger>
+                <SelectContent>
+                  {postLengthOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldContent>
+            <FieldError />
+          </Field>
 
-          <div>
-            <Label htmlFor="startDate">Start Date (Optional)</Label>
-            <Input
-              id="startDate"
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => setFormData((prev) => ({ ...prev, startDate: e.target.value }))}
-              className="mt-1"
-            />
-          </div>
+          <Field title="startDate">
+            <FieldLabel>Start Date (Optional)</FieldLabel>
+            <FieldContent>
+              <Input type="date" />
+            </FieldContent>
+            <FieldError />
+          </Field>
 
-          <div>
-            <Label htmlFor="endDate">End Date (Optional)</Label>
-            <Input
-              id="endDate"
-              type="date"
-              value={formData.endDate}
-              onChange={(e) => setFormData((prev) => ({ ...prev, endDate: e.target.value }))}
-              className="mt-1"
-            />
-          </div>
+          <Field title="endDate">
+            <FieldLabel>End Date (Optional)</FieldLabel>
+            <FieldContent>
+              <Input type="date" />
+            </FieldContent>
+            <FieldError />
+          </Field>
         </div>
       </CardContent>
     </Card>
