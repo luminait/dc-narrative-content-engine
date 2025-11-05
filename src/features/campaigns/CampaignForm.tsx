@@ -1,11 +1,11 @@
 'use client';
 
-import { SetStateAction, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import type { Persona, Character } from '@/src/server/db/types';
+import type { Persona } from '@/src/server/db/types';
 import { createCampaignAction } from '@/src/server/actions/campaign.actions';
 import {
     campaignFormSchema,
@@ -14,15 +14,16 @@ import {
 import CampaignDetails from '@/src/features/campaigns/new/sections/CampaignDetails';
 import ScheduleSection from '@/src/features/campaigns/new/sections/ScheduleSection';
 import PersonasSection from '@/src/features/campaigns/new/sections/PersonasSection';
-import CharactersSection from '@/src/features/campaigns/new/sections/CharactersSelection';
+import CharactersSection from '@/src/features/campaigns/new/sections/CharactersSection';
 import PostTypeSection from '@/src/features/campaigns/new/sections/PostTypeSection';
 import VideoLengthSection from '@/src/features/campaigns/new/sections/VideoLengthSection';
 import MergeFieldsSection from '@/src/features/campaigns/new/sections/MergeFieldsSection';
 import FormActionsSection from '@/src/features/campaigns/new/sections/FormActionsSection';
+import { CharacterWithImage } from "@/src/lib/types/ui";
 
 interface CampaignFormProps {
     personas: Persona[];
-    characters: Character[];
+    characters: CharacterWithImage[];
     valueTypes: string[];
 }
 
@@ -52,14 +53,14 @@ export default function CampaignForm( {
         },
     } );
 
-    const { handleSubmit, control, watch } = form;
+    const { handleSubmit, watch } = form;
     const postType = watch( 'postType' );
 
     const onSubmit = ( values: CampaignFormData ) => {
         startTransition( async () => {
             const result = await createCampaignAction( values );
 
-            if ( result.success ) {
+            if (result.success) {
                 toast.success( 'Campaign created successfully!' );
                 router.push( `/campaigns/${result.campaignId}` );
             } else {
@@ -71,27 +72,26 @@ export default function CampaignForm( {
     };
 
     return (
-        <form onSubmit={handleSubmit( onSubmit )} className="space-y-6 mt-6">
-            <CampaignDetails/>
-            <ScheduleSection/>
-            <PersonasSection personas={personas}/>
-            <CharactersSection characters={characters} selectedCharacters={[]}
-                               setSelectedCharacters={function ( value: SetStateAction<string[]> ): void {
-                                   throw new Error( "Function not implemented." );
-                               }} />
-      <PostTypeSection  />
+        <FormProvider {...form}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-6">
+                <CampaignDetails/>
+                <ScheduleSection/>
+                <PersonasSection personas={personas}/>
+                <CharactersSection characters={characters} />
+                <PostTypeSection/>
 
-      {postType === 'video' && (
-        <>
-          <VideoLengthSection />
-          <MergeFieldsSection valueTypes={valueTypes} />
-        </>
-      )}
+                {postType === 'video' && (
+                    <>
+                        <VideoLengthSection/>
+                        <MergeFieldsSection valueTypes={valueTypes}/>
+                    </>
+                )}
 
-      <FormActionsSection
-        isPending={isPending}
-        onCancel={() => router.push('/campaigns')}
-      />
-    </form>
-  );
+                <FormActionsSection
+                    isPending={isPending}
+                    onCancel={() => router.push('/campaigns')}
+                />
+            </form>
+        </FormProvider>
+    );
 }

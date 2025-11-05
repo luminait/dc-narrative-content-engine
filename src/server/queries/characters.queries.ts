@@ -6,7 +6,7 @@ import { RawCharacterFromQuery } from '@/src/lib/utils/characters.utils';
  * Fetches all characters with their associated campaigns and assets.
  */
 export const getCharacters = unstable_cache(
-  async () => {
+  async (): Promise<RawCharacterFromQuery[]> => {
     return prisma.character.findMany({
       where: { deletedAt: null },
       include: {

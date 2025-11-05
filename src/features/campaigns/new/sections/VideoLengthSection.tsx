@@ -1,16 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
-import { Video, ChevronDown, ChevronRight } from 'lucide-react';
-import {
-  Field,
-  FieldControl,
-  FieldError,
-  FieldSet
-} from '@/ui/shadcn/field'; // Assuming new components are here
+import { FieldError, FieldLabel, FieldSet } from '@/ui/shadcn/field';
+import { RadioGroup, RadioGroupItem } from '@/ui/shadcn/radio-group';
+import { ChevronDown, ChevronRight, Video } from 'lucide-react';
 import type { CampaignFormData } from '../../campaign.schema';
 
 const videoLengthOptions = [
@@ -20,6 +16,7 @@ const videoLengthOptions = [
 ];
 
 export default function VideoLengthSection() {
+  const { control } = useFormContext<CampaignFormData>();
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -39,29 +36,39 @@ export default function VideoLengthSection() {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="pt-4">
-            <FieldSet name="videoLength">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {videoLengthOptions.map((option) => (
-                  <Field
-                    key={option.value}
-                    name="videoLength"
-                    type="radio"
-                    value={option.value}
-                    className={`cursor-pointer rounded-lg border p-4 transition-colors data-[state=checked]:border-blue-300 data-[state=checked]:bg-blue-50 dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-950`}
+            <Controller
+              name="videoLength"
+              control={control}
+              render={({ field, fieldState }) => (
+                <FieldSet>
+                  <RadioGroup
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={String(field.value)}
+                    className="grid grid-cols-1 gap-4 md:grid-cols-3"
                   >
-                    <FieldControl>
-                      <div className="text-center">
-                        <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {option.label}
-                        </h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">{option.description}</p>
+                    {videoLengthOptions.map((option) => (
+                      <div key={option.value}>
+                        <RadioGroupItem
+                          value={String(option.value)}
+                          id={`videoLength-${option.value}`}
+                          className="peer sr-only"
+                        />
+                        <FieldLabel
+                          htmlFor={`videoLength-${option.value}`}
+                          className="block cursor-pointer rounded-lg border bg-transparent p-4 text-center transition-colors peer-data-[state=checked]:border-blue-300 peer-data-[state=checked]:bg-blue-50 dark:peer-data-[state=checked]:border-blue-700 dark:peer-data-[state=checked]:bg-blue-950"
+                        >
+                          <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {option.label}
+                          </h3>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{option.description}</p>
+                        </FieldLabel>
                       </div>
-                    </FieldControl>
-                  </Field>
-                ))}
-              </div>
-              <FieldError />
-            </FieldSet>
+                    ))}
+                  </RadioGroup>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </FieldSet>
+              )}
+            />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

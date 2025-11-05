@@ -7,7 +7,7 @@ import type { Campaign, Character, Persona } from '@/src/lib/types/ui';
 import { isAssetSystemAvailable } from '@/src/features/assets';
 import { MergeField } from "@/src/features/campaigns/campaign.schema";
 import { Badge } from "@/ui/shadcn/badge";
-import { getAssetUrl } from "@/src/server/actions/assets";
+import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 import type { AssetData } from "@/src/features/assets/assets.schema";
 
 

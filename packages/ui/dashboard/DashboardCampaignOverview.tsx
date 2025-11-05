@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { Campaign } from "@/src/lib/types/ui";
 
 // Define the extended Campaign type with counts
-
 interface DashboardCampaignOverviewProps {
     campaigns: Campaign[] | undefined;
     isLoading: boolean;
@@ -112,7 +111,7 @@ const DashboardCampaignOverview = ( {
                                         </p>
 
                                         <div className="flex items-center space-x-4 text-xs text-gray-500">
-                                            <span>Created {formatDate( campaign.createdAt.toString() || Date.now().toString() )}</span>
+                                            <span>Created {formatDate( campaign.createdAt?.toString() || Date.now().toString() )}</span>
                                             <span>•</span>
                                             <span>{campaign.personaCount} {campaign.personaCount === 1 ? 'persona' : 'personas'}</span>
                                             <span>•</span>

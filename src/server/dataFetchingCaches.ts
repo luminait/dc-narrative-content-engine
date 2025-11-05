@@ -28,7 +28,17 @@ export const getValueTypes = unstable_cache(
   async () => {
     // Assuming you have a ValueType model or similar
     // Replace with actual implementation
-    return ['text', 'number', 'image', 'video'];
+    return ['image',
+        'text',
+        'video',
+        'audio_voice',
+        'audio_music',
+        'gen_ai_image',
+        'gen_ai_text',
+        'gen_ai_video',
+        'gen_ai_voice',
+        'gen_ai_music',
+        'image_or_video',];
   },
   ['value-types'],
   { tags: ['value-types'], revalidate: 3600 }

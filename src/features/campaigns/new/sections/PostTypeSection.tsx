@@ -1,17 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
-import { Image, Images, Video, ChevronDown, ChevronRight } from 'lucide-react';
+import { FieldError, FieldLabel, FieldSet } from '@/ui/shadcn/field';
+import { RadioGroup, RadioGroupItem } from '@/ui/shadcn/radio-group';
+import { ChevronDown, ChevronRight, Image, Images, Video } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import {
-  Field,
-  FieldControl,
-  FieldError,
-  FieldSet
-} from '@/ui/shadcn/field'; // Assuming new components are here
 import type { CampaignFormData } from '../../campaign.schema';
 
 interface PostTypeOption {
@@ -28,9 +24,8 @@ const postTypeOptions: PostTypeOption[] = [
 ];
 
 export default function PostTypeSection() {
-  const { watch } = useFormContext<CampaignFormData>();
+  const { control } = useFormContext<CampaignFormData>();
   const [isOpen, setIsOpen] = useState(true);
-  const postType = watch('postType');
 
   return (
     <Card>
@@ -49,35 +44,43 @@ export default function PostTypeSection() {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="pt-4">
-            <FieldSet name="postType">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {postTypeOptions.map((option) => {
-                  const IconComponent = option.icon;
-                  return (
-                    <Field
-                      key={option.id}
-                      name="postType"
-                      type="radio"
-                      value={option.id}
-                      className={`cursor-pointer rounded-lg border p-4 transition-colors data-[state=checked]:border-blue-300 data-[state=checked]:bg-blue-50 dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-950`}
-                    >
-                      <FieldControl>
-                        <div className="text-center">
-                          <IconComponent
-                            className={`mx-auto mb-2 h-8 w-8 data-[state=checked]:text-blue-600 text-gray-400`}
-                          />
-                          <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {option.label}
-                          </h3>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">{option.description}</p>
+            <Controller
+              name="postType"
+              control={control}
+              render={({ field, fieldState }) => (
+                <FieldSet>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    className="grid grid-cols-1 gap-4 md:grid-cols-3 w-full items-stretch"
+                  >
+                    {postTypeOptions.map((option) => {
+                      const IconComponent = option.icon;
+                      return (
+                        <div key={option.id} className={"flex-1"}>
+                          <RadioGroupItem value={option.id} id={option.id} className="peer sr-only" />
+                          <FieldLabel
+                            htmlFor={option.id}
+                            className="block h-full cursor-pointer rounded-lg border bg-transparent p-4 text-gray-400 transition-colors peer-data-[state=checked]:border-blue-300 peer-data-[state=checked]:bg-blue-50 peer-data-[state=checked]:text-blue-600 dark:peer-data-[state=checked]:border-blue-700 dark:peer-data-[state=checked]:bg-blue-950"
+                          >
+                            <div className="text-center">
+                              <IconComponent className="mx-auto mb-2 h-8 w-8" />
+                              <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {option.label}
+                              </h3>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {option.description}
+                              </p>
+                            </div>
+                          </FieldLabel>
                         </div>
-                      </FieldControl>
-                    </Field>
-                  );
-                })}
-              </div>
-              <FieldError />
-            </FieldSet>
+                      );
+                    })}
+                  </RadioGroup>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </FieldSet>
+              )}
+            />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

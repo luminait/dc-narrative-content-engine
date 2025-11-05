@@ -37,11 +37,26 @@ export const mergeFieldSchema = z.object({
   length: z.string().nullable().optional(),
 });
 
+/**
+ * Persona schema for UI consumption
+ * Simplified version focusing on what the form needs
+ */
+export const personaFormSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    personaKey: z.string(),
+    isPrimaryPersona: z.boolean().default(true),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+    deletedAt: z.string().optional(),
+});
+
 export const characterSelectionSchema = z.object({
   id: z.uuid(),
   name: z.string(),
-  characterTypes: z.string().optional(),
-  imageUrl: z.url().optional(),
+  characterTypes: z.string().nullable().optional(),
+  imageUrl: z.url().nullable().optional(),
 });
 
 /**
@@ -120,3 +135,4 @@ export type CampaignFormData = z.infer<typeof campaignFormSchema>;
 export type Cadence = z.infer<typeof cadenceSchema>;
 export type MergeField = z.infer<typeof mergeFieldSchema>;
 export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
+export type PersonaData = z.infer<typeof personaFormSchema>;

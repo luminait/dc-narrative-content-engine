@@ -1,6 +1,7 @@
 import { CharacterData } from "@/src/features/characters/character.schema";
 import { CharacterWithImage } from "@/src/lib/types/ui";
 import { getPublicUrl } from "./supabase.utils";
+import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 
 // Based on schema.prisma: This defines the shape of the `assets` relation
 // as returned by our Prisma query.
@@ -9,6 +10,7 @@ export type RawCharacterAssetFromPrisma = {
     storageObject: {
         id: string;
     };
+    assetRef: string;
 };
 
 // This is the complete shape of a character object returned by our data-fetching functions.
@@ -23,13 +25,14 @@ export type RawCharacterFromQuery = CharacterData & {
  * @param character - The raw character object from Prisma, including the `assets` array.
  * @returns The URL of the primary image, falling back to the first image.
  */
-export const getCharacterDefaultImage = (
+export const getCharacterDefaultImage = async (
     character: RawCharacterFromQuery,
-): string | undefined => {
+): Promise<string | undefined> => {
     if (!character.assets || character.assets.length === 0) {
         return undefined;
     }
 
+    console.log(`Getting default image for character: ${character.name} \n with assets: ${JSON.stringify(character.assets)}`);
     const primaryAsset = character.assets.find(asset => asset.isPrimary);
     const assetToUse = primaryAsset || character.assets[0];
 
@@ -38,7 +41,10 @@ export const getCharacterDefaultImage = (
     }
 
     // Assumes character images are in a "characters" bucket.
-    return getPublicUrl("characters", assetToUse.storageObject.id);
+    const assetRef = primaryAsset?.assetRef || character.assets[0].assetRef;
+    const asset_url = (await getAssetUrlFromAssetRef(assetRef)).asset_url;
+    return asset_url;
+    // return getPublicUrl("characters", assetToUse.storageObject.id);
 };
 
 /**

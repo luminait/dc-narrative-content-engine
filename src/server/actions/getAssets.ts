@@ -1,14 +1,14 @@
 "use server";
 
-import { getAssetUrl } from "@/src/server/actions/assets";
+import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 
-export async function getAssetAction(asset_ref: string) {
-    const asset = await getAssetUrl({ asset_ref });
+export async function getAssetFromAssetRefAction( asset_ref: string) {
+    const asset = await getAssetUrlFromAssetRef( asset_ref );
     return asset;
 }
 
 
 export async function getAssetsAction(asset_refs: string[]) {
-    const assets = await Promise.all(asset_refs.map(getAssetAction));
+    const assets = await Promise.all(asset_refs.map(getAssetFromAssetRefAction));
     return assets;
 }
