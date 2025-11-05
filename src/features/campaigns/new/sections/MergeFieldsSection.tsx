@@ -107,7 +107,7 @@ export default function MergeFieldsSection() {
         } catch (error) {
           const message =
             error instanceof z.ZodError
-              ? `CSV data validation failed: ${error.errors.map((e) => `${e.path.join('.')} - ${e.message}`).join(', ')}`
+              ? `CSV data validation failed: ${error.issues.map((issue) => issue.message).join(', ')}`
               : error instanceof Error
                 ? `Error processing CSV: ${error.message}`
                 : 'An unknown error occurred while processing the CSV.';
@@ -201,7 +201,7 @@ export default function MergeFieldsSection() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={() => {
-                              const currentField = control.getValues(`mergeFields.${index}`);
+                              const currentField = control._formValues.mergeFields[index];
                               insert(index + 1, { ...currentField, name: `${currentField.name}_copy` });
                             }}
                           >

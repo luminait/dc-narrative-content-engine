@@ -9,6 +9,7 @@ import {
 } from '@/src/features/campaigns/campaign.schema';
 import { sendWebhookToN8n } from '@/src/server/webhooks/SendWebhookToN8n';
 import { formDataToPrismaInput } from '@/src/lib/mappers/campaignFormDataMapper';
+import { createSupabaseServerClient } from '@/src/server/supabase/server';
 
 /**
  * Creates a new campaign.
@@ -16,12 +17,20 @@ import { formDataToPrismaInput } from '@/src/lib/mappers/campaignFormDataMapper'
  */
 export async function createCampaignAction(values: CampaignFormData) {
   try {
+    // 0. Get User
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data?.user) {
+      throw new Error('User not authenticated');
+    }
+    const user = data.user;
+
     // 1. Validate with Zod
     const validatedData = campaignFormSchema.parse(values);
 
     // 2. Transform to Prisma input
-    // TODO: Get userId from auth session
-    const prismaInput = formDataToPrismaInput(validatedData, 'user-id-placeholder');
+    const prismaInput = formDataToPrismaInput(validatedData, user.id);
 
     // 3. Save to database
     const campaign = await prisma.campaign.create({
@@ -61,7 +70,8 @@ export async function createCampaignAction(values: CampaignFormData) {
     return {
       success: false,
       campaignId: null,
-      error: 'Failed to create campaign',
+      error:
+        error instanceof Error ? error.message : 'Failed to create campaign',
     };
   }
 }

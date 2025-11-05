@@ -2,6 +2,7 @@
 
 import { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Slot } from "@radix-ui/react-slot"
 
 import { cn } from "@/src/lib/utils/utils"
 import { Label } from "@/ui/shadcn/label"
@@ -81,10 +82,13 @@ const fieldVariants = cva(
 function Field({
   className,
   orientation = "vertical",
+  asChild = false,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof fieldVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : "div"
   return (
-    <div
+    <Comp
       role="group"
       data-slot="field"
       data-orientation={orientation}

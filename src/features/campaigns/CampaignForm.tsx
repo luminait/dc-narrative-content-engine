@@ -24,36 +24,38 @@ import { CharacterWithImage } from "@/src/lib/types/ui";
 interface CampaignFormProps {
     personas: Persona[];
     characters: CharacterWithImage[];
-    valueTypes: string[];
 }
 
 export default function CampaignForm( {
                                           personas,
                                           characters,
-                                          valueTypes,
                                       }: CampaignFormProps ) {
     const router = useRouter();
     const [ isPending, startTransition ] = useTransition();
 
     const form = useForm<CampaignFormData>( {
         resolver: zodResolver( campaignFormSchema ),
+        mode: 'onChange',
         defaultValues: {
-            title: '',
-            objective: '',
+            title: 'New Campaign',
+            objective: 'A great campaign objective.',
             narrativeContext: '',
-            postLength: '',
+            postLength: 'short',
+            startDate: undefined,
+            endDate: undefined,
             cadence: {
-                daysOfWeek: [],
+                daysOfWeek: ['monday'],
                 frequency: 'weekly',
             },
             postType: 'single_image',
+            videoLength: undefined,
             personas: [],
             characters: [],
             mergeFields: [],
         },
     } );
 
-    const { handleSubmit, watch } = form;
+    const { handleSubmit, watch, formState } = form;
     const postType = watch( 'postType' );
 
     const onSubmit = ( values: CampaignFormData ) => {
@@ -83,9 +85,27 @@ export default function CampaignForm( {
                 {postType === 'video' && (
                     <>
                         <VideoLengthSection/>
-                        <MergeFieldsSection valueTypes={valueTypes}/>
+                        <MergeFieldsSection />
                     </>
                 )}
+
+                {/* --- START DEBUGGING BLOCK --- */}
+                <div className="mt-6 p-4 bg-slate-900 border border-slate-700 rounded-lg text-slate-300">
+                  <h3 className="font-mono font-bold text-lg text-white">Debug Output</h3>
+                  <div className="grid grid-cols-2 gap-4 mt-2">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-400">formState.isValid</label>
+                      <pre className="mt-1 text-lg font-bold text-white">{JSON.stringify(formState.isValid)}</pre>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-slate-400">formState.errors</label>
+                    <pre className="mt-1 p-2 bg-black rounded-md text-sm whitespace-pre-wrap">
+                      {JSON.stringify(formState.errors, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+                {/* --- END DEBUGGING BLOCK --- */}
 
                 <FormActionsSection
                     isPending={isPending}

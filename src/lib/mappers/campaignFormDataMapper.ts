@@ -1,5 +1,46 @@
 import type { Prisma } from '@/src/server/db/generated/prisma';
+import {
+  CaptionLength,
+  EventCadence,
+  PostType,
+  VideoLengthSeconds,
+  Weekdays,
+} from '@/src/server/db/generated/prisma';
 import type { CampaignFormData } from '@/src/features/campaigns/campaign.schema';
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Converts a number (of seconds) to its corresponding VideoLengthSeconds enum.
+ * Example: 30 -> VideoLengthSeconds.S_30
+ */
+const numberToVideoLengthEnum = (
+  seconds?: number,
+): VideoLengthSeconds | undefined => {
+  if (seconds === undefined || seconds === null) return undefined;
+  const enumKey = `S_${seconds}` as keyof typeof VideoLengthSeconds;
+  if (Object.values(VideoLengthSeconds).includes(enumKey as any)) {
+    return enumKey as VideoLengthSeconds;
+  }
+  console.warn(`No matching VideoLengthSeconds enum for value: ${seconds}`);
+  return undefined;
+};
+
+/**
+ * Safely maps a string to a Prisma enum.
+ * @param enumObj The Prisma enum object (e.g., CaptionLength).
+ * @param value The string value from the form (e.g., 'short').
+ * @returns The corresponding enum member (e.g., CaptionLength.SHORT).
+ */
+function mapToEnum<T extends object>(enumObj: T, value: string): T[keyof T] {
+  const upperValue = value.toUpperCase().replace('-', '_') as keyof T;
+  if (upperValue in enumObj) {
+    return enumObj[upperValue];
+  }
+  throw new Error(`Invalid enum value: ${value} for enum ${Object.keys(enumObj)}`);
+}
 
 // ============================================================================
 // Form Data → Prisma Input (Outbound: UI → Database)
@@ -7,11 +48,6 @@ import type { CampaignFormData } from '@/src/features/campaigns/campaign.schema'
 
 /**
  * Maps form data to Prisma create input.
- * Transforms Zod-validated form data into a database-compatible format.
- *
- * @param formData - Validated form data from Zod schema.
- * @param userId - User ID for creator relationship.
- * @returns Prisma input for campaign creation.
  */
 export function formDataToPrismaInput(
   formData: CampaignFormData,
@@ -21,13 +57,13 @@ export function formDataToPrismaInput(
     title: formData.title,
     campaignObjective: formData.objective,
     narrativeContext: formData.narrativeContext || null,
-    postCaptionLength: formData.postLength,  // TODO: Validate and map post caption length to enum by creating an enum constuctor
+    postCaptionLength: mapToEnum(CaptionLength, formData.postLength),
     startDate: formData.startDate,
     endDate: formData.endDate,
-    daysOfWeek: formData.cadence.daysOfWeek,
-    frequency: formData.cadence.frequency,
-    postType: formData.postType,
-    postVideoLength: formData.videoLength,
+    daysOfWeek: formData.cadence.daysOfWeek.map((day) => mapToEnum(Weekdays, day)),
+    frequency: mapToEnum(EventCadence, formData.cadence.frequency),
+    postType: mapToEnum(PostType, formData.postType),
+    postVideoLength: numberToVideoLengthEnum(formData.videoLength),
     creator: {
       connect: { userId },
     },
@@ -57,33 +93,3 @@ export function formDataToPrismaInput(
       : undefined,
   };
 }
-
-/**
- *
- * export type CampaignCreateInput = {
- *     id?: string
- *     versionNumber?: number
- *     title: string
- *     campaignObjective: string
- *     createdAt?: Date | string | null
- *     updatedAt?: Date | string | null
- *     deletedAt?: Date | string | null
- *     daysOfWeek?: CampaignCreatedaysOfWeekInput | $Enums.Weekdays[]
- *     frequency?: $Enums.EventCadence
- *     postType?: $Enums.PostType
- *     postCaptionLength?: $Enums.CaptionLength
- *     postVideoLength?: $Enums.VideoLengthSeconds | null
- *     startDate?: Date | string | null
- *     endDate?: Date | string | null
- *     narrativeContext?: string | null
- *     isActive?: boolean
- *     isArchived?: boolean
- *     isDraft?: boolean
- *     creator?: UserCreateNestedOneWithoutCampaignsInput
- *     characters?: CampaignsCharactersCreateNestedManyWithoutCampaignInput
- *     personas?: CampaignsPersonasCreateNestedManyWithoutCampaignInput
- *     mergeFields?: ShotstackMergeFieldCreateNestedManyWithoutCampaignInput
- *     renders?: ShotstackRenderCreateNestedManyWithoutCampaignInput
- *     posts?: PostCreateNestedManyWithoutCampaignInput
- *   }
- */
