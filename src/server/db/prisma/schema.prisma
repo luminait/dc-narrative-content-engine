@@ -12,7 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["public", "storage", "auth"]
+  schemas  = ["public", "storage"]
 }
 
 model Campaign {
@@ -42,8 +42,6 @@ model Campaign {
   mergeFields ShotstackMergeField[]
   renders     ShotstackRender[]
   posts       Post[]
-  // The trigger trg_enforce_archived_inactive is not representable in Prisma Schema.
-  // It runs: execute FUNCTION enforce_archived_inactive ();
 
   @@map("campaigns")
   @@schema("public")
@@ -58,7 +56,6 @@ model User {
   userId    String    @unique @map("user_id") @db.Uuid
   role      UserRole  @default(client)
 
-  authUser  AuthUser   @relation(fields: [userId], references: [id])
   campaigns Campaign[]
 
   @@id([id, userId])
@@ -142,27 +139,12 @@ model CharacterAsset {
   @@schema("public")
 }
 
-// Placeholder model for Supabase (auth)
-model AuthUser {
-  id    String @id @db.Uuid
-  users User[]
-
-  @@map("users")
-  // This table is in the '(auth)' schema. You may need to enable multi-schema support
-  // in the datasource block if you haven't already.
-  // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
-  @@schema("auth")
-}
-
 // Placeholder model for Supabase storage
 model StorageObject {
   id         String           @id @db.Uuid
   assets     CharacterAsset[]
   render     ShotstackRender?
   postImages PostImage[]
-  // This table is in the 'storage' schema. You may need to enable multi-schema support
-  // in the datasource block if you haven't already.
-  // See: https://www.prisma.io/docs/concepts/components/prisma-schema/data-model#multi-schema
 
   @@map("objects")
   @@schema("storage")
@@ -185,8 +167,6 @@ model Post {
 
   campaign Campaign?   @relation(fields: [campaignId], references: [id], onUpdate: Cascade, onDelete: SetNull)
   images   PostImage[]
-  // The CHECK constraint chk_posts_exactly_one_status_true is not representable in Prisma Schema.
-  // The trigger trg_posts_normalize_status is not representable in Prisma Schema.
 
   @@map("posts")
   @@schema("public")

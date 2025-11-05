@@ -17,20 +17,33 @@ import { createSupabaseServerClient } from '@/src/server/supabase/server';
  */
 export async function createCampaignAction(values: CampaignFormData) {
   try {
-    // 0. Get User
-    const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.auth.getUser();
+    // 0. Get User and Ensure Profile Exists
+    const supabase = await createSupabaseServerClient();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
 
-    if (error || !data?.user) {
+    if (authError || !authData?.user) {
       throw new Error('User not authenticated');
     }
-    const user = data.user;
+    const authUser = authData.user;
+
+    // Ensure a public user profile exists.
+    if (!authUser.email) {
+      throw new Error('User email is not available, cannot create profile.');
+    }
+    await prisma.user.upsert({
+      where: { userId: authUser.id },
+      update: {},
+      create: {
+        userId: authUser.id,
+        email: authUser.email,
+      },
+    });
 
     // 1. Validate with Zod
     const validatedData = campaignFormSchema.parse(values);
 
     // 2. Transform to Prisma input
-    const prismaInput = formDataToPrismaInput(validatedData, user.id);
+    const prismaInput = formDataToPrismaInput(validatedData, authUser.id);
 
     // 3. Save to database
     const campaign = await prisma.campaign.create({

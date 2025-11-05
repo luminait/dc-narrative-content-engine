@@ -29,7 +29,7 @@ function CharacterCard({ character, isSelected }: CharacterCardProps) {
     <div className="text-center">
       <div className="relative mx-auto mb-2 h-20 w-20 overflow-hidden rounded">
         <ImageWithFallback
-          src={character.imageUrl ?? ''}
+          src={character.imageUrl ?? null}
           alt={character.name}
           className="h-full w-full object-cover"
         />

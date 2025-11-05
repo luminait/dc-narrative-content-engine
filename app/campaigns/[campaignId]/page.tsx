@@ -63,18 +63,36 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
         const entries = await Promise.all(
             fields.map(async (f) => {
                 if (!f.value || !f.mediaValueType) return null;
-                console.log(`f.value: ${f.value}`);
+
+                const isUrl = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(f.value);
+
                 if (isMediaAssetType(f.mediaValueType)) {
-                    const assetData = await getAssetUrlFromAssetRef(f.value);
-                    console.log(`assetData: ${assetData}`);
-                    return [f.value, { type: String(f.mediaValueType), ...assetData }] as const;
+                    if (isUrl) {
+                        // If the value is already a URL, construct the AssetData directly
+                        return [f.value, {
+                            type: String(f.mediaValueType),
+                            asset_ref: f.value, // Use the URL as the ref for keying
+                            name: f.name,
+                            asset_url: f.value,
+                            path_tokens: null,
+                            bucket_id: null,
+                        }] as const;
+                    } else {
+                        // Otherwise, assume it's a UUID and resolve it
+                        const assetData = await getAssetUrlFromAssetRef(f.value);
+                        return [f.value, { type: String(f.mediaValueType), ...assetData }] as const;
+                    }
                 }
-                return [f.value, { type: String(f.mediaValueType),
+
+                // Handle non-media types
+                return [f.value, {
+                    type: String(f.mediaValueType),
                     asset_ref: null,
                     name: f.name,
                     path_tokens: null,
                     bucket_id: null,
-                    asset_url: null } as const]
+                    asset_url: null
+                } as const];
             })
         );
         return Object.fromEntries(entries.filter((e): e is readonly [string, MergeFieldAsset] => !!e));
@@ -89,6 +107,13 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     ]);
 
     const mergeFieldValues = await resolveMergeFieldValues(mergeFields);
+
+    // Sanitize mergeFields to convert Decimal objects to numbers before passing to client component
+    const serializableMergeFields = mergeFields.map(field => ({
+        ...field,
+        startTime: field.startTime ? Number(field.startTime) : null,
+        endTime: field.endTime ? Number(field.endTime) : null,
+    }));
 
     // Convert to UI types using the centralized utility functions
     const posts: Post[] = toUiPosts( rawPosts );
@@ -138,7 +163,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 posts={posts}
                 campaignPersonas={personas}
                 characters={characters}
-                campaignMergeFields={mergeFields}
+                campaignMergeFields={serializableMergeFields}
                 campaignMergeFieldValues={mergeFieldValues}
             />
         </div>
