@@ -1,18 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
 import { Checkbox } from '@/ui/shadcn/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
-import {
-  Field, 
-  FieldContent, 
-  FieldLabel, 
-  FieldError,
-  FieldSet
-} from '@/ui/shadcn/field'; // Assuming new components are here
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/ui/shadcn/field';
 import { Calendar, ChevronDown, ChevronRight } from 'lucide-react';
 import type { CampaignFormData } from '../../campaign.schema';
 
@@ -27,8 +21,9 @@ const daysOptions = [
 ] as const;
 
 export default function ScheduleSection() {
-  const { watch } = useFormContext<CampaignFormData>();
+  const { control, watch } = useFormContext<CampaignFormData>();
   const [isOpen, setIsOpen] = useState(true);
+
   const selectedDays = watch('cadence.daysOfWeek');
   const frequency = watch('cadence.frequency');
 
@@ -36,7 +31,7 @@ export default function ScheduleSection() {
     <Card>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900">
+          <CardHeader className="cursor-pointer hover:bg-slate-900/50">
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Calendar className="h-5 w-5 text-purple-600" />
@@ -48,43 +43,63 @@ export default function ScheduleSection() {
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4 pt-4">
-            <FieldSet name="cadence.daysOfWeek">
-              <FieldLabel>Days of the Week *</FieldLabel>
-              <div className="grid grid-cols-2 gap-3 pt-2 md:grid-cols-4">
-                {daysOptions.map((day) => (
-                  <Field title="cadence.daysOfWeek"  defaultValue={day.id} key={day.id}>
-                     <FieldContent>
-                        <Checkbox />
-                     </FieldContent>
-                     <FieldLabel className="font-normal">{day.label}</FieldLabel>
-                  </Field>
-                ))}
-              </div>
-              <FieldError />
-            </FieldSet>
+          <CardContent className="space-y-6 pt-6">
+            <Controller
+              name="cadence.daysOfWeek"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Days of the Week *</FieldLabel>
+                  <FieldGroup className="grid grid-cols-2 gap-4 pt-2 md:grid-cols-4">
+                    {daysOptions.map((day) => (
+                      <Field key={day.id} orientation="horizontal">
+                        <Checkbox
+                          id={`day-${day.id}`}
+                          aria-invalid={fieldState.invalid}
+                          checked={field.value.includes(day.id)}
+                          onCheckedChange={(checked) => {
+                            const newValue = checked
+                              ? [...field.value, day.id]
+                              : field.value.filter((value) => value !== day.id);
+                            field.onChange(newValue);
+                          }}
+                        />
+                        <FieldLabel htmlFor={`day-${day.id}`} className="font-normal">
+                          {day.label}
+                        </FieldLabel>
+                      </Field>
+                    ))}
+                  </FieldGroup>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
 
-            <Field title="cadence.frequency">
-              <FieldLabel>Frequency</FieldLabel>
-              <FieldContent>
-                <Select>
-                  <SelectTrigger className="max-w-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FieldContent>
-              <FieldError />
-            </Field>
+            <Controller
+              name="cadence.frequency"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Frequency</FieldLabel>
+                  <Select name={field.name} value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id={field.name} aria-invalid={fieldState.invalid} className="max-w-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
 
-            {selectedDays.length > 0 && (
-              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            {selectedDays?.length > 0 && (
+              <div className="mt-4 text-sm text-slate-500">
                 <strong>Schedule Preview:</strong> Posts will be published{' '}
                 {selectedDays.length === 7 ? 'daily' : `on ${selectedDays.join(', ')}`}{' '}
-                {frequency === 'bi-weekly' ? 'every two weeks' : 'every week'}
+                {frequency === 'bi-weekly' ? 'every two weeks' : 'every week'}.
               </div>
             )}
           </CardContent>

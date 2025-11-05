@@ -8,6 +8,11 @@ export async function getAssetUrlFromAssetRef( asset_ref: string) {
     // ✅ Validate the input
     // const { asset_ref } = assetSchema.parse(input);
 
+    if (!SUPABASE_EDGE_URL) {
+        console.error('CRITICAL: NEXT_PUBLIC_SUPABASE_EDGE_URL is not set in .env.local');
+        throw new Error('Server configuration error: Missing Edge Function URL.');
+    }
+
     // ✅ Call the Edge Function
     const res = await fetch(`${SUPABASE_EDGE_URL}/${FUNCTION_NAME}`, {
         method: "POST",

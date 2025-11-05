@@ -4,6 +4,8 @@ import { z } from 'zod';
 // Enums & Constants
 // ============================================================================
 
+export const CAPTION_LENGTHS = ['short', 'medium', 'long'] as const;
+
 /**
  * Represents the possible types for a merge field's value, derived from the Prisma schema.
  * This is the single source of truth for merge field value types across the application.
@@ -31,7 +33,7 @@ export const mediaValueTypeSchema = z.enum(MERGE_FIELD_VALUE_TYPES);
 export const cadenceSchema = z.object({
   daysOfWeek: z
     .array(z.enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']))
-    .min(1, 'Select at least one day'),
+    .refine((arr) => arr.length > 0, { message: 'Select at least one day' }),
   frequency: z.enum(['weekly', 'bi-weekly']),
 });
 
@@ -77,14 +79,16 @@ export const campaignFormSchema = z
     title: z.string().min(3, 'Title must be at least 3 characters'),
     objective: z.string().min(10, 'Objective must be at least 10 characters'),
     narrativeContext: z.string().optional(),
-    postLength: z.string().min(1, 'Post length is required'),
+    postLength: z.enum(CAPTION_LENGTHS, {
+      errorMap: () => ({ message: 'Post length is required' }),
+    }),
     startDate: z.date().optional(),
     endDate: z.date().optional(),
     cadence: cadenceSchema,
     postType: z.enum(['single_image', 'carousel', 'video']),
     videoLength: z.number().optional(),
-    personas: z.array(z.string()).min(1, 'Select at least one persona'),
-    characters: z.array(z.string()).min(1, 'Select at least one character'),
+    personas: z.array(z.string()).refine((arr) => arr.length > 0, { message: 'Select at least one persona' }),
+    characters: z.array(z.string()).refine((arr) => arr.length > 0, { message: 'Select at least one character' }),
     mergeFields: z.array(mergeFieldSchema).optional(),
   })
   .refine(
