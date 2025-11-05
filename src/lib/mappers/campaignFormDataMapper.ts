@@ -14,18 +14,22 @@ import type { CampaignFormData } from '@/src/features/campaigns/campaign.schema'
 
 /**
  * Converts a number (of seconds) to its corresponding VideoLengthSeconds enum.
- * Example: 30 -> VideoLengthSeconds.S_30
  */
 const numberToVideoLengthEnum = (
   seconds?: number,
 ): VideoLengthSeconds | undefined => {
   if (seconds === undefined || seconds === null) return undefined;
-  const enumKey = `S_${seconds}` as keyof typeof VideoLengthSeconds;
-  if (Object.values(VideoLengthSeconds).includes(enumKey as any)) {
-    return enumKey as VideoLengthSeconds;
+  switch (seconds) {
+    case 30:
+      return VideoLengthSeconds.THIRTY;
+    case 45:
+      return VideoLengthSeconds.FORTY_FIVE;
+    case 60:
+      return VideoLengthSeconds.SIXTY;
+    default:
+      console.warn(`No matching VideoLengthSeconds enum for value: ${seconds}`);
+      return undefined;
   }
-  console.warn(`No matching VideoLengthSeconds enum for value: ${seconds}`);
-  return undefined;
 };
 
 /**
@@ -35,11 +39,24 @@ const numberToVideoLengthEnum = (
  * @returns The corresponding enum member (e.g., CaptionLength.SHORT).
  */
 function mapToEnum<T extends object>(enumObj: T, value: string): T[keyof T] {
-  const upperValue = value.toUpperCase().replace('-', '_') as keyof T;
-  if (upperValue in enumObj) {
-    return enumObj[upperValue];
+  const normalizedValue = value.toUpperCase().replace('-', '_'); // e.g., "MEDIUM"
+
+  // Iterate over the *values* of the enum to find a match
+  for (const key in enumObj) {
+    // Ensure it's a string enum member, not a reverse mapping from numeric enums
+    if (typeof enumObj[key] === 'string') {
+      const enumMemberValue = enumObj[key] as string;
+      if (enumMemberValue.toUpperCase() === normalizedValue) {
+        return enumObj[key]; // Return the actual enum value (e.g., 'MEDIUM')
+      }
+    }
   }
-  throw new Error(`Invalid enum value: ${value} for enum ${Object.keys(enumObj)}`);
+
+  // If no match found, throw an error with clearer enum values
+  const validEnumValues = Object.values(enumObj)
+    .filter((v) => typeof v === 'string') // Filter out numeric keys from numeric enums
+    .map((v) => (v as string).toLowerCase()); // Present valid options in lowercase for user
+  throw new Error(`Invalid enum value: "${value}" for enum. Valid options are: ${validEnumValues.join(', ')}`);
 }
 
 // ============================================================================
@@ -87,7 +104,6 @@ export function formDataToPrismaInput(
             type: field.type,
             startTime: field.startTime,
             endTime: field.endTime,
-            length: field.length,
           })),
         }
       : undefined,
