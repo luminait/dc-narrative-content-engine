@@ -1,6 +1,30 @@
 import { z } from 'zod';
 
 // ============================================================================
+// Enums & Constants
+// ============================================================================
+
+/**
+ * Represents the possible types for a merge field's value, derived from the Prisma schema.
+ * This is the single source of truth for merge field value types across the application.
+ */
+export const MERGE_FIELD_VALUE_TYPES = [
+  'image',
+  'text',
+  'video',
+  'audio_voice',
+  'audio_music',
+  'gen_ai_image',
+  'gen_ai_text',
+  'gen_ai_video',
+  'gen_ai_voice',
+  'gen_ai_music',
+  'image_or_video',
+] as const;
+
+export const mediaValueTypeSchema = z.enum(MERGE_FIELD_VALUE_TYPES);
+
+// ============================================================================
 // Base Schemas
 // ============================================================================
 
@@ -15,21 +39,7 @@ export const mergeFieldSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1),
   description: z.string().nullable().optional(),
-  mediaValueType: z
-    .enum([
-      'image',
-      'text',
-      'video',
-      'audio_voice',
-      'audio_music',
-      'gen_ai_image',
-      'gen_ai_text',
-      'gen_ai_video',
-      'gen_ai_voice',
-      'gen_ai_music',
-      'image_or_video',
-    ])
-    .optional(),
+  mediaValueType: mediaValueTypeSchema.optional(),
   value: z.string().nullable().optional(),
   type: z.enum(['text', 'character', 'environment', 'music', 'voiceover', 'sfx', 'luma_matte']).optional(),
   startTime: z.string().nullable().optional(),
@@ -136,3 +146,4 @@ export type Cadence = z.infer<typeof cadenceSchema>;
 export type MergeField = z.infer<typeof mergeFieldSchema>;
 export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
 export type PersonaData = z.infer<typeof personaFormSchema>;
+export type MediaValueType = z.infer<typeof mediaValueTypeSchema>;
