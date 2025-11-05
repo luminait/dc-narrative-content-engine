@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@/src/server/db/generated/prisma';
 import type { CampaignFormData } from '@/src/features/campaigns/campaign.schema';
 
 // ============================================================================
@@ -21,7 +21,7 @@ export function formDataToPrismaInput(
     title: formData.title,
     campaignObjective: formData.objective,
     narrativeContext: formData.narrativeContext || null,
-    postCaptionLength: formData.postLength,
+    postCaptionLength: formData.postLength,  // TODO: Validate and map post caption length to enum by creating an enum constuctor
     startDate: formData.startDate,
     endDate: formData.endDate,
     daysOfWeek: formData.cadence.daysOfWeek,
@@ -57,3 +57,33 @@ export function formDataToPrismaInput(
       : undefined,
   };
 }
+
+/**
+ *
+ * export type CampaignCreateInput = {
+ *     id?: string
+ *     versionNumber?: number
+ *     title: string
+ *     campaignObjective: string
+ *     createdAt?: Date | string | null
+ *     updatedAt?: Date | string | null
+ *     deletedAt?: Date | string | null
+ *     daysOfWeek?: CampaignCreatedaysOfWeekInput | $Enums.Weekdays[]
+ *     frequency?: $Enums.EventCadence
+ *     postType?: $Enums.PostType
+ *     postCaptionLength?: $Enums.CaptionLength
+ *     postVideoLength?: $Enums.VideoLengthSeconds | null
+ *     startDate?: Date | string | null
+ *     endDate?: Date | string | null
+ *     narrativeContext?: string | null
+ *     isActive?: boolean
+ *     isArchived?: boolean
+ *     isDraft?: boolean
+ *     creator?: UserCreateNestedOneWithoutCampaignsInput
+ *     characters?: CampaignsCharactersCreateNestedManyWithoutCampaignInput
+ *     personas?: CampaignsPersonasCreateNestedManyWithoutCampaignInput
+ *     mergeFields?: ShotstackMergeFieldCreateNestedManyWithoutCampaignInput
+ *     renders?: ShotstackRenderCreateNestedManyWithoutCampaignInput
+ *     posts?: PostCreateNestedManyWithoutCampaignInput
+ *   }
+ */

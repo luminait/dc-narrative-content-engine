@@ -1,21 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useState, useMemo, KeyboardEvent } from 'react';
+import { useFormContext, Controller } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
 import { Input } from '@/ui/shadcn/input';
 import { Badge } from '@/ui/shadcn/badge';
 import ImageWithFallback from '@/ui/common/ImageWithFallback';
-import {
-  Field,
-  FieldControl,
-  FieldLabel,
-  FieldError,
-  FieldSet
-} from '@/ui/shadcn/field'; // Assuming new components are here
+import { FieldError, FieldLabel, FieldSet } from '@/ui/shadcn/field';
 import { Users, ChevronDown, ChevronRight, Search, X } from 'lucide-react';
 import type { CampaignFormData, CharacterSelectionData } from '../../campaign.schema';
+
+// ============================================================================
+// Props & Sub-Components
+// ============================================================================
 
 interface CharactersSectionProps {
   characters: CharacterSelectionData[];
@@ -23,9 +21,10 @@ interface CharactersSectionProps {
 
 interface CharacterCardProps {
   character: CharacterSelectionData;
+  isSelected: boolean;
 }
 
-function CharacterCard({ character }: CharacterCardProps) {
+function CharacterCard({ character, isSelected }: CharacterCardProps) {
   return (
     <div className="text-center">
       <div className="relative mx-auto mb-2 h-20 w-20 overflow-hidden rounded">
@@ -34,13 +33,13 @@ function CharacterCard({ character }: CharacterCardProps) {
           alt={character.name}
           className="h-full w-full object-cover"
         />
-        <FieldControl>
-          <div className="absolute inset-0 flex items-center justify-center bg-blue-500 bg-opacity-20 data-[state=unchecked]:hidden">
+        {isSelected && (
+          <div className="absolute inset-0 flex items-center justify-center bg-blue-500 bg-opacity-20">
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500">
               <X className="h-4 w-4 text-white" aria-hidden="true" />
             </div>
           </div>
-        </FieldControl>
+        )}
       </div>
       <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{character.name}</h3>
       {character.characterTypes && (
@@ -57,7 +56,7 @@ interface SelectedBadgesProps {
 }
 
 function SelectedBadges({ selectedIds, characters, onRemove }: SelectedBadgesProps) {
-  if (selectedIds.length === 0) return null;
+  if (!selectedIds || selectedIds.length === 0) return null;
 
   return (
     <div className="mt-4">
@@ -87,11 +86,14 @@ function SelectedBadges({ selectedIds, characters, onRemove }: SelectedBadgesPro
   );
 }
 
+// ============================================================================
+// Main Component
+// ============================================================================
+
 export default function CharactersSection({ characters }: CharactersSectionProps) {
-  const { watch, setValue } = useFormContext<CampaignFormData>();
+  const { control } = useFormContext<CampaignFormData>();
   const [isOpen, setIsOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const selectedCharacters = watch('characters');
 
   const filteredCharacters = useMemo(() => {
     if (!searchTerm) return characters;
@@ -102,13 +104,6 @@ export default function CharactersSection({ characters }: CharactersSectionProps
         (char.characterTypes?.toLowerCase().includes(lower) ?? false),
     );
   }, [characters, searchTerm]);
-
-  const handleToggle = (characterId: string) => {
-    const newValue = selectedCharacters?.includes(characterId)
-      ? selectedCharacters?.filter((id) => id !== characterId)
-      : [...(selectedCharacters || []), characterId];
-    setValue('characters', newValue);
-  };
 
   return (
     <Card>
@@ -142,26 +137,60 @@ export default function CharactersSection({ characters }: CharactersSectionProps
                 aria-label="Search characters"
               />
             </div>
-            <FieldSet name="characters">
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                {filteredCharacters.map((character) => (
-                  <Field
-                    key={character.id}
-                    name="characters"
-                    type="checkbox"
-                    value={character.id}
-                    className="cursor-pointer rounded-lg border p-3 transition-colors data-[state=checked]:border-blue-300 data-[state=checked]:bg-blue-50 dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-950"
-                  >
-                    <CharacterCard character={character} />
-                  </Field>
-                ))}
-              </div>
-              <FieldError />
-            </FieldSet>
-            <SelectedBadges
-              selectedIds={selectedCharacters}
-              characters={characters}
-              onRemove={handleToggle}
+
+            <Controller
+              name="characters"
+              control={control}
+              render={({ field, fieldState }) => {
+                const handleToggle = (characterId: string) => {
+                  const currentIds = field.value || [];
+                  const newValue = currentIds.includes(characterId)
+                    ? currentIds.filter((id: string) => id !== characterId)
+                    : [...currentIds, characterId];
+                  field.onChange(newValue);
+                };
+
+                return (
+                  <>
+                    <FieldSet>
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                        {filteredCharacters.map((character) => {
+                          const isSelected = field.value?.includes(character.id);
+                          return (
+                            <div
+                              key={character.id}
+                              role="button"
+                              tabIndex={0}
+                              aria-pressed={isSelected}
+                              aria-label={`${isSelected ? 'Deselect' : 'Select'} ${character.name}`}
+                              className={`cursor-pointer rounded-lg border p-3 transition-colors ${
+                                isSelected
+                                  ? 'border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950'
+                                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+                              }`}
+                              onClick={() => handleToggle(character.id)}
+                              onKeyDown={(e: KeyboardEvent) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleToggle(character.id);
+                                }
+                              }}
+                            >
+                              <CharacterCard character={character} isSelected={isSelected} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                    </FieldSet>
+                    <SelectedBadges
+                      selectedIds={field.value || []}
+                      characters={characters}
+                      onRemove={handleToggle}
+                    />
+                  </>
+                );
+              }}
             />
           </CardContent>
         </CollapsibleContent>

@@ -9,7 +9,7 @@ import { Input } from '@/ui/shadcn/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import {
   Field,
-  FieldControl,
+  FieldContent,
   FieldLabel,
   FieldError,
 } from '@/ui/shadcn/field'; // Assuming new components are here
@@ -75,17 +75,17 @@ export default function MergeFieldsSection({ valueTypes }: MergeFieldsSectionPro
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                      <Field name={`mergeFields.${index}.name`}>
+                      <Field title={`mergeFields.${index}.name`}>
                         <FieldLabel className="text-xs">Merge Field Name</FieldLabel>
-                        <FieldControl>
+                        <FieldContent>
                           <Input placeholder="e.g., character_name" />
-                        </FieldControl>
+                        </FieldContent>
                         <FieldError />
                       </Field>
 
-                      <Field name={`mergeFields.${index}.mediaValueType`}>
+                      <Field title={`mergeFields.${index}.mediaValueType`}>
                         <FieldLabel className="text-xs">Value Type</FieldLabel>
-                        <FieldControl>
+                        <FieldContent>
                           <Select>
                             <SelectTrigger>
                               <SelectValue />
@@ -98,23 +98,23 @@ export default function MergeFieldsSection({ valueTypes }: MergeFieldsSectionPro
                               ))}
                             </SelectContent>
                           </Select>
-                        </FieldControl>
+                        </FieldContent>
                         <FieldError />
                       </Field>
 
-                      <Field name={`mergeFields.${index}.value`}>
+                      <Field title={`mergeFields.${index}.value`}>
                         <FieldLabel className="text-xs">Value</FieldLabel>
-                        <FieldControl>
+                        <FieldContent>
                           <Input placeholder="Field value" />
-                        </FieldControl>
+                        </FieldContent>
                         <FieldError />
                       </Field>
 
-                      <Field name={`mergeFields.${index}.startTime`}>
+                      <Field title={`mergeFields.${index}.startTime`}>
                         <FieldLabel className="text-xs">Start Time (seconds)</FieldLabel>
-                        <FieldControl>
+                        <FieldContent>
                           <Input type="number" step="0.1" />
-                        </FieldControl>
+                        </FieldContent>
                         <FieldError />
                       </Field>
                     </div>

@@ -9,7 +9,7 @@ import { Checkbox } from '@/ui/shadcn/checkbox';
 import { Badge } from '@/ui/shadcn/badge';
 import {
   Field,
-  FieldControl,
+  FieldContent,
   FieldLabel,
   FieldError,
   FieldSet
@@ -49,16 +49,16 @@ export default function PersonaSelection({ personas }: PersonasSectionProps) {
                 {personas.map((persona) => (
                   <Field
                     key={persona.id}
-                    name="personas"
-                    type="checkbox"
-                    value={persona.id}
+                    title="personas"
+
+                    defaultValue={persona.id}
                     className={`cursor-pointer rounded-lg border p-4 transition-colors data-[checked]:border-blue-300 data-[checked]:bg-blue-50 dark:data-[checked]:border-blue-700 dark:data-[checked]:bg-blue-950`}
                   >
                     <div className="flex items-center space-x-3">
-                      <FieldControl>
+                      <FieldContent>
                         <Checkbox />
-                      </FieldControl>
-                      <h3 className="text-sm font-medium">{persona.label}</h3>
+                      </FieldContent>
+                      <h3 className="text-sm font-medium">{persona.name}</h3>
                     </div>
                     {persona.description && (
                       <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
@@ -79,7 +79,7 @@ export default function PersonaSelection({ personas }: PersonasSectionProps) {
                     const persona = personas.find((p) => p.id === personaId);
                     return (
                       <Badge key={personaId} variant="secondary" className="flex items-center space-x-1">
-                        <span>{persona?.label || personaId}</span>
+                        <span>{persona?.name || personaId}</span>
                         <X
                           className="h-3 w-3 cursor-pointer"
                           onClick={(e) => {

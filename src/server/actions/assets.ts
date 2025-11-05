@@ -4,7 +4,7 @@ import { z } from "zod";
 const SUPABASE_EDGE_URL = process.env.NEXT_PUBLIC_SUPABASE_EDGE_URL ?? "";
 const FUNCTION_NAME = "get-url-from-asset-ref";
 
-export async function getAssetUrl(asset_ref: string) {
+export async function getAssetUrlFromAssetRef( asset_ref: string) {
     // ✅ Validate the input
     // const { asset_ref } = assetSchema.parse(input);
 
@@ -16,7 +16,7 @@ export async function getAssetUrl(asset_ref: string) {
             // (optional) auth header if you use Supabase Auth
             // "Authorization": `Bearer ${supabaseAuthToken}`
         },
-        body: JSON.stringify({ asset_ref }),
+        body: JSON.stringify({ asset_ref: asset_ref }),
     });
 
     const json = await res.json();

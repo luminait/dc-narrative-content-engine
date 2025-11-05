@@ -2,8 +2,11 @@
 import { Suspense } from 'react';
 import Header from '@/ui/layout/Header';
 import CampaignForm from "@/src/features/campaigns/CampaignForm";
-import { getPersonas, getCharacters, getValueTypes } from '@/src/server/dataFetchingCaches';
+import { getPersonas, getValueTypes } from '@/src/server/dataFetchingCaches';
+import { getCharacters } from "@/src/server/queries/characters.queries";
 import { Skeleton } from '@/ui/shadcn/skeleton';
+import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
+import { getCharacterDefaultImage } from "@/src/lib/utils/characters.utils";
 
 export default async function NewCampaignPage() {
     return (
@@ -22,10 +25,18 @@ export default async function NewCampaignPage() {
 async function CampaignFormData() {
     const [personas, characters, valueTypes] = await Promise.all([
         getPersonas(),
-        getCharacters(),
+        (async () => {
+            const chars = await getCharacters();
+            return Promise.all(
+              chars.map(async (char) => ({
+                ...char,
+                imageUrl: await getCharacterDefaultImage(char),
+              }))
+            );
+        })(),
         getValueTypes(),
     ]);
-
+    console.log(characters);
     return (
         <CampaignForm
             personas={personas}

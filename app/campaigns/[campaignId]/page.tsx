@@ -15,7 +15,7 @@ import { getMergeFieldsForCampaignId } from "@/src/server/queries/mergefields.qu
 import { useCallback } from "react";
 import { buildAssetUrl, canOpenAsset, isMediaAssetType, useAssetResolution } from "@/src/features/assets";
 // helper on the server
-import { getAssetUrl } from "@/src/server/actions/assets";
+import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 import type { MergeField } from "@/src/features/campaigns/campaign.schema";
 import type { AssetData } from "@/src/features/assets/assets.schema";
 
@@ -65,7 +65,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 if (!f.value || !f.mediaValueType) return null;
                 console.log(`f.value: ${f.value}`);
                 if (isMediaAssetType(f.mediaValueType)) {
-                    const assetData = await getAssetUrl(f.value);
+                    const assetData = await getAssetUrlFromAssetRef(f.value);
                     console.log(`assetData: ${assetData}`);
                     return [f.value, { type: String(f.mediaValueType), ...assetData }] as const;
                 }
@@ -94,6 +94,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     const posts: Post[] = toUiPosts( rawPosts );
     const characters: Character[] = toUiCharacters( rawCharacters );
     // TODO: Find a cleaner way to convert rawPersonas to type of Persona[]
+    // TODO: Find a way to immediately get the value of `isPrimaryPersona`
     const personas: Persona[] = rawPersonas.map( persona => {
             return {
                 ...persona,
