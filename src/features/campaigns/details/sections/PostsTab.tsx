@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle, Clock, FileText, Plus } from 'lucide-react';
 import { Button } from '@/ui/shadcn/button';
 import { Card, CardContent } from '@/ui/shadcn/card';
@@ -8,15 +11,22 @@ import { formatDate } from '@/src/lib/utils/utils';
 import { getStatusColor } from '@/ui/src/utils';
 import { getPostStatusIcon } from '@/packages/ui/src/utils'
 
-type View = 'dashboard' | 'campaign-generator' | 'campaign-details' | 'post-generator' | 'post-details';
-
 interface PostsTabProps {
     campaign: Campaign;
     posts: Post[];
-    onNavigate: ( view: View, campaign?: Campaign, post?: Post ) => void;
 }
 
-export function PostsTab( { campaign, posts, onNavigate }: PostsTabProps ) {
+export function PostsTab( { campaign, posts }: PostsTabProps ) {
+    const router = useRouter();
+
+    const handleCreatePost = () => {
+        router.push(`/campaigns/${campaign.id}/posts/new`);
+    };
+
+    const handlePostClick = (post: Post) => {
+        router.push(`/campaigns/${campaign.id}/posts/${post.id}`);
+    };
+
     return (
         <div className="space-y-4">
             {posts.length === 0 ? (
@@ -28,7 +38,7 @@ export function PostsTab( { campaign, posts, onNavigate }: PostsTabProps ) {
                             Create your first post to get started with this campaign.
                         </p>
                         <Button
-                            onClick={() => onNavigate( 'post-generator', campaign )}
+                            onClick={handleCreatePost}
                             className="flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4"/>
@@ -38,11 +48,12 @@ export function PostsTab( { campaign, posts, onNavigate }: PostsTabProps ) {
                 </Card>
             ) : (
                 posts.map( ( post ) => {
-
-
                     return (
-                        <Card key={post.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                              onClick={() => onNavigate( 'post-details', campaign, post )}>
+                        <Card
+                            key={post.id}
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => handlePostClick(post)}
+                        >
                             <CardContent className="p-6">
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1 space-y-2">
@@ -71,16 +82,16 @@ export function PostsTab( { campaign, posts, onNavigate }: PostsTabProps ) {
                                     </div>
                                     {
                                         post.images.map( ( image, index ) => (
-                                                <div
-                                                    className="w-20 h-20 ml-4 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                                    <img
-                                                        src={image.url}
-                                                        alt="Post preview"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                            )
-                                        )
+                                            <div
+                                                key={index}
+                                                className="w-20 h-20 ml-4 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                <img
+                                                    src={image.url}
+                                                    alt="Post preview"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        ))
                                     }
                                 </div>
                             </CardContent>

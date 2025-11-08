@@ -69,7 +69,6 @@ const CampaignDetailTabSwitcher = ( {
                     <PostsTab
                         campaign={campaign}
                         posts={posts}
-                        onNavigate={() => {}}
                     />
                 </TabsContent>
 

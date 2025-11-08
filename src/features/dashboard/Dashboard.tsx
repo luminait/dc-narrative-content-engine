@@ -24,13 +24,15 @@ const Dashboard = () => {
       return { activeCount: 0, draftCount: 0, totalCount: 0 };
     }
 
-    const isActive = Boolean(campaigns.isActive);
-    const isDraft = !campaigns.isActive && !campaigns.isArchived;
+    const activeCount = campaigns.reduce((count, campaign) => count + (campaign.isActive ? 1 : 0), 0);
+    const draftCount = campaigns.reduce((count, campaign) => count + ((campaign.isDraft && !campaign.isArchived) ? 1 : 0), 0);
+    const totalCount = campaigns.length;
+
 
     return {
-      activeCount: isActive ? 1 : 0,
-      draftCount: isDraft ? 1 : 0,
-      totalCount: 1,
+      activeCount: activeCount,
+      draftCount: draftCount,
+      totalCount: totalCount,
     };
   }, [campaigns]);
 
@@ -80,8 +82,8 @@ const Dashboard = () => {
         <DashboardCampaignOverview
           campaigns={campaigns ? campaigns : []}
           isLoading={false}
-          error={undefined}
-          refetch={undefined}
+          error={null}
+          refetch={() => {} }
         />
       </div>
     </div>
