@@ -36,12 +36,13 @@ model Campaign {
   isArchived        Boolean             @default(false) @map("is_archived")
   isDraft           Boolean             @default(false) @map("is_draft")
 
-  creator     User?                 @relation(fields: [createdBy], references: [userId])
-  characters  CampaignsCharacters[]
-  personas    CampaignsPersonas[]
-  mergeFields ShotstackMergeField[]
-  renders     ShotstackRender[]
-  posts       Post[]
+  creator               User?                   @relation(fields: [createdBy], references: [userId])
+  characters            CampaignsCharacters[]
+  personas              CampaignsPersonas[]
+  mergeFields           ShotstackMergeField[]
+  renders               ShotstackRender[]
+  posts                 Post[]
+  CampaignCharacterPool CampaignCharacterPool[]
 
   @@map("campaigns")
   @@schema("public")
@@ -64,20 +65,21 @@ model User {
 }
 
 model Character {
-  id                String                @id @default(uuid()) @db.Uuid
-  name              String
-  createdAt         DateTime?             @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt         DateTime?             @updatedAt @map("updated_at") @db.Timestamp()
-  deletedAt         DateTime?             @map("deleted_at") @db.Timestamp()
-  isHuman           Boolean?              @default(false) @map("is_human")
-  isTrainer         Boolean?              @default(false) @map("is_trainer")
-  characterTypes    String?               @map("character_types")
-  personality       String?
-  heightCentimeters Int?                  @map("height_centimeters")
-  weightGrams       Int?                  @map("weight_grams")
-  moralAlignment    MoralAlignment?       @map("moral_alignment")
-  campaigns         CampaignsCharacters[]
-  assets            CharacterAsset[]
+  id                    String                  @id @default(uuid()) @db.Uuid
+  name                  String
+  createdAt             DateTime?               @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt             DateTime?               @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt             DateTime?               @map("deleted_at") @db.Timestamp()
+  isHuman               Boolean?                @default(false) @map("is_human")
+  isTrainer             Boolean?                @default(false) @map("is_trainer")
+  characterTypes        String?                 @map("character_types")
+  personality           String?
+  heightCentimeters     Int?                    @map("height_centimeters")
+  weightGrams           Int?                    @map("weight_grams")
+  moralAlignment        MoralAlignment?         @map("moral_alignment")
+  campaigns             CampaignsCharacters[]
+  assets                CharacterAsset[]
+  CampaignCharacterPool CampaignCharacterPool[]
 
   @@map("characters")
   @@schema("public")
@@ -139,6 +141,22 @@ model CharacterAsset {
   @@schema("public")
 }
 
+// Holds the Pools of Characters that the AI agent can choose from to mix and match assets in a post.
+model CampaignCharacterPool {
+  id               String  @id @default(uuid()) @db.Uuid
+  campaignId       String  @map("campaign_id") @db.Uuid
+  characterId      String  @map("character_id") @db.Uuid
+  narrativeRole    String? @map("narrative_role")
+  recommendedScene String? @map("recommended_scene")
+  notes            String?
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  campaign  Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_character_pool")
+  @@schema("public")
+}
+
 // Placeholder model for Supabase storage
 model StorageObject {
   id         String           @id @db.Uuid
@@ -151,19 +169,20 @@ model StorageObject {
 }
 
 model Post {
-  id          String    @id @default(uuid()) @db.Uuid
-  campaignId  String?   @map("campaign_id") @db.Uuid
-  postType    PostType? @map("post_type")
-  title       String?
-  content     String?
-  hashtags    String[]
-  isActive    Boolean   @default(false) @map("is_active")
-  isDraft     Boolean   @default(true) @map("is_draft")
-  isArchived  Boolean   @default(false) @map("is_archived")
-  scheduledAt DateTime? @map("scheduled_at") @db.Timestamptz
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+  id                 String    @id @default(uuid()) @db.Uuid
+  campaignId         String?   @map("campaign_id") @db.Uuid
+  postType           PostType? @map("post_type")
+  title              String?
+  content            String?
+  hashtags           String[]
+  customInstructions String?   @map("custom_instructions")
+  isActive           Boolean   @default(false) @map("is_active")
+  isDraft            Boolean   @default(true) @map("is_draft")
+  isArchived         Boolean   @default(false) @map("is_archived")
+  scheduledAt        DateTime? @map("scheduled_at") @db.Timestamptz
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime? @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz
 
   campaign Campaign?   @relation(fields: [campaignId], references: [id], onUpdate: Cascade, onDelete: SetNull)
   images   PostImage[]
@@ -190,15 +209,16 @@ model PostImage {
 }
 
 model ShotstackMergeField {
-  id             String              @id @default(uuid()) @db.Uuid
-  name           String              @map("merge_field")
-  description    String?
-  mediaValueType MergeFieldValueType @default(image) @map("media_value_type")
-  startTime      Decimal?            @map("start_time")
-  endTime        Decimal?            @map("end_time")
-  campaignId     String              @map("campaign_id") @db.Uuid
-  type           MergeFieldType?     @map("merge_field_type")
-  value          String?             @map("value")
+  id                        String              @id @default(uuid()) @db.Uuid
+  name                      String              @map("merge_field")
+  description               String?
+  mediaValueType            MergeFieldValueType @default(image) @map("media_value_type")
+  startTime                 Decimal?            @map("start_time")
+  endTime                   Decimal?            @map("end_time")
+  campaignId                String              @map("campaign_id") @db.Uuid
+  type                      MergeFieldType?     @map("merge_field_type")
+  value                     String?             @map("value")
+  shouldRefreshOnRegenerate Boolean             @map("should_refresh_on_generate")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 

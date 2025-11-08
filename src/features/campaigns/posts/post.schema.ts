@@ -3,6 +3,7 @@ import { z } from "zod";
 
 const uuid = z.uuid();
 
+
 // Exact enum values from public."PostType"
 export const PostTypeSchema = z.enum(["single_image", "carousel", "video"]);
 
@@ -52,6 +53,7 @@ export const PostBaseSchema = z
 
         // DB column is text[]; on the wire we use string[]
         hashtags: z.array(z.string()).default([]).nullable().optional(),
+        customInstructions: z.string().nullable().optional(),
 
         isActive: z.boolean().default(false),
         isDraft: z.boolean().default(true),
@@ -95,6 +97,7 @@ export const PostUpdateSchema = z
         title: z.string().nullable().optional(),
         content: z.string().nullable().optional(),
         hashtags: z.array(z.string()).nullable().optional(),
+        customInstructions: z.string().nullable().optional(),
         isActive: z.boolean().optional(),
         isDraft: z.boolean().optional(),
         isArchived: z.boolean().optional(),

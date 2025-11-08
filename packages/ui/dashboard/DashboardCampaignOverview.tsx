@@ -9,6 +9,8 @@ import { CampaignAction, handleCampaignAction } from "@/src/server/actions/campa
 import { formatDate } from "@/src/lib/utils/utils";
 import { useRouter } from "next/navigation";
 import { Campaign } from "@/src/lib/types/ui";
+import { getCampaignStatusIcon, getStatusColor } from "@/ui/src/utils";
+import { Badge } from "@/ui/shadcn/badge";
 
 // Define the extended Campaign type with counts
 interface DashboardCampaignOverviewProps {
@@ -104,6 +106,13 @@ const DashboardCampaignOverview = ( {
                                     <div className="space-y-2 flex-1">
                                         <div className="flex items-center space-x-3">
                                             <h3 className="text-lg font-semibold text-gray-900">{campaign.title}</h3>
+                                            <Badge
+                                                variant="secondary"
+                                                className={`flex items-center space-x-1 ${getStatusColor(campaign.status)}`}
+                                            >
+                                                {getCampaignStatusIcon(campaign.status)}
+                                                <span className="capitalize">{campaign.status}</span>
+                                            </Badge>
                                         </div>
 
                                         <p className="text-gray-600 text-sm max-w-2xl line-clamp-2">

@@ -68,6 +68,31 @@ export interface PostGeneratorProps {
 
 export type PostStatus = 'draft' | 'published' | 'scheduled' | 'archived';
 
+/**
+ * Computes the status of a post based on its properties.
+ * @param post The post object containing status-related fields.
+ * @returns The computed PostStatus.
+ */
+export const getPostStatus = (
+  post: Pick<PostBase, 'isDraft' | 'isActive' | 'isArchived' | 'scheduledAt'>
+): PostStatus => {
+  if (post.isDraft) {
+    return 'draft';
+  }
+  if (post.isArchived) {
+    return 'archived';
+  }
+  if (post.scheduledAt && new Date(post.scheduledAt) > new Date()) {
+    return 'scheduled';
+  }
+  if (post.isActive) {
+    return 'published';
+  }
+  // Default fallback status
+  return 'draft';
+};
+
+
 export type PostWithStatus = PostBase & {
     status: PostStatus
 };
@@ -133,5 +158,3 @@ export interface CampaignDetailsProps {
 export type MediaValueType = 'image' | 'text' | 'video' | 'audio_voice' | 'audio_music' | 'gen_ai_image' | 'gen_ai_text' | 'gen_ai_video' | 'gen_ai_voice' | 'gen_ai_music' | 'image_or_video';
 
 export type MergeFieldType = 'text' | 'character' | 'environment' | 'music' | 'voiceover' | 'sfx' | 'luma_matte';
-
-

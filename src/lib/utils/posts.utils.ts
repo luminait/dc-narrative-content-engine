@@ -57,25 +57,28 @@ export const getPostWithStatus = (
     return { ...post, status };
 };
 
-export const getPostStatus = (post: PostBase): PostStatus => {
-    let status: PostStatus;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const startDate = post.scheduledAt ? new Date(post.scheduledAt) : null;
-    if (startDate) startDate.setHours(0, 0, 0, 0);
-
-    if (post.isArchived) {
-        status = "archived";
-    } else if (post.isActive && (!startDate || today >= startDate)) {
-        status = "published";
-    } else if (startDate && today < startDate) {
-        status = "scheduled";
-    } else {
-        status = "draft";
+/**
+ * Computes the status of a post based on its properties.
+ * @param post The post object containing status-related fields.
+ * @returns The computed PostStatus.
+ */
+export const getPostStatus = (
+    post: Pick<PostBase, 'isDraft' | 'isActive' | 'isArchived' | 'scheduledAt'>
+): PostStatus => {
+    if (post.isDraft) {
+        return 'draft';
     }
-    return status;
+    if (post.isArchived) {
+        return 'archived';
+    }
+    if (post.scheduledAt && new Date(post.scheduledAt) > new Date()) {
+        return 'scheduled';
+    }
+    if (post.isActive) {
+        return 'published';
+    }
+    // Default fallback status
+    return 'draft';
 };
 
 /**

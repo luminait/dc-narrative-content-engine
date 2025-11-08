@@ -88,3 +88,89 @@ export async function createCampaignAction(values: CampaignFormData) {
     };
   }
 }
+
+/**
+ * Campaign action types
+ */
+export type CampaignAction = 'archive' | 'unpublish' | 'delete';
+
+/**
+ * Handles various campaign actions (archive, unpublish, delete).
+ * Server Action for campaign state management.
+ */
+export async function handleCampaignAction(
+  campaignId: string,
+  action: CampaignAction
+) {
+  try {
+    // Get User and verify authentication
+    const supabase = await createSupabaseServerClient();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData?.user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Verify the campaign exists and belongs to the user
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: campaignId },
+    });
+
+    if (!campaign) {
+      throw new Error('Campaign not found');
+    }
+
+    if (campaign.createdBy !== authData.user.id) {
+      throw new Error('Unauthorized: You do not own this campaign');
+    }
+
+    // Perform the action
+    switch (action) {
+      case 'archive':
+        await prisma.campaign.update({
+          where: { id: campaignId },
+          data: { isArchived: true, isActive: false },
+        });
+        break;
+
+      case 'unpublish':
+        await prisma.campaign.update({
+          where: { id: campaignId },
+          data: { isActive: false },
+        });
+        break;
+
+      case 'delete':
+        await prisma.campaign.delete({
+          where: { id: campaignId },
+        });
+        break;
+
+      default:
+        throw new Error(`Unknown action: ${action}`);
+    }
+
+    // Send webhook notification (non-blocking)
+    try {
+      await sendWebhookToN8n({
+        campaignId,
+        action: `campaign.${action}`,
+        data: { campaignId, action },
+      });
+    } catch (webhookError) {
+      console.error('Webhook failed but action was performed:', webhookError);
+    }
+
+    // Revalidate caches
+    revalidateTag('campaigns');
+    revalidateTag(`campaign-${campaignId}`);
+
+    return { success: true, error: null };
+  } catch (error) {
+    console.error(`Campaign ${action} error:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : `Failed to ${action} campaign`,
+    };
+  }
+}
