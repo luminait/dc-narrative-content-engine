@@ -8,6 +8,7 @@ import { z } from 'zod';
 export const postFormSchema = z.object({
     title: z.string().min(1, 'Title is required').max(200),
     content: z.string().min(1, 'Content is required').max(5000),
+    customInstructions: z.string().max(1000).optional(),
     hashtags: z.array(z.string()), // Required array, can be empty
     isDraft: z.boolean(), // Required boolean
     isActive: z.boolean(), // Required boolean

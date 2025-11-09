@@ -29,6 +29,22 @@ export default function PostFormFields({ campaign }: PostFormFieldsProps) {
             </div>
 
             <div>
+                <Label htmlFor="customInstructions">Custom Instructions (Optional)</Label>
+                <Textarea
+                    id="customInstructions"
+                    {...register('customInstructions')}
+                    placeholder="Add specific instructions for this post (e.g., 'Focus on rare card highlights', 'Include pricing information', etc.)"
+                    rows={3}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                    These instructions will guide the AI when generating content for this specific post
+                </p>
+                {errors.customInstructions && (
+                    <p className="text-sm text-red-600 mt-1">{errors.customInstructions.message}</p>
+                )}
+            </div>
+
+            <div>
                 <Label htmlFor="content">Content</Label>
                 <Textarea
                     id="content"
