@@ -15,9 +15,9 @@ import {
     postFormSchema
 } from '@/src/features/campaigns/posts/postForm.schema';
 import type { CampaignData } from '@/src/features/campaigns/campaign.schema';
-import PostFormFields from './sections/PostFormFields';
 import PostPreview from './sections/PostPreview';
 import { Separator } from "@/ui/shadcn/separator";
+import PostCustomizationDetailsTabSwitcher from './sections/PostCustomizationDetailsTabSwitcher';
 
 interface PostGeneratorClientProps {
     campaign: CampaignData;
@@ -148,32 +148,21 @@ export default function PostGeneratorClient( { campaign }: PostGeneratorClientPr
                                         onClick={() => setIsCustomizing( !isCustomizing )}
                                         variant={"outline"}
                                     >
-                                        <Edit2>Customize</Edit2>
+                                        <Edit2 className="w-4 h-4 mr-2" />
+                                        Customize
                                     </Button>
                                 </div>
 
                                 {isCustomizing && (
                                     <div>
-                                        <Separator></Separator>
+                                        <Separator className="my-6" />
                                         <CardHeader>
                                             <CardTitle>Customize the Post</CardTitle>
                                         </CardHeader>
                                         <CardContent>
                                             <FormProvider {...form}>
                                                 <form onSubmit={handleSubmit( onSubmit )} className="space-y-6">
-                                                    <PostFormFields campaign={campaign}/>
-                                                    {/*<div className="flex justify-end space-x-2">*/}
-                                                    {/*    <Button*/}
-                                                    {/*        type="button"*/}
-                                                    {/*        variant="outline"*/}
-                                                    {/*        onClick={() => router.push( `/campaigns/${campaign.id}` )}*/}
-                                                    {/*    >*/}
-                                                    {/*        Cancel*/}
-                                                    {/*    </Button>*/}
-                                                    {/*    <Button type="submit" disabled={isPending}>*/}
-                                                    {/*        {isPending ? 'Creating...' : 'Create Post'}*/}
-                                                    {/*    </Button>*/}
-                                                    {/*</div>*/}
+                                                    <PostCustomizationDetailsTabSwitcher campaign={campaign} />
                                                 </form>
                                             </FormProvider>
                                         </CardContent>
