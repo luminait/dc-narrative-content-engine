@@ -11,7 +11,7 @@ interface PostFormFieldsProps {
     campaign: CampaignData;
 }
 
-export default function PostFormFields({ campaign }: PostFormFieldsProps) {
+export default function PostFormFieldsTab( { campaign }: PostFormFieldsProps) {
     const { register, formState: { errors } } = useFormContext<PostFormData>();
 
     return (
