@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { cadenceSchema, CAPTION_LENGTHS, mergeFieldSchema } from "@/src/lib/zod/campaign.schema";
 
 // ============================================================================
 // Database-Aligned Schema
@@ -9,7 +10,7 @@ import { z } from 'zod';
  * This is used for type safety on raw data returned from Prisma queries.
  */
 export const characterDbSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),
@@ -43,37 +44,70 @@ export const characterAssetUISchema = z.object({
  * Extended character schema for selection UI with image support
  * This is the type that should be passed to the CharactersSelection component
  */
-export const characterSelectionSchema = z.object({
+export const characterSelectionSchema = z.object( {
     id: z.uuid(),
     name: z.string(),
-    characterTypes: z.string().optional().nullable(),
-    imageUrl: z.string().optional(), // Pre-computed default image URL
+    characterTypes: z.string().nullable().optional(),
+    imageUrl: z.url().nullable().optional(),
+    narrativeRole: z.string().nullable().optional(),
+    recommendedScene: z.string().nullable().optional(),
+    notes: z.string().nullable().optional(),
+} );
+
+/**
+ * Schema for the join table data when creating/updating campaign-character relationships
+ */
+export const campaignCharacterRelationSchema = z.object({
+    characterId: z.uuid(),
+    narrativeRole: z.string().nullable().optional(),
+    recommendedScene: z.string().nullable().optional(),
+    notes: z.string().nullable().optional(),
 });
 
 /**
- * Character schema for UI forms
+ * Main campaign form schema for creating and editing campaigns.
  */
-export const characterFormSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    tagline: z.string().optional(),
-    imageUrl: z.string().optional(),
-    characterTypes: z.string().optional().nullable(),
-    isHuman: z.boolean().optional(),
-    isTrainer: z.boolean().optional(),
-    heightCentimeters: z.number().optional(),
-    weightGrams: z.number().optional(),
-    moralAlignment: z.string().optional(),
-    personality: z.string().optional(),
-    assets: z.array(characterAssetUISchema).optional(),
-});
+export const campaignFormSchema = z
+    .object( {
+        title: z.string().min( 3, 'Title must be at least 3 characters' ),
+        objective: z.string().min( 10, 'Objective must be at least 10 characters' ),
+        narrativeContext: z.string().optional(),
+        postLength: z.enum( CAPTION_LENGTHS, 'Post length is required' ),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+        cadence: cadenceSchema,
+        postType: z.enum( [ 'single_image', 'carousel', 'video' ] ),
+        videoLength: z.number().optional(),
+        personas: z.array( z.string() ).refine( ( arr ) => arr.length > 0, { message: 'Select at least one persona' } ),
+        // Updated to support either simple string IDs or full relationship objects
+        characters: z.array(
+            z.union([
+                z.uuid(),
+                campaignCharacterRelationSchema
+            ])
+        ).refine( ( arr ) => arr.length > 0, { message: 'Select at least one character' } ),
+        mergeFields: z.array( mergeFieldSchema ).optional(),
+    } )
+    .refine(
+        ( data ) => {
+            if ( data.postType === 'video' ) {
+                return data.videoLength !== undefined && data.mergeFields !== undefined;
+            }
+            return true;
+        },
+        {
+            message: 'Video length and merge fields are required for video posts',
+            path: [ 'videoLength' ],
+        },
+    );
 
 
 // ============================================================================
 // Inferred Types
 // ============================================================================
 
+export type CampaignCharacterRelation = z.infer<typeof campaignCharacterRelationSchema>;
 export type CharacterData = z.infer<typeof characterDbSchema>;
-export type CharacterFormData = z.infer<typeof characterFormSchema>;
+export type CharacterFormData = z.infer<typeof characterSelectionSchema>;
 export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
 export type CharacterAssetUI = z.infer<typeof characterAssetUISchema>;

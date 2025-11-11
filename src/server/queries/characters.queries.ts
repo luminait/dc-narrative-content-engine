@@ -49,31 +49,39 @@ export const getCharacterById = unstable_cache(
 
 /**
  * Fetches all characters for a specific campaign, conforming to the RawCharacterFromQuery type.
+ * Now includes the campaign relationship fields (narrativeRole, recommendedScene, notes)
  */
 export const getCharactersForCampaign = unstable_cache(
-  async (campaignId: string): Promise<RawCharacterFromQuery[]> => {
-    return prisma.character.findMany({
-      where: {
-        deletedAt: null,
-        campaigns: {
-          some: {
-            campaignId: campaignId,
-          },
-        },
-      },
-      include: {
-        // Corrected from `images` to `assets` to match schema.prisma
-        assets: {
-          include: {
-            storageObject: true,
-          },
-        },
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
-  },
-  ['characters-for-campaign'],
-  { tags: ['characters'], revalidate: 3600 },
+    async (campaignId: string): Promise<RawCharacterFromQuery[]> => {
+        return prisma.character.findMany({
+            where: {
+                deletedAt: null,
+                campaigns: {
+                    some: {
+                        campaignId: campaignId,
+                    },
+                },
+            },
+            include: {
+                campaigns: {
+                    where: {
+                        campaignId: campaignId,
+                    },
+                    include: {
+                        campaign: true,
+                    },
+                },
+                assets: {
+                    include: {
+                        storageObject: true,
+                    },
+                },
+            },
+            orderBy: {
+                name: 'asc',
+            },
+        });
+    },
+    ['characters-for-campaign'],
+    { tags: ['characters'], revalidate: 3600 },
 );
