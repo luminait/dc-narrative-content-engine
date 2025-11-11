@@ -36,13 +36,12 @@ model Campaign {
   isArchived        Boolean             @default(false) @map("is_archived")
   isDraft           Boolean             @default(false) @map("is_draft")
 
-  creator               User?                   @relation(fields: [createdBy], references: [userId])
-  characters            CampaignsCharacters[]
-  personas              CampaignsPersonas[]
-  mergeFields           ShotstackMergeField[]
-  renders               ShotstackRender[]
-  posts                 Post[]
-  CampaignCharacterPool CampaignCharacterPool[]
+  creator     User?                 @relation(fields: [createdBy], references: [userId])
+  characters  CampaignsCharacters[]
+  personas    CampaignsPersonas[]
+  mergeFields ShotstackMergeField[]
+  renders     ShotstackRender[]
+  posts       Post[]
 
   @@map("campaigns")
   @@schema("public")
@@ -65,31 +64,35 @@ model User {
 }
 
 model Character {
-  id                    String                  @id @default(uuid()) @db.Uuid
-  name                  String
-  createdAt             DateTime?               @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt             DateTime?               @updatedAt @map("updated_at") @db.Timestamp()
-  deletedAt             DateTime?               @map("deleted_at") @db.Timestamp()
-  isHuman               Boolean?                @default(false) @map("is_human")
-  isTrainer             Boolean?                @default(false) @map("is_trainer")
-  characterTypes        String?                 @map("character_types")
-  personality           String?
-  heightCentimeters     Int?                    @map("height_centimeters")
-  weightGrams           Int?                    @map("weight_grams")
-  moralAlignment        MoralAlignment?         @map("moral_alignment")
-  campaigns             CampaignsCharacters[]
-  assets                CharacterAsset[]
-  CampaignCharacterPool CampaignCharacterPool[]
+  id                String                @id @default(uuid()) @db.Uuid
+  name              String
+  createdAt         DateTime?             @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt         DateTime?             @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt         DateTime?             @map("deleted_at") @db.Timestamp()
+  isHuman           Boolean?              @default(false) @map("is_human")
+  isTrainer         Boolean?              @default(false) @map("is_trainer")
+  characterTypes    String?               @map("character_types")
+  personality       String?
+  heightCentimeters Int?                  @map("height_centimeters")
+  weightGrams       Int?                  @map("weight_grams")
+  moralAlignment    MoralAlignment?       @map("moral_alignment")
+  campaigns         CampaignsCharacters[]
+  assets            CharacterAsset[]
 
   @@map("characters")
   @@schema("public")
 }
 
+// Holds the Pools of Characters that the AI agent can choose from to mix and match assets in a post.
 model CampaignsCharacters {
-  campaignId  String    @map("campaign_id") @db.Uuid
-  characterId String    @map("character_id") @db.Uuid
-  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  campaignId       String  @map("campaign_id") @db.Uuid
+  characterId      String  @map("character_id") @db.Uuid
+  narrativeRole    String? @map("narrative_role")
+  recommendedScene String? @map("recommended_use_in_scene")
+  notes            String?
+
+  campaign  Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@id([campaignId, characterId])
   @@map("campaigns_characters")
@@ -138,22 +141,6 @@ model CharacterAsset {
   storageObject StorageObject @relation(fields: [assetRef], references: [id], onUpdate: Cascade, onDelete: SetNull)
 
   @@map("character_assets")
-  @@schema("public")
-}
-
-// Holds the Pools of Characters that the AI agent can choose from to mix and match assets in a post.
-model CampaignCharacterPool {
-  id               String  @id @default(uuid()) @db.Uuid
-  campaignId       String  @map("campaign_id") @db.Uuid
-  characterId      String  @map("character_id") @db.Uuid
-  narrativeRole    String? @map("narrative_role")
-  recommendedScene String? @map("recommended_scene")
-  notes            String?
-
-  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  campaign  Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  @@map("campaign_character_pool")
   @@schema("public")
 }
 
