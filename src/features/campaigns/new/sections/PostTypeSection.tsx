@@ -8,7 +8,7 @@ import { FieldError, FieldLabel, FieldSet } from '@/ui/shadcn/field';
 import { RadioGroup, RadioGroupItem } from '@/ui/shadcn/radio-group';
 import { ChevronDown, ChevronRight, Image, Images, Video } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { CampaignFormData } from '../../campaign.schema';
+import type { CampaignFormData } from '../../../../lib/zod/campaign.schema';
 
 interface PostTypeOption {
   id: 'single_image' | 'carousel' | 'video';

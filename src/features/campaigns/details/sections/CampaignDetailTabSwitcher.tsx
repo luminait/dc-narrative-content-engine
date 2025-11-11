@@ -6,8 +6,8 @@ import { OverviewTab } from "@/src/features/campaigns/details/sections/OverviewT
 import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 import { PostsTab } from "@/src/features/campaigns/details/sections/PostsTab";
 import { MergeFieldsTab } from "@/src/features/campaigns/details/sections/MergeFieldsTab";
-import { MergeField } from "@/src/features/campaigns/campaign.schema";
-import type { AssetData } from "@/src/features/assets/assets.schema";
+import { MergeField } from "@/src/lib/zod/campaign.schema";
+import type { AssetData } from "@/src/lib/zod/assets.schema";
 
 // Mapping of merge field types to their corresponding asset types and values
 type MergeFieldEntry = [ string, MergeFieldAsset ];

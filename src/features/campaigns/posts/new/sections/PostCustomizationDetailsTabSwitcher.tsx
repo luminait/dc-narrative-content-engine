@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/shadcn/tabs";
 import PostFormFieldsTab from "./PostFormFieldsTab";
 import PostMergeFieldsTab from "./PostMergeFieldsTab";
-import type { CampaignData } from "@/src/features/campaigns/campaign.schema";
+import type { CampaignData } from "@/src/lib/zod/campaign.schema";
 
 interface PostCustomizationDetailsTabSwitcherProps {
     campaign: CampaignData;

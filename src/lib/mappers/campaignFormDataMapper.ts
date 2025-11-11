@@ -6,7 +6,7 @@ import {
   VideoLengthSeconds,
   Weekdays,
 } from '@/src/server/db/generated/prisma';
-import type { CampaignFormData } from '@/src/features/campaigns/campaign.schema';
+import type { CampaignFormData } from '@/src/lib/zod/campaign.schema';
 
 // ============================================================================
 // Helper Functions

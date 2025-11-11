@@ -3,7 +3,7 @@ import {
     PostBase,
     PostImage,
     PostWithImages,
-} from "@/src/features/campaigns/posts/post.schema";
+} from "@/src/lib/zod/post.schema";
 import { getPublicUrl } from "./supabase.utils";
 
 // Type representing the raw image relation returned by Prisma

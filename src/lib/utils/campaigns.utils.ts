@@ -1,5 +1,5 @@
 import { Campaign, CampaignWithStatus, CampaignStatus } from "@/src/lib/types/ui";
-import type { CampaignData } from "@/src/features/campaigns/campaign.schema";
+import type { CampaignData } from "@/src/lib/zod/campaign.schema";
 import type { DbCampaignWithAll } from "@/src/server/db/selects/campaign";
 
 const VIDEO_LENGTH_MAP = { THIRTY: 30, FORTY_FIVE: 45, SIXTY: 60 } as const;

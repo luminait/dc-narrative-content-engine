@@ -10,7 +10,7 @@ import { createCampaignAction } from '@/src/server/actions/campaign.actions';
 import {
     campaignFormSchema,
     type CampaignFormData,
-} from '@/src/features/campaigns/campaign.schema';
+} from '@/src/lib/zod/campaign.schema';
 import CampaignDetails from '@/src/features/campaigns/new/sections/CampaignDetails';
 import ScheduleSection from '@/src/features/campaigns/new/sections/ScheduleSection';
 import PersonasSection from '@/src/features/campaigns/new/sections/PersonasSection';

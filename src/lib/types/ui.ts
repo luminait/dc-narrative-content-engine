@@ -3,10 +3,10 @@
  * These types are safe for client-side use and add computed/display fields.
  */
 
-import type { CampaignData, PersonaData } from "@/src/features/campaigns/campaign.schema";
-import type { CharacterData } from "@/src/features/characters/character.schema";
-import type { PostBase, PostWithImages } from '@/src/features/campaigns/posts/post.schema';
-import type { PostImageRecord } from '@/src/features/campaigns/posts/postImages.schema';
+import type { CampaignData, PersonaData } from "@/src/lib/zod/campaign.schema";
+import type { CharacterData } from "@/src/lib/zod/character.schema";
+import type { PostBase, PostWithImages } from '@/src/lib/zod/post.schema';
+import type { PostImageRecord } from '@/src/lib/zod/postImages.schema';
 
 /*********************************************************************************************************************
  * CAMPAIGNS

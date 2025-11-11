@@ -2,7 +2,7 @@ import { getCampaignById } from "@/src/server/queries/campaigns.queries";
 import { Badge } from "@/ui/shadcn/badge";
 import { getStatusColor } from "@/ui/src/utils";
 import { buildCampaign } from "@/src/lib/utils/campaigns.utils";
-import { CampaignData, campaignSchema } from "@/src/features/campaigns/campaign.schema";
+import { CampaignData, campaignSchema } from "@/src/lib/zod/campaign.schema";
 import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 import CampaignDetails from "@/src/features/campaigns/details/sections/CampaignDetails";
 import CampaignDetailTabSwitcher from "@/src/features/campaigns/details/sections/CampaignDetailTabSwitcher";
@@ -16,8 +16,8 @@ import { useCallback } from "react";
 import { buildAssetUrl, canOpenAsset, isMediaAssetType, useAssetResolution } from "@/src/features/assets";
 // helper on the server
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
-import type { MergeField } from "@/src/features/campaigns/campaign.schema";
-import type { AssetData } from "@/src/features/assets/assets.schema";
+import type { MergeField } from "@/src/lib/zod/campaign.schema";
+import type { AssetData } from "@/src/lib/zod/assets.schema";
 
 
 

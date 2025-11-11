@@ -9,7 +9,7 @@ import { Badge } from '@/ui/shadcn/badge';
 import ImageWithFallback from '@/ui/common/ImageWithFallback';
 import { FieldError, FieldLabel, FieldSet } from '@/ui/shadcn/field';
 import { Users, ChevronDown, ChevronRight, Search, X } from 'lucide-react';
-import type { CampaignFormData, CharacterSelectionData } from '../../campaign.schema';
+import type { CampaignFormData, CharacterSelectionData } from '../../../../lib/zod/campaign.schema';
 
 // ============================================================================
 // Props & Sub-Components

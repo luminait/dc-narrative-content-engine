@@ -1,4 +1,4 @@
-import { MergeField } from "@/src/features/campaigns/campaign.schema";
+import { MergeField } from "@/src/lib/zod/campaign.schema";
 
 export const sanitizeMergeFields = (mergeFields: Array<any>): MergeField[] => {
     const sanitizedMergeFields = mergeFields.map((field) => {

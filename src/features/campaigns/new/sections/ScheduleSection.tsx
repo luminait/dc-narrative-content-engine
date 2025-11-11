@@ -8,7 +8,7 @@ import { Checkbox } from '@/ui/shadcn/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/ui/shadcn/field';
 import { Calendar, ChevronDown, ChevronRight } from 'lucide-react';
-import type { CampaignFormData } from '../../campaign.schema';
+import type { CampaignFormData } from '../../../../lib/zod/campaign.schema';
 
 const daysOptions = [
   { id: 'monday', label: 'Monday' },

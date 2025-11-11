@@ -6,7 +6,7 @@ import { Skeleton } from '@/ui/shadcn/skeleton';
 import { Alert, AlertDescription } from '@/ui/shadcn/alert';
 import { Character, Post } from "@/src/lib/types/ui";
 import { filterPostsByStatus } from "@/src/lib/utils/posts.utils";
-import { CampaignData } from "@/src/features/campaigns/campaign.schema";
+import { CampaignData } from "@/src/lib/zod/campaign.schema";
 
 interface OverviewTabProps {
     campaign: CampaignData;

@@ -218,7 +218,8 @@ model ShotstackMergeField {
   campaignId                String              @map("campaign_id") @db.Uuid
   type                      MergeFieldType?     @map("merge_field_type")
   value                     String?             @map("value")
-  shouldRefreshOnRegenerate Boolean             @map("should_refresh_on_generate")
+  shouldRefreshOnRegenerate Boolean             @map("should_refresh_on_generate") // Indicates whether this specific merge field should be swapped out or auto-generated for every new post.
+  postId                    String?             @map("post_id") @db.Uuid
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
@@ -239,6 +240,15 @@ model ShotstackRender {
   campaign      Campaign?     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@map("shotstack_renders")
+  @@schema("public")
+}
+
+model AppSettings {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
   @@schema("public")
 }
 

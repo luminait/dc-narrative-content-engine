@@ -9,7 +9,7 @@ import { Checkbox } from '@/ui/shadcn/checkbox';
 import { Badge } from '@/ui/shadcn/badge';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/ui/shadcn/field';
 import { Users, ChevronDown, ChevronRight, X } from 'lucide-react';
-import type { CampaignFormData } from '../../campaign.schema';
+import type { CampaignFormData } from '../../../../lib/zod/campaign.schema';
 
 interface PersonasSectionProps {
   personas: Persona[];

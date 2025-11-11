@@ -3,7 +3,7 @@
 import { revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/src/server/db';
-import { postFormSchema, type PostFormData } from '@/src/features/campaigns/posts/postForm.schema';
+import { postFormSchema, type PostFormData } from '@/src/lib/zod/postForm.schema';
 import { sendWebhookToN8n } from '@/src/server/webhooks/SendWebhookToN8n';
 import { createSupabaseServerClient } from '@/src/server/supabase/server';
 

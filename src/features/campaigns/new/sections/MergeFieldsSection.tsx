@@ -28,8 +28,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/ui/shadcn/dropdown-menu';
-import type { CampaignFormData, MediaValueType, MergeField } from '../../campaign.schema';
-import { MERGE_FIELD_VALUE_TYPES, mergeFieldSchema } from '../../campaign.schema';
+import type { CampaignFormData, MediaValueType, MergeField } from '../../../../lib/zod/campaign.schema';
+import { MERGE_FIELD_VALUE_TYPES, mergeFieldSchema } from '../../../../lib/zod/campaign.schema';
 
 export default function MergeFieldsSection() {
   const { control } = useFormContext<CampaignFormData>();
