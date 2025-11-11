@@ -2,7 +2,7 @@
 
 import { Badge } from "@/ui/shadcn/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/shadcn/card";
-import type { CampaignData } from "@/src/features/campaigns/campaign.schema";
+import type { CampaignData } from "@/src/lib/zod/campaign.schema";
 
 interface PostMergeFieldsTabProps {
     campaign: CampaignData;

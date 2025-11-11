@@ -1,4 +1,4 @@
-import { assetSchema } from "@/src/features/assets/assets.schema";
+import { assetSchema } from "@/src/lib/zod/assets.schema";
 import { z } from "zod";
 
 const SUPABASE_EDGE_URL = process.env.NEXT_PUBLIC_SUPABASE_EDGE_URL ?? "";

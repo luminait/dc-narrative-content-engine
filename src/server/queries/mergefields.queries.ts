@@ -1,6 +1,6 @@
 import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
-import { MergeField } from "@/src/features/campaigns/campaign.schema";
+import { MergeField } from "@/src/lib/zod/campaign.schema";
 import { campaignMergeFieldsSelect, mergeFieldSelect } from "@/src/server/db/selects/campaign";
 import { sanitizeMergeFields } from "@/src/lib/utils/mergefield.utils";
 

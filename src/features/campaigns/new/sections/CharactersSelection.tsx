@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { z } from 'zod';
-import { characterSelectionSchema, type CharacterSelectionData } from '@/src/features/campaigns/campaign.schema';
+import { characterSelectionSchema, type CharacterSelectionData } from '@/src/lib/zod/campaign.schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn/collapsible';
 import { Input } from '@/ui/shadcn/input';

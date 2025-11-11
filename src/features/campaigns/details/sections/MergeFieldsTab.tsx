@@ -5,10 +5,10 @@ import { Skeleton } from '@/ui/shadcn/skeleton';
 import { Alert, AlertDescription } from '@/ui/shadcn/alert';
 import type { Campaign, Character, Persona } from '@/src/lib/types/ui';
 import { isAssetSystemAvailable } from '@/src/features/assets';
-import { MergeField } from "@/src/features/campaigns/campaign.schema";
+import { MergeField } from "@/src/lib/zod/campaign.schema";
 import { Badge } from "@/ui/shadcn/badge";
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
-import type { AssetData } from "@/src/features/assets/assets.schema";
+import type { AssetData } from "@/src/lib/zod/assets.schema";
 
 
 // Mapping of merge field types to their corresponding asset types and values

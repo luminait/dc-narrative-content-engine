@@ -4,8 +4,8 @@ import { useFormContext } from 'react-hook-form';
 import { Input } from '@/ui/shadcn/input';
 import { Textarea } from '@/ui/shadcn/textarea';
 import { Label } from '@/ui/shadcn/label';
-import type { CampaignData } from '@/src/features/campaigns/campaign.schema';
-import type { PostFormData } from '@/src/features/campaigns/posts/postForm.schema';
+import type { CampaignData } from '@/src/lib/zod/campaign.schema';
+import type { PostFormData } from '@/src/lib/zod/postForm.schema';
 
 interface PostFormFieldsProps {
     campaign: CampaignData;

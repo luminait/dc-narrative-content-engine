@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Eye } from 'lucide-react';
-import type { GeneratedContent } from '@/src/features/campaigns/posts/postForm.schema';
+import type { GeneratedContent } from '@/src/lib/zod/postForm.schema';
 
 interface PostPreviewProps {
     content: GeneratedContent;

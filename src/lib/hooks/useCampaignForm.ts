@@ -10,7 +10,7 @@ import {
   type MergeField,
   safeParseCampaignForm,
   validateCampaignForm,
-} from '@/src/features/campaigns/campaign.schema';
+} from '@/src/lib/zod/campaign.schema';
 import { charactersToFormData } from '@/src/lib/mappers/campaignFormDataMapper';
 
 // NOTE: You would create these API services similarly to getCharacters

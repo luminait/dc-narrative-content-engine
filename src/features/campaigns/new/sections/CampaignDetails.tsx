@@ -7,7 +7,7 @@ import { Textarea } from '@/ui/shadcn/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/shadcn/select';
 import { Field, FieldError, FieldLabel } from '@/ui/shadcn/field';
 import { Target } from 'lucide-react';
-import type { CampaignFormData } from '@/src/features/campaigns/campaign.schema';
+import type { CampaignFormData } from '@/src/lib/zod/campaign.schema';
 
 const postLengthOptions = [
   { value: 'short', label: 'Short (50-100 words)' },

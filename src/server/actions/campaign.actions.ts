@@ -6,7 +6,7 @@ import { prisma } from '@/src/server/db';
 import {
   campaignFormSchema,
   type CampaignFormData,
-} from '@/src/features/campaigns/campaign.schema';
+} from '@/src/lib/zod/campaign.schema';
 import { sendWebhookToN8n } from '@/src/server/webhooks/SendWebhookToN8n';
 import { formDataToPrismaInput } from '@/src/lib/mappers/campaignFormDataMapper';
 import { createSupabaseServerClient } from '@/src/server/supabase/server';

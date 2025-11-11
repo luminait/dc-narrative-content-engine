@@ -1,6 +1,6 @@
 // server-only mapper: Prisma → UI DTOs
 import type { DbCampaignWithAll } from '@/src/server/db/selects/campaign';
-import type { PersonaData, CampaignData } from '@/src/features/campaigns/campaign.schema';
+import type { PersonaData, CampaignData } from '@/src/lib/zod/campaign.schema';
 
 type PersonaJoin = DbCampaignWithAll['personas'][number];
 

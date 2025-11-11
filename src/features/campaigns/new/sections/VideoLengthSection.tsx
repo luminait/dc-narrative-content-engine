@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/ui/shadcn
 import { FieldError, FieldLabel, FieldSet } from '@/ui/shadcn/field';
 import { RadioGroup, RadioGroupItem } from '@/ui/shadcn/radio-group';
 import { ChevronDown, ChevronRight, Video } from 'lucide-react';
-import type { CampaignFormData } from '../../campaign.schema';
+import type { CampaignFormData } from '../../../../lib/zod/campaign.schema';
 
 const videoLengthOptions = [
   { value: 30, label: '30 seconds', description: 'Short, quick content' },

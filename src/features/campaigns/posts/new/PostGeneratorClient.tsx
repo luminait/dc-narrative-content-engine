@@ -13,8 +13,8 @@ import {
     type GeneratedContent,
     type PostFormData,
     postFormSchema
-} from '@/src/features/campaigns/posts/postForm.schema';
-import type { CampaignData } from '@/src/features/campaigns/campaign.schema';
+} from '@/src/lib/zod/postForm.schema';
+import type { CampaignData } from '@/src/lib/zod/campaign.schema';
 import PostPreview from './sections/PostPreview';
 import { Separator } from "@/ui/shadcn/separator";
 import PostCustomizationDetailsTabSwitcher from './sections/PostCustomizationDetailsTabSwitcher';

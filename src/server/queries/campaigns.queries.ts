@@ -2,7 +2,7 @@ import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
 import { campaignSelect, campaignWithAllSelect, DbCampaignWithAll } from "@/src/server/db/selects/campaign";
 import { toUiCampaign } from "@/src/lib/utils/campaigns.utils";
-import { CampaignData } from "@/src/features/campaigns/campaign.schema";
+import { CampaignData } from "@/src/lib/zod/campaign.schema";
 
 
 /**
