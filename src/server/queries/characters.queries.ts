@@ -1,13 +1,14 @@
 import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
-import { RawCharacterFromQuery } from '@/src/lib/utils/characters.utils';
+import { getCharacterDefaultImage, RawCharacterFromQuery } from '@/src/lib/utils/characters.utils';
+import { CharacterWithImage } from "@/src/lib/types/ui";
 
 /**
  * Fetches all characters with their associated campaigns and assets.
  */
 export const getCharacters = unstable_cache(
-  async (): Promise<RawCharacterFromQuery[]> => {
-    return prisma.character.findMany({
+  async (): Promise<CharacterWithImage[]> => {
+    const characters = await prisma.character.findMany({
       where: { deletedAt: null },
       include: {
         campaigns: { include: { campaign: true } },
@@ -20,6 +21,13 @@ export const getCharacters = unstable_cache(
       },
       orderBy: { name: 'asc' },
     });
+
+    return Promise.all(
+        characters.map(async (char) => ({
+            ...char,
+            imageUrl: await getCharacterDefaultImage(char as RawCharacterFromQuery),
+        }))
+    );
   },
   ['characters'],
   { tags: ['characters'], revalidate: 3600 },
@@ -30,7 +38,7 @@ export const getCharacters = unstable_cache(
  */
 export const getCharacterById = unstable_cache(
   async (id: string) => {
-    return prisma.character.findUnique({
+    const character = await prisma.character.findUnique({
       where: { id, deletedAt: null },
       include: {
         campaigns: { include: { campaign: true } },
@@ -42,6 +50,13 @@ export const getCharacterById = unstable_cache(
         },
       },
     });
+
+    if (!character) return null;
+
+    return {
+        ...character,
+        imageUrl: await getCharacterDefaultImage(character as RawCharacterFromQuery),
+    };
   },
   ['character-by-id'],
   { tags: ['characters'], revalidate: 3600 },
@@ -52,8 +67,8 @@ export const getCharacterById = unstable_cache(
  * Now includes the campaign relationship fields (narrativeRole, recommendedScene, notes)
  */
 export const getCharactersForCampaign = unstable_cache(
-    async (campaignId: string): Promise<RawCharacterFromQuery[]> => {
-        return prisma.character.findMany({
+    async (campaignId: string): Promise<CharacterWithImage[]> => {
+        const characters = await prisma.character.findMany({
             where: {
                 deletedAt: null,
                 campaigns: {
@@ -81,6 +96,13 @@ export const getCharactersForCampaign = unstable_cache(
                 name: 'asc',
             },
         });
+
+        return Promise.all(
+            characters.map(async (char) => ({
+                ...char,
+                imageUrl: await getCharacterDefaultImage(char as RawCharacterFromQuery),
+            }))
+        );
     },
     ['characters-for-campaign'],
     { tags: ['characters'], revalidate: 3600 },

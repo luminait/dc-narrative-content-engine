@@ -2,28 +2,8 @@ import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
 import { campaignSelect, campaignWithAllSelect, DbCampaignWithAll } from "@/src/server/db/selects/campaign";
 import { toUiCampaign } from "@/src/lib/utils/campaigns.utils";
-import { CampaignData } from "@/src/lib/zod/campaign.schema";
+import { convertDecimalsToStrings } from "@/src/lib/utils/serialization";
 
-
-/**
- * Fetches all campaigns with related data using the standardized select.
- */
-export const getCampaigns = unstable_cache(
-    async () => {
-        const dbCampaigns = await prisma.campaign.findMany({
-            where: { deletedAt: null },
-            select: campaignWithAllSelect,
-            orderBy: { updatedAt: 'desc' },
-        });
-        return dbCampaigns.map(c => toUiCampaign(c as DbCampaignWithAll));
-    },
-    ['campaigns'],
-    { tags: ['campaigns'], revalidate: 3600 }
-);
-
-/**
- * Fetches a single campaign by ID, returning a UI-optimized object.
- */
 export const getCampaignById = unstable_cache(
     async (id: string) => {
         const dbCampaign = await prisma.campaign.findFirst({
@@ -31,12 +11,32 @@ export const getCampaignById = unstable_cache(
             select: campaignWithAllSelect,
         });
 
-        return dbCampaign ? toUiCampaign(dbCampaign as DbCampaignWithAll) : null;
+        if (!dbCampaign) return null;
+
+        // Convert any Decimal types to strings before returning
+        const serialized = convertDecimalsToStrings(dbCampaign);
+        return toUiCampaign(serialized as DbCampaignWithAll);
     },
     ['campaign-by-id'],
     { tags: ['campaigns'], revalidate: 3600 }
 );
 
+// Apply the same pattern to other query functions
+export const getCampaigns = unstable_cache(
+    async () => {
+        const dbCampaigns = await prisma.campaign.findMany({
+            where: { deletedAt: null },
+            select: campaignWithAllSelect,
+            orderBy: { updatedAt: 'desc' },
+        });
+
+        // Serialize before mapping
+        const serialized = convertDecimalsToStrings(dbCampaigns);
+        return serialized.map(c => toUiCampaign(c as DbCampaignWithAll));
+    },
+    ['campaigns'],
+    { tags: ['campaigns'], revalidate: 3600 }
+);
 /**
  * Fetches a single campaign by ID with all related data.
  * Note: This is an alias for getCampaignById as campaignWithAllSelect now includes all relations.

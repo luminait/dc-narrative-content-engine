@@ -15,5 +15,5 @@ export const getPublicUrl = (bucketName: string, objectId: string): string => {
         console.error("Supabase URL is not configured.");
         return "";
     }
-    return `${supabaseUrl}/storage/v1/object/public/pokemon-assets/${bucketName}/${objectId}`;
+    return `${supabaseUrl}/storage/v1/object/public/${bucketName}/${objectId}`;
 };

@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import { characterSelectionSchema, type CharacterSelectionData } from '@/src/lib/zod/campaign.schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
@@ -13,32 +12,20 @@ import ImageWithFallback from '@/ui/common/ImageWithFallback';
 import { Users, ChevronDown, ChevronRight, Search, X } from 'lucide-react';
 
 // ============================================================================
-// Props Types (TypeScript + Zod hybrid approach)
+// Props Types
 // ============================================================================
 
-/**
- * Zod schema for validating the DATA portion of props
- * (excludes function props which cannot be validated by Zod)
- */
-const charactersSectionDataSchema = z.object({
+const charactersSectionPropsSchema = z.object({
     characters: z.array(characterSelectionSchema),
-    selectedCharacters: z.array(z.string().uuid()),
+    initialSelection: z.array(z.string().uuid()).optional(),
+    selectionMode: z.enum(['single', 'multiple']).default('multiple'),
+    onSelectionChange: z.function().optional(),
+    collapsible: z.boolean().default(true),
 });
 
-/**
- * Full props interface using TypeScript
- * This is the recommended approach for React component props with functions
- */
-interface CharactersSectionProps {
-    characters: CharacterSelectionData[];
-    selectedCharacters: string[];
-    setSelectedCharacters: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
-// Optional: Runtime validation helper (only validates data, not functions)
-function validateCharactersSectionData(props: unknown) {
-    return charactersSectionDataSchema.parse(props);
-}
+type CharactersSectionProps = z.infer<typeof charactersSectionPropsSchema> & {
+    onSelectionChange?: (selectedIds: string[]) => void;
+};
 
 // ============================================================================
 // Sub-Components
@@ -51,6 +38,15 @@ interface CharacterCardProps {
 }
 
 function CharacterCard({ character, isSelected, onToggle }: CharacterCardProps) {
+    const imgSrc = character.imageUrl ?? '';
+    if (!imgSrc) {
+        // Debug: surface empty/missing image URLs
+        console.warn('[CharactersSelection] Empty imageUrl for character', {
+            id: character.id,
+            name: character.name,
+            characterTypes: character.characterTypes
+        });
+    }
     return (
         <div
             role="button"
@@ -69,13 +65,22 @@ function CharacterCard({ character, isSelected, onToggle }: CharacterCardProps) 
                     onToggle(character.id);
                 }
             }}
+            title={imgSrc || 'No image URL'}
+            data-img-src={imgSrc}
         >
             <div className="text-center">
                 <div className="relative mx-auto mb-2 h-20 w-20 overflow-hidden rounded">
                     <ImageWithFallback
-                        src={character.imageUrl ?? ''}
+                        src={imgSrc}
                         alt={character.name}
                         className="h-full w-full object-cover"
+                        onError={() => {
+                            console.error('[CharactersSelection] Image failed to load', {
+                                id: character.id,
+                                name: character.name,
+                                imgSrc,
+                            });
+                        }}
                     />
                     {isSelected && (
                         <div className="absolute inset-0 flex items-center justify-center bg-blue-500 bg-opacity-20">
@@ -140,12 +145,19 @@ function SelectedBadges({ selectedIds, characters, onRemove }: SelectedBadgesPro
 // ============================================================================
 
 export default function CharactersSection({
-                                              characters,
-                                              selectedCharacters,
-                                              setSelectedCharacters,
-                                          }: CharactersSectionProps) {
-    const [isOpen, setIsOpen] = useState(false);
+    characters,
+    initialSelection = [],
+    onSelectionChange,
+    selectionMode = 'multiple',
+    collapsible = true,
+}: CharactersSectionProps) {
+    const [selectedCharacters, setSelectedCharacters] = useState<string[]>(initialSelection);
+    const [isOpen, setIsOpen] = useState(!collapsible);
     const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        onSelectionChange?.(selectedCharacters);
+    }, [selectedCharacters, onSelectionChange]);
 
     const filteredCharacters = useMemo(() => {
         if (!searchTerm) return characters;
@@ -159,14 +171,55 @@ export default function CharactersSection({
 
     const handleToggle = useCallback(
         (characterId: string) => {
-            setSelectedCharacters((prev) =>
-                prev.includes(characterId)
+            setSelectedCharacters((prev) => {
+                if (selectionMode === 'single') {
+                    return prev.includes(characterId) ? [] : [characterId];
+                }
+                // Multiple selection mode
+                return prev.includes(characterId)
                     ? prev.filter((id) => id !== characterId)
-                    : [...prev, characterId]
-            );
+                    : [...prev, characterId];
+            });
         },
-        [setSelectedCharacters]
+        [selectionMode]
     );
+
+    const content = (
+        <>
+            <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" aria-hidden="true" />
+                <Input
+                    type="search"
+                    placeholder="Search characters..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                    aria-label="Search characters"
+                />
+            </div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                {filteredCharacters.map((character) => (
+                    <CharacterCard
+                        key={character.id}
+                        character={character}
+                        isSelected={selectedCharacters.includes(character.id)}
+                        onToggle={handleToggle}
+                    />
+                ))}
+            </div>
+            {selectionMode === 'multiple' && (
+                <SelectedBadges
+                    selectedIds={selectedCharacters}
+                    characters={characters}
+                    onRemove={handleToggle}
+                />
+            )}
+        </>
+    );
+
+    if (!collapsible) {
+        return <div className="space-y-4">{content}</div>;
+    }
 
     return (
         <Card>
@@ -190,34 +243,7 @@ export default function CharactersSection({
                     </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <CardContent className="space-y-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" aria-hidden="true" />
-                            <Input
-                                type="search"
-                                placeholder="Search characters..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10"
-                                aria-label="Search characters"
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                            {filteredCharacters.map((character) => (
-                                <CharacterCard
-                                    key={character.id}
-                                    character={character}
-                                    isSelected={selectedCharacters.includes(character.id)}
-                                    onToggle={handleToggle}
-                                />
-                            ))}
-                        </div>
-                        <SelectedBadges
-                            selectedIds={selectedCharacters}
-                            characters={characters}
-                            onRemove={handleToggle}
-                        />
-                    </CardContent>
+                    <CardContent className="space-y-4">{content}</CardContent>
                 </CollapsibleContent>
             </Collapsible>
         </Card>

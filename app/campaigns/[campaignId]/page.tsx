@@ -10,16 +10,10 @@ import { getPostsForCampaign } from "@/src/server/queries/posts.queries";
 import { getCharactersForCampaign } from "@/src/server/queries/characters.queries";
 import { getPersonasForCampaign } from "@/src/server/queries/personas.queries";
 import { toUiPosts } from "@/src/lib/utils/posts.utils";
-import { toUiCharacters } from "@/src/lib/utils/characters.utils";
-import { getMergeFieldsForCampaignId } from "@/src/server/queries/mergefields.queries";
-import { useCallback } from "react";
-import { buildAssetUrl, canOpenAsset, isMediaAssetType, useAssetResolution } from "@/src/features/assets";
-// helper on the server
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 import type { MergeField } from "@/src/lib/zod/campaign.schema";
 import type { AssetData } from "@/src/lib/zod/assets.schema";
-
-
+import { isMediaAssetType } from "@/src/features/assets";
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
 // Typing `params` as a Promise keeps TypeScript correct for the new behavior.
@@ -99,47 +93,45 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     }
 
     // Fetch raw data. The return types are now strictly enforced in the query functions.
-    const [rawPosts, rawCharacters, rawPersonas, mergeFields] = await Promise.all([
+    const [rawPosts, characters, rawPersonas] = await Promise.all([
         getPostsForCampaign( campaign.id ),
         getCharactersForCampaign( campaign.id ),
         getPersonasForCampaign( campaign.id ),
-        getMergeFieldsForCampaignId( campaign.id )
     ]);
 
-    const mergeFieldValues = await resolveMergeFieldValues(mergeFields);
+    const mergeFieldValues = await resolveMergeFieldValues(campaignData.mergeFields ?? []);
 
-    // Sanitize mergeFields to convert Decimal objects to numbers before passing to client component
-    const serializableMergeFields = mergeFields.map(field => ({
-        ...field,
-        startTime: field.startTime ? Number(field.startTime) : null,
-        endTime: field.endTime ? Number(field.endTime) : null,
-    }));
+    // Ensure each post has an `images` array as required by toUiPosts' RawPostFromQuery
+    const posts: Post[] = toUiPosts(
+        (rawPosts as any[]).map(p => ({
+            ...p,
+            images: (p as any).images ?? [],
+        })) as any
+    );
 
-    // Convert to UI types using the centralized utility functions
-    const posts: Post[] = toUiPosts( rawPosts );
-    const characters: Character[] = toUiCharacters( rawCharacters );
-    // TODO: Find a cleaner way to convert rawPersonas to type of Persona[]
-    // TODO: Find a way to immediately get the value of `isPrimaryPersona`
-    const personas: Persona[] = rawPersonas.map( persona => {
-            return {
-                ...persona,
-                name: persona.name || 'hardcore_collector',
-                createdAt: persona.createdAt?.toString() || Date.now().toString(),
-                updatedAt: persona.updatedAt?.toString() || Date.now().toString(),
-                deletedAt: persona.deletedAt?.toString() || undefined,
-                description: persona.description || 'A hardcore collector',
-            }
-        }
-    ); // Direct assignment
-    // const refNames = mergeFields.map( field => field.mediaValueType );
-    // const refUrls = mergeFields.map( field => await canOpenAsset( field ) && await buildAssetUrl(field.value, field, campaign.title, {}) );
-    // const [assetRefNames, setAssetRefNames, setAssetUrls, setLoadingAssetRefs] = useAssetResolution()
+    // TODO: Consider sourcing `isPrimaryPersona` from the campaign-persona join if available in the query
+    const personas: Persona[] = (rawPersonas as any[]).map((persona: any) => {
+        const name = persona?.name ?? 'hardcore_collector';
+        const personaKey =
+            persona?.personaKey ??
+            (typeof name === 'string' ? name.toLowerCase().replace(/\s+/g, '_') : 'hardcore_collector');
+        const isPrimaryPersona =
+            typeof persona?.isPrimaryPersona === 'boolean' ? persona.isPrimaryPersona : false;
+
+        return {
+            id: String(persona?.id ?? crypto.randomUUID?.() ?? `persona_${Math.random().toString(36).slice(2)}`),
+            name,
+            description: persona?.description ?? 'A hardcore collector',
+            personaKey,
+            isPrimaryPersona,
+            createdAt: persona?.createdAt?.toString?.() ?? new Date().toISOString(),
+            updatedAt: persona?.updatedAt?.toString?.() ?? new Date().toISOString(),
+            deletedAt: persona?.deletedAt?.toString?.() ?? undefined,
+        } as Persona;
+    });
 
     // Render the campaign details
-
-
     return (
-
         <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="space-y-2">
@@ -162,8 +154,8 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 campaign={campaign}
                 posts={posts}
                 campaignPersonas={personas}
-                characters={characters}
-                campaignMergeFields={serializableMergeFields}
+                characters={characters as Character[]}
+                campaignMergeFields={campaignData.mergeFields ?? []}
                 campaignMergeFieldValues={mergeFieldValues}
             />
         </div>

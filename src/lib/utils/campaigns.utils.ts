@@ -1,6 +1,7 @@
 import { Campaign, CampaignWithStatus, CampaignStatus } from "@/src/lib/types/ui";
 import type { CampaignData } from "@/src/lib/zod/campaign.schema";
 import type { DbCampaignWithAll } from "@/src/server/db/selects/campaign";
+import { convertDecimalsToStrings } from "./serialization";
 
 const VIDEO_LENGTH_MAP = { THIRTY: 30, FORTY_FIVE: 45, SIXTY: 60 } as const;
 
@@ -8,26 +9,32 @@ export function toUiCampaign(c: DbCampaignWithAll): CampaignData {
     const characters = c.characters.map(cc => cc.character?.name).filter(Boolean) as string[];
     const personas = c.personas.map(p => p.personaKey ?? p.persona?.id).filter(Boolean) as string[];
 
+    // Serialize mergeFields to convert Decimals to strings
+    const serializedMergeFields = convertDecimalsToStrings(c.mergeFields);
+
     return {
         id: c.id,
         title: c.title,
         objective: c.campaignObjective ?? "",
         narrativeContext: c.narrativeContext ?? undefined,
         postCaptionLength: c.postCaptionLength,
-        startDate: c.startDate ?? undefined,
-        endDate: c.endDate ?? undefined,
+        startDate: c.startDate ? new Date(c.startDate) : undefined,
+        endDate: c.endDate ? new Date(c.endDate) : undefined,
         cadence: { daysOfWeek: c.daysOfWeek ?? [], frequency: c.frequency },
         postType: c.postType,
         videoLength: c.postVideoLength ? VIDEO_LENGTH_MAP[c.postVideoLength as keyof typeof VIDEO_LENGTH_MAP] : undefined,
         personas,
         characters,
-        mergeFields: (c.mergeFields ?? []).map(m => ({ name: m.name ?? "" })),
+        mergeFields: (serializedMergeFields ?? []).map(m => ({
+            ...m,
+            name: m.name ?? ""
+        })),
         isActive: c.isActive,
         isArchived: c.isArchived,
         isDraft: c.isDraft,
-        createdAt: c.createdAt ?? undefined,
-        updatedAt: c.updatedAt ?? undefined,
-        deletedAt: c.deletedAt ?? undefined,
+        createdAt: c.createdAt ? new Date(c.createdAt) : undefined,
+        updatedAt: c.updatedAt ? new Date(c.updatedAt) : undefined,
+        deletedAt: c.deletedAt ? new Date(c.deletedAt) : undefined,
     };
 }
 
@@ -100,4 +107,3 @@ export const buildCampaign = (campaignData: CampaignData): Campaign => {
         characterCount,
     };
 };
-

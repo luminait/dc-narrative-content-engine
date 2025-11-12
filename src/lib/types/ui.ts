@@ -42,6 +42,7 @@ export type Campaign = CampaignWithStatus & CampaignWithCounts;
  */
 export type CharacterWithImage = CharacterData & {
   defaultImage?: string;
+  imageUrl?: string | null;
   type?: string; // Legacy compatibility for filtering
 };
 
