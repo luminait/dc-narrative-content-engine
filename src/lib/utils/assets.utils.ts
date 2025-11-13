@@ -1,5 +1,5 @@
 export const isMediaAssetType = (mediaType: string) =>
-    ['image','video','audio_music','audio_voice','image_or_audio'].includes(mediaType);
+    ['image','video','audio_music','audio_voice', 'gen_ai_image', 'gen_ai_video', 'gen_ai_voice', 'gen_ai_music', 'image_or_video'].includes(mediaType);
 
 export const isAssetReferenceId = (value: string) =>
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);

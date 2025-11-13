@@ -131,7 +131,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     ]);
 
     // 🔍 DEBUG: what does the app *actually* see for CHAR_FG2?
-    const debugFieldId = "48854e28-1419-4d06-8c66-2326136a3a13";
+    const debugFieldId = "4f0e955d-1134-4ed5-852e-ad794813e14f";
 
     console.log("=== mergeFields from getMergeFieldsForCampaignId ===");
     console.log(
