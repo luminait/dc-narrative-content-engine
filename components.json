@@ -10,11 +10,15 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "radix",
   "aliases": {
     "components": "@/ui/shadcn",
     "utils": "@/src/lib/utils",
     "ui": "@/ui/shadcn",
     "lib": "@/src/lib",
     "hooks": "@/src/lib/hooks"
+  },
+  "registries": {
+    "@supabase": "https://supabase.com/ui/r/{name}.json"
   }
 }
