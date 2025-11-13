@@ -1,12 +1,28 @@
 import { Campaign, CampaignWithStatus, CampaignStatus } from "@/src/lib/types/ui";
 import type { CampaignData } from "@/src/lib/zod/campaign.schema";
-import type { DbCampaignWithAll } from "@/src/server/db/selects/campaign";
-
+import type { DbCampaignWithAll } from "@/src/server/db/selects/campaign.schema.selects";
+import { Decimal } from '@prisma/client/runtime/library';
+import { convertDecimalsToStrings } from "@/src/lib/utils/serialization";
+import { calculateLength } from "@/src/lib/utils/mergefield.utils";
 const VIDEO_LENGTH_MAP = { THIRTY: 30, FORTY_FIVE: 45, SIXTY: 60 } as const;
+
+/**
+ * Helper to convert Decimal to string or return undefined
+ */
+function decimalToString(value: any): string | undefined {
+    if (value === null || value === undefined) return undefined;
+    if (value instanceof Decimal) return value.toString();
+    if (typeof value === 'number') return value.toString();
+    if (typeof value === 'string') return value;
+    return undefined;
+}
 
 export function toUiCampaign(c: DbCampaignWithAll): CampaignData {
     const characters = c.characters.map(cc => cc.character?.name).filter(Boolean) as string[];
     const personas = c.personas.map(p => p.personaKey ?? p.persona?.id).filter(Boolean) as string[];
+
+    // Serialize mergeFields to convert Decimals to strings
+    const serializedMergeFields = convertDecimalsToStrings(c.mergeFields);
 
     return {
         id: c.id,
@@ -14,20 +30,38 @@ export function toUiCampaign(c: DbCampaignWithAll): CampaignData {
         objective: c.campaignObjective ?? "",
         narrativeContext: c.narrativeContext ?? undefined,
         postCaptionLength: c.postCaptionLength,
-        startDate: c.startDate ?? undefined,
-        endDate: c.endDate ?? undefined,
+        startDate: c.startDate ? new Date(c.startDate) : undefined,
+        endDate: c.endDate ? new Date(c.endDate) : undefined,
         cadence: { daysOfWeek: c.daysOfWeek ?? [], frequency: c.frequency },
         postType: c.postType,
         videoLength: c.postVideoLength ? VIDEO_LENGTH_MAP[c.postVideoLength as keyof typeof VIDEO_LENGTH_MAP] : undefined,
         personas,
         characters,
-        mergeFields: (c.mergeFields ?? []).map(m => ({ name: m.name ?? "" })),
+        mergeFields: (c.mergeFields ?? []).map(m => {
+            const startTime = decimalToString(m.startTime);
+            const endTime = decimalToString(m.endTime);
+
+            return {
+                id: m.id ?? undefined,
+                name: m.name ?? "",
+                description: m.description ?? undefined,
+                mediaValueType: m.mediaValueType ?? undefined,
+                value: m.value ?? undefined,
+                type: m.type ?? undefined,
+                startTime,
+                endTime,
+                length: (startTime && endTime) ? calculateLength(startTime, endTime) : undefined,
+                shouldRefreshOnRegenerate: typeof m.shouldRefreshOnRegenerate === 'boolean'
+                    ? m.shouldRefreshOnRegenerate
+                    : undefined,
+            };
+        }),
         isActive: c.isActive,
         isArchived: c.isArchived,
         isDraft: c.isDraft,
-        createdAt: c.createdAt ?? undefined,
-        updatedAt: c.updatedAt ?? undefined,
-        deletedAt: c.deletedAt ?? undefined,
+        createdAt: c.createdAt ? new Date(c.createdAt) : undefined,
+        updatedAt: c.updatedAt ? new Date(c.updatedAt) : undefined,
+        deletedAt: c.deletedAt ? new Date(c.deletedAt) : undefined,
     };
 }
 
@@ -100,4 +134,3 @@ export const buildCampaign = (campaignData: CampaignData): Campaign => {
         characterCount,
     };
 };
-

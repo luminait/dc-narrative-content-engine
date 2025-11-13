@@ -41,8 +41,9 @@ export type Campaign = CampaignWithStatus & CampaignWithCounts;
  * Character with computed default image for UI display.
  */
 export type CharacterWithImage = CharacterData & {
-  defaultImage?: string;
-  type?: string; // Legacy compatibility for filtering
+    defaultImage?: string;
+    imageUrl?: string | null;
+    type?: string; // Legacy compatibility for filtering
 };
 
 

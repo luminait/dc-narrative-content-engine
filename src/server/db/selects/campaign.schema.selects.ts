@@ -55,6 +55,7 @@ export const campaignPersonasSelect = Prisma.validator<Prisma.CampaignSelect>()(
 /// Used when selected the mergefields directly from the Campaign object.
 export const campaignMergeFieldsSelect = Prisma.validator<Prisma.CampaignSelect>()({
     mergeFields: { select: {
+            id: true,
             name: true,
             description: true,
             mediaValueType: true,
@@ -63,6 +64,7 @@ export const campaignMergeFieldsSelect = Prisma.validator<Prisma.CampaignSelect>
             type: true,
             value: true,
             campaignId: true,
+            shouldRefreshOnRegenerate: true,
         } },
 });
 
@@ -123,6 +125,7 @@ export const campaignWithAllSelect = Prisma.validator<Prisma.CampaignSelect>()({
     },
     mergeFields: {
         select: {
+            id: true,
             name: true,
             description: true,
             mediaValueType: true,
@@ -131,6 +134,7 @@ export const campaignWithAllSelect = Prisma.validator<Prisma.CampaignSelect>()({
             type: true,
             value: true,
             campaignId: true,
+            shouldRefreshOnRegenerate: true,
         }
     },
 });

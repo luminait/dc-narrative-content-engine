@@ -153,12 +153,12 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
 
     const mergeFieldValues = await resolveMergeFieldValues(mergeFields);
 
-    // Sanitize mergeFields to convert Decimal objects to numbers before passing to client component
-    const serializableMergeFields = mergeFields.map(field => ({
-        ...field,
-        startTime: field.startTime ? Number(field.startTime) : null,
-        endTime: field.endTime ? Number(field.endTime) : null,
-    }));
+    // // Sanitize mergeFields to convert Decimal objects to numbers before passing to client component
+    // const serializableMergeFields = mergeFields.map(field => ({
+    //     ...field,
+    //     startTime: field.startTime ? Number(field.startTime) : null,
+    //     endTime: field.endTime ? Number(field.endTime) : null,
+    // }));
 
     // Convert to UI types using the centralized utility functions
     // Ensure each post has an `images` array as required by toUiPosts' RawPostFromQuery
@@ -222,7 +222,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 posts={posts}
                 campaignPersonas={personas}
                 characters={characters}
-                campaignMergeFields={serializableMergeFields}
+                campaignMergeFields={mergeFields}
                 campaignMergeFieldValues={mergeFieldValues}
             />
         </div>
