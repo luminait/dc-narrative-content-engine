@@ -11,6 +11,16 @@ export const getMergeFieldsForCampaignId: (id: string) => Promise<MergeField[]> 
             select: mergeFieldSelect,
         });
 
+        // Debug once:
+        // console.log(
+        //     '[getMergeFieldsForCampaignId] raw rows',
+        //     JSON.stringify(
+        //         mergeFields.filter(r => r.id === '48854e28-1419-4d06-8c66-2326136a3a13'),
+        //         null,
+        //         2
+        //     )
+        // );
+
         const sanitizedMergeFields =  sanitizeMergeFields(mergeFields);
         return sanitizedMergeFields;
     }
