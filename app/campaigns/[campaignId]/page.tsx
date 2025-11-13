@@ -12,8 +12,7 @@ import { getPersonasForCampaign } from "@/src/server/queries/personas.queries";
 import { toUiPosts } from "@/src/lib/utils/posts.utils";
 import { toUiCharacters } from "@/src/lib/utils/characters.utils";
 import { getMergeFieldsForCampaignId } from "@/src/server/queries/mergefields.queries";
-import { useCallback } from "react";
-import { buildAssetUrl, canOpenAsset, isMediaAssetType, useAssetResolution } from "@/src/features/assets";
+import { isMediaAssetType } from "@/src/features/assets";
 // helper on the server
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 import type { MergeField } from "@/src/lib/zod/campaign.schema";
@@ -37,7 +36,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     // Fetch the campaign data
     const response = await getCampaignById( campaignId );
 
-    // Handle case where campaign is not found
+    // Handle case where the campaign is not found
     if ( !response ) {
         return <div>Campaign not found</div>;
     }
@@ -65,7 +64,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 try {
                     if (!f.value || !f.mediaValueType) return null;
 
-                    const isUrl = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(f.value);
+                    const isUrl = /^(https?|ftp):\/\/[^\s\/$.?#].\S*$/i.test(f.value);
 
                     if (isMediaAssetType(f.mediaValueType)) {
                         if (isUrl) {
@@ -143,7 +142,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
         )
     );
 
-// Also hit Prisma directly to compare with Supabase UI
+    // it Prisma directly to compare with the Supabase UI
     const prismaRow = await prisma.shotstackMergeField.findUnique({
         where: { id: debugFieldId },
     });
@@ -153,7 +152,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
 
     const mergeFieldValues = await resolveMergeFieldValues(mergeFields);
 
-    // // Sanitize mergeFields to convert Decimal objects to numbers before passing to client component
+    // // Sanitize mergeFields to convert Decimal objects to numbers before passing to the client component
     // const serializableMergeFields = mergeFields.map(field => ({
     //     ...field,
     //     startTime: field.startTime ? Number(field.startTime) : null,
@@ -161,7 +160,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     // }));
 
     // Convert to UI types using the centralized utility functions
-    // Ensure each post has an `images` array as required by toUiPosts' RawPostFromQuery
+    // Ensure each post has an `images` array as required by `toUiPosts` RawPostFromQuery
     const posts: Post[] = toUiPosts(
         (rawPosts as any[]).map(p => ({
             ...p,
