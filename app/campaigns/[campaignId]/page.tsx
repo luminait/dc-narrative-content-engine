@@ -18,7 +18,7 @@ import { buildAssetUrl, canOpenAsset, isMediaAssetType, useAssetResolution } fro
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 import type { MergeField } from "@/src/lib/zod/campaign.schema";
 import type { AssetData } from "@/src/lib/zod/assets.schema";
-
+import { prisma } from "@/src/server/db";
 
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
@@ -62,40 +62,65 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     ): Promise<Record<string, MergeFieldAsset>> {
         const entries = await Promise.all(
             fields.map(async (f) => {
-                if (!f.value || !f.mediaValueType) return null;
+                try {
+                    if (!f.value || !f.mediaValueType) return null;
 
-                const isUrl = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(f.value);
+                    const isUrl = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(f.value);
 
-                if (isMediaAssetType(f.mediaValueType)) {
-                    if (isUrl) {
-                        // If the value is already a URL, construct the AssetData directly
-                        return [f.value, {
+                    if (isMediaAssetType(f.mediaValueType)) {
+                        if (isUrl) {
+                            return [
+                                f.value,
+                                {
+                                    type: String(f.mediaValueType),
+                                    asset_ref: f.value,
+                                    name: f.name,
+                                    asset_url: f.value,
+                                    path_tokens: null,
+                                    bucket_id: null,
+                                },
+                            ] as const;
+                        } else {
+                            const assetData = await getAssetUrlFromAssetRef(f.value);
+
+                            if (!assetData) {
+                                console.warn(
+                                    `[resolveMergeFieldValues] No asset found for merge field`,
+                                    { fieldId: f.id, name: f.name, value: f.value }
+                                );
+                                return null;
+                            }
+
+                            return [f.value, { type: String(f.mediaValueType), ...assetData }] as const;
+                        }
+                    }
+
+                    // Non-media types: just treat as a plain string value
+                    return [
+                        f.value,
+                        {
                             type: String(f.mediaValueType),
-                            asset_ref: f.value, // Use the URL as the ref for keying
+                            asset_ref: null,
                             name: f.name,
-                            asset_url: f.value,
                             path_tokens: null,
                             bucket_id: null,
-                        }] as const;
-                    } else {
-                        // Otherwise, assume it's a UUID and resolve it
-                        const assetData = await getAssetUrlFromAssetRef(f.value);
-                        return [f.value, { type: String(f.mediaValueType), ...assetData }] as const;
-                    }
+                            asset_url: null,
+                        },
+                    ] as const;
+                } catch (err) {
+                    console.error(
+                        `[resolveMergeFieldValues] Failed to resolve merge field`,
+                        { fieldId: f.id, name: f.name, value: f.value },
+                        err
+                    );
+                    return null;
                 }
-
-                // Handle non-media types
-                return [f.value, {
-                    type: String(f.mediaValueType),
-                    asset_ref: null,
-                    name: f.name,
-                    path_tokens: null,
-                    bucket_id: null,
-                    asset_url: null
-                } as const];
             })
         );
-        return Object.fromEntries(entries.filter((e): e is readonly [string, MergeFieldAsset] => !!e));
+
+        return Object.fromEntries(
+            entries.filter((e): e is readonly [string, MergeFieldAsset] => !!e)
+        );
     }
 
     // Fetch raw data. The return types are now strictly enforced in the query functions.
@@ -105,6 +130,26 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
         getPersonasForCampaign( campaign.id ),
         getMergeFieldsForCampaignId( campaign.id )
     ]);
+
+    // 🔍 DEBUG: what does the app *actually* see for CHAR_FG2?
+    const debugFieldId = "48854e28-1419-4d06-8c66-2326136a3a13";
+
+    console.log("=== mergeFields from getMergeFieldsForCampaignId ===");
+    console.log(
+        JSON.stringify(
+            mergeFields.filter((f) => f.id === debugFieldId),
+            null,
+            2
+        )
+    );
+
+// Also hit Prisma directly to compare with Supabase UI
+    const prismaRow = await prisma.shotstackMergeField.findUnique({
+        where: { id: debugFieldId },
+    });
+    console.log("=== Prisma.shotstackMergeField row ===");
+    console.log(JSON.stringify(prismaRow, null, 2));
+
 
     const mergeFieldValues = await resolveMergeFieldValues(mergeFields);
 
