@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -16,46 +10,44 @@ datasource db {
 }
 
 model Campaign {
-  id                String              @id @default(uuid()) @db.Uuid
-  versionNumber     Int                 @default(1) @map("version_number")
+  versionNumber     Int                   @default(1) @map("version_number")
   title             String
-  campaignObjective String              @map("campaign_objective") // CHECK constraint: char_length(campaign_objective) > 25
-  createdBy         String?             @map("created_by") @db.Uuid
-  createdAt         DateTime?           @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt         DateTime?           @updatedAt @map("updated_at") @db.Timestamp()
-  deletedAt         DateTime?           @map("deleted_at") @db.Timestamp()
-  daysOfWeek        Weekdays[]          @map("days_of_week")
-  frequency         EventCadence        @default(weekly)
-  postType          PostType            @default(single_image) @map("post_type")
-  postCaptionLength CaptionLength       @default(short) @map("post_caption_length")
-  postVideoLength   VideoLengthSeconds? @map("post_video_length")
-  startDate         DateTime?           @map("start_date") @db.Date
-  endDate           DateTime?           @map("end_date") @db.Date
-  narrativeContext  String?             @map("narrative_context")
-  isActive          Boolean             @default(true) @map("is_active")
-  isArchived        Boolean             @default(false) @map("is_archived")
-  isDraft           Boolean             @default(false) @map("is_draft")
-
-  creator     User?                 @relation(fields: [createdBy], references: [userId])
-  characters  CampaignsCharacters[]
-  personas    CampaignsPersonas[]
-  mergeFields ShotstackMergeField[]
-  renders     ShotstackRender[]
-  posts       Post[]
+  campaignObjective String                @map("campaign_objective")
+  createdBy         String?               @map("created_by") @db.Uuid
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime?             @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt         DateTime?             @map("deleted_at") @db.Timestamp(6)
+  daysOfWeek        Weekdays[]            @map("days_of_week")
+  frequency         EventCadence          @default(weekly)
+  postType          PostType              @default(single_image) @map("post_type")
+  postCaptionLength CaptionLength         @default(short) @map("post_caption_length")
+  startDate         DateTime?             @map("start_date") @db.Date
+  endDate           DateTime?             @map("end_date") @db.Date
+  narrativeContext  String?               @map("narrative_context")
+  isActive          Boolean               @default(true) @map("is_active")
+  isArchived        Boolean               @default(false) @map("is_archived")
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postVideoLength   VideoLengthSeconds?   @map("post_video_length")
+  isDraft           Boolean               @default(false) @map("is_draft")
+  creator           User?                 @relation(fields: [createdBy], references: [userId])
+  characters        CampaignsCharacters[]
+  personas          CampaignsPersonas[]
+  posts             Post[]
+  mergeFields       ShotstackMergeField[]
+  renders           ShotstackRender[]
 
   @@map("campaigns")
   @@schema("public")
 }
 
 model User {
-  id        BigInt    @default(autoincrement())
-  email     String    @unique
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp()
-  deletedAt DateTime? @map("deleted_at") @db.Timestamp()
-  userId    String    @unique @map("user_id") @db.Uuid
-  role      UserRole  @default(client)
-
+  id        BigInt     @default(autoincrement())
+  email     String     @unique
+  createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime?  @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt DateTime?  @map("deleted_at") @db.Timestamp(6)
+  userId    String     @unique @map("user_id") @db.Uuid
+  role      UserRole   @default(client)
   campaigns Campaign[]
 
   @@id([id, userId])
@@ -64,11 +56,10 @@ model User {
 }
 
 model Character {
-  id                String                @id @default(uuid()) @db.Uuid
   name              String
-  createdAt         DateTime?             @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt         DateTime?             @updatedAt @map("updated_at") @db.Timestamp()
-  deletedAt         DateTime?             @map("deleted_at") @db.Timestamp()
+  createdAt         DateTime?             @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime?             @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt         DateTime?             @map("deleted_at") @db.Timestamp(6)
   isHuman           Boolean?              @default(false) @map("is_human")
   isTrainer         Boolean?              @default(false) @map("is_trainer")
   characterTypes    String?               @map("character_types")
@@ -76,6 +67,7 @@ model Character {
   heightCentimeters Int?                  @map("height_centimeters")
   weightGrams       Int?                  @map("weight_grams")
   moralAlignment    MoralAlignment?       @map("moral_alignment")
+  id                String                @id @default(uuid()) @db.Uuid
   campaigns         CampaignsCharacters[]
   assets            CharacterAsset[]
 
@@ -83,16 +75,14 @@ model Character {
   @@schema("public")
 }
 
-// Holds the Pools of Characters that the AI agent can choose from to mix and match assets in a post.
 model CampaignsCharacters {
-  campaignId       String  @map("campaign_id") @db.Uuid
-  characterId      String  @map("character_id") @db.Uuid
-  narrativeRole    String? @map("narrative_role")
-  recommendedScene String? @map("recommended_use_in_scene")
+  campaignId       String    @map("campaign_id") @db.Uuid
+  characterId      String    @map("character_id") @db.Uuid
+  narrativeRole    String?   @map("narrative_role")
+  recommendedScene String?   @map("recommended_use_in_scene")
   notes            String?
-
-  campaign  Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  campaign         Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  character        Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@id([campaignId, characterId])
   @@map("campaigns_characters")
@@ -100,12 +90,12 @@ model CampaignsCharacters {
 }
 
 model Persona {
-  id          String              @id @default(uuid()) @db.Uuid
   name        String?
-  createdAt   DateTime?           @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt   DateTime?           @updatedAt @map("updated_at") @db.Timestamp()
-  deletedAt   DateTime?           @map("deleted_at") @db.Timestamp()
+  createdAt   DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime?           @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt   DateTime?           @map("deleted_at") @db.Timestamp(6)
   description String?
+  id          String              @id @default(uuid()) @db.Uuid
   campaigns   CampaignsPersonas[]
 
   @@map("personas")
@@ -113,13 +103,12 @@ model Persona {
 }
 
 model CampaignsPersonas {
-  id               String  @id @default(uuid()) @db.Uuid
-  campaignId       String  @map("campaign_id") @db.Uuid
-  personaKey       String? @map("persona_key") @db.Uuid
-  isPrimaryPersona Boolean @default(true) @map("is_primary_persona")
-
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  persona  Persona? @relation(fields: [personaKey], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid()) @db.Uuid
+  campaignId       String   @map("campaign_id") @db.Uuid
+  personaKey       String?  @map("persona_key") @db.Uuid
+  isPrimaryPersona Boolean  @default(true) @map("is_primary_persona")
+  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  persona          Persona? @relation(fields: [personaKey], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, personaKey], name: "unique_campaign_persona")
   @@map("campaigns_personas")
@@ -127,88 +116,106 @@ model CampaignsPersonas {
 }
 
 model CharacterAsset {
-  id          String    @id @default(uuid()) @db.Uuid
-  characterId String?   @map("character_id") @db.Uuid
-  assetRef    String    @map("asset_ref") @db.Uuid
-  name        String?
-  attributes  Json?
-  isPrimary   Boolean?  @default(false) @map("is_primary")
-  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt   DateTime? @updatedAt @map("updated_at") @db.Timestamp()
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamp()
-
-  character     Character?    @relation(fields: [characterId], references: [id])
-  storageObject StorageObject @relation(fields: [assetRef], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  assetRef      String        @map("asset_ref") @db.Uuid
+  name          String?
+  attributes    Json?
+  isPrimary     Boolean?      @default(false) @map("is_primary")
+  createdAt     DateTime?     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt     DateTime?     @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt     DateTime?     @map("deleted_at") @db.Timestamp(6)
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  characterId   String?       @map("character_id") @db.Uuid
+  storageObject StorageObject @relation(fields: [assetRef], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  character     Character?    @relation(fields: [characterId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("character_assets")
   @@schema("public")
 }
 
-// Placeholder model for Supabase storage
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model StorageObject {
-  id         String           @id @db.Uuid
-  assets     CharacterAsset[]
-  render     ShotstackRender?
-  postImages PostImage[]
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bucket_id        String?
+  name             String?
+  owner            String?          @db.Uuid
+  created_at       DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?        @default(now()) @db.Timestamptz(6)
+  last_accessed_at DateTime?        @default(now()) @db.Timestamptz(6)
+  metadata         Json?
+  path_tokens      String[]         @default(dbgenerated("string_to_array(name, '/'::text)"))
+  version          String?
+  owner_id         String?
+  user_metadata    Json?
+  level            Int?
+  assets           CharacterAsset[]
+  postImages       PostImage[]
+  buckets          buckets?         @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "objects_bucketId_fkey")
 
+  @@unique([bucket_id, name], map: "bucketid_objname")
+  @@unique([name, bucket_id, level], map: "idx_name_bucket_level_unique")
+  @@unique([bucket_id, level, name], map: "objects_bucket_id_level_idx")
+  @@index([bucket_id, name], map: "idx_objects_bucket_id_name")
+  @@index([name], map: "name_prefix_search")
   @@map("objects")
   @@schema("storage")
 }
 
 model Post {
-  id                 String    @id @default(uuid()) @db.Uuid
-  campaignId         String?   @map("campaign_id") @db.Uuid
-  postType           PostType? @map("post_type")
-  title              String?
-  content            String?
-  hashtags           String[]
-  customInstructions String?   @map("custom_instructions")
-  isActive           Boolean   @default(false) @map("is_active")
-  isDraft            Boolean   @default(true) @map("is_draft")
-  isArchived         Boolean   @default(false) @map("is_archived")
-  scheduledAt        DateTime? @map("scheduled_at") @db.Timestamptz
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt          DateTime? @updatedAt @map("updated_at") @db.Timestamptz
-  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz
+  id                     String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId             String?               @map("campaign_id") @db.Uuid
+  postType               PostType?             @map("post_type")
+  title                  String?
+  content                String?
+  hashtags               String[]
+  isActive               Boolean               @default(false) @map("is_active")
+  isDraft                Boolean               @default(true) @map("is_draft")
+  isArchived             Boolean               @default(false) @map("is_archived")
+  scheduledAt            DateTime?             @map("scheduled_at") @db.Timestamptz(6)
+  createdAt              DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime?             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt              DateTime?             @map("deleted_at") @db.Timestamptz(6)
+  customInstructions     String?               @map("custom_instructions")
+  campaign               Campaign?             @relation(fields: [campaignId], references: [id], map: "fk_posts_campaign_id")
+  images                 PostImage[]
+  shotstack_merge_fields ShotstackMergeField[]
 
-  campaign Campaign?   @relation(fields: [campaignId], references: [id], onUpdate: Cascade, onDelete: SetNull)
-  images   PostImage[]
-
+  @@index([campaignId], map: "idx_posts_campaign_id")
+  @@index([createdAt], map: "idx_posts_created_at")
+  @@index([updatedAt], map: "idx_posts_updated_at")
   @@map("posts")
   @@schema("public")
 }
 
 model PostImage {
-  postId    String   @map("post_id") @db.Uuid
-  objectId  String   @map("object_id") @db.Uuid
-  position  Int      @default(1)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-
-  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-  storageObject StorageObject @relation(fields: [objectId], references: [id], onDelete: Restrict)
+  postId        String        @map("post_id") @db.Uuid
+  objectId      String        @map("object_id") @db.Uuid
+  position      Int           @default(1)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  storageObject StorageObject @relation(fields: [objectId], references: [id], onUpdate: NoAction)
+  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([postId, objectId])
-  @@index([postId])
-  @@index([objectId])
-  @@index([postId, position], name: "idx_posts_images_post_order")
+  @@index([postId, position], map: "idx_posts_images_post_order")
+  @@index([objectId], map: "idx_posts_images_object_id")
+  @@index([postId], map: "idx_posts_images_post_id")
   @@map("posts_images")
   @@schema("public")
 }
 
 model ShotstackMergeField {
-  id                        String              @id @default(uuid()) @db.Uuid
   name                      String              @map("merge_field")
   description               String?
   mediaValueType            MergeFieldValueType @default(image) @map("media_value_type")
   startTime                 Decimal?            @map("start_time")
   endTime                   Decimal?            @map("end_time")
-  campaignId                String              @map("campaign_id") @db.Uuid
   type                      MergeFieldType?     @map("merge_field_type")
   value                     String?             @map("value")
-  shouldRefreshOnRegenerate Boolean             @map("should_refresh_on_generate") // Indicates whether this specific merge field should be swapped out or auto-generated for every new post.
+  id                        String              @id @default(uuid()) @db.Uuid
+  campaignId                String              @map("campaign_id") @db.Uuid
+  shouldRefreshOnRegenerate Boolean?            @default(false) @map("should_refresh_on_generate")
   postId                    String?             @map("post_id") @db.Uuid
-
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign                  Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  posts                     Post?               @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([campaignId, name])
   @@map("shotstack_merge_fields")
@@ -216,15 +223,14 @@ model ShotstackMergeField {
 }
 
 model ShotstackRender {
-  id         String   @id @db.Uuid
-  campaignId String?  @map("campaign_id") @db.Uuid
-  url        String?
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
-  status     String?
-
-  storageObject StorageObject @relation(fields: [id], references: [id], onDelete: Cascade)
-  campaign      Campaign?     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id            String    @id @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  status        String?
+  url           String?
+  campaignId    String?   @map("campaign_id") @db.Uuid
+  campaign      Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  storageObject objects   @relation(fields: [id], references: [id], onDelete: Cascade)
 
   @@map("shotstack_renders")
   @@schema("public")
@@ -233,10 +239,117 @@ model ShotstackRender {
 model AppSettings {
   key       String   @id
   value     Json
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("app_settings")
   @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model objects {
+  id     String           @id @db.Uuid
+  render ShotstackRender?
+
+  @@schema("public")
+}
+
+model users {
+  id String @id @db.Uuid
+
+  @@schema("public")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model buckets {
+  id                         String                       @id
+  name                       String                       @unique(map: "bname")
+  owner                      String?                      @db.Uuid
+  created_at                 DateTime?                    @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime?                    @default(now()) @db.Timestamptz(6)
+  public                     Boolean?                     @default(false)
+  avif_autodetection         Boolean?                     @default(false)
+  file_size_limit            BigInt?
+  allowed_mime_types         String[]
+  owner_id                   String?
+  type                       buckettype                   @default(STANDARD)
+  objects                    StorageObject[]
+  prefixes                   prefixes[]
+  s3_multipart_uploads       s3_multipart_uploads[]
+  s3_multipart_uploads_parts s3_multipart_uploads_parts[]
+
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model buckets_analytics {
+  id         String     @id
+  type       buckettype @default(ANALYTICS)
+  format     String     @default("ICEBERG")
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at DateTime   @default(now()) @db.Timestamptz(6)
+
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model migrations {
+  id          Int       @id
+  name        String    @unique @db.VarChar(100)
+  hash        String    @db.VarChar(40)
+  executed_at DateTime? @default(now()) @db.Timestamp(6)
+
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model prefixes {
+  bucket_id  String
+  name       String
+  level      Int       @default(dbgenerated("storage.get_level(name)"))
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  buckets    buckets   @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prefixes_bucketId_fkey")
+
+  @@id([bucket_id, level, name])
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model s3_multipart_uploads {
+  id                         String                       @id
+  in_progress_size           BigInt                       @default(0)
+  upload_signature           String
+  bucket_id                  String
+  key                        String
+  version                    String
+  owner_id                   String?
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  user_metadata              Json?
+  buckets                    buckets                      @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  s3_multipart_uploads_parts s3_multipart_uploads_parts[]
+
+  @@index([bucket_id, key, created_at], map: "idx_multipart_uploads_list")
+  @@schema("storage")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model s3_multipart_uploads_parts {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  upload_id            String
+  size                 BigInt               @default(0)
+  part_number          Int
+  bucket_id            String
+  key                  String
+  etag                 String
+  owner_id             String?
+  version              String
+  created_at           DateTime             @default(now()) @db.Timestamptz(6)
+  buckets              buckets              @relation(fields: [bucket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  s3_multipart_uploads s3_multipart_uploads @relation(fields: [upload_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("storage")
 }
 
 enum UserRole {
@@ -330,4 +443,11 @@ enum MergeFieldType {
   luma_matte
 
   @@schema("public")
+}
+
+enum buckettype {
+  STANDARD
+  ANALYTICS
+
+  @@schema("storage")
 }

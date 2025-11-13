@@ -161,21 +161,35 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
     }));
 
     // Convert to UI types using the centralized utility functions
-    const posts: Post[] = toUiPosts( rawPosts );
+    // Ensure each post has an `images` array as required by toUiPosts' RawPostFromQuery
+    const posts: Post[] = toUiPosts(
+        (rawPosts as any[]).map(p => ({
+            ...p,
+            images: (p as any).images ?? [],
+        })) as any
+    );
     const characters: Character[] = toUiCharacters( rawCharacters );
     // TODO: Find a cleaner way to convert rawPersonas to type of Persona[]
     // TODO: Find a way to immediately get the value of `isPrimaryPersona`
-    const personas: Persona[] = rawPersonas.map( persona => {
-            return {
-                ...persona,
-                name: persona.name || 'hardcore_collector',
-                createdAt: persona.createdAt?.toString() || Date.now().toString(),
-                updatedAt: persona.updatedAt?.toString() || Date.now().toString(),
-                deletedAt: persona.deletedAt?.toString() || undefined,
-                description: persona.description || 'A hardcore collector',
-            }
-        }
-    ); // Direct assignment
+    const personas: Persona[] = (rawPersonas as any[]).map((persona: any) => {
+        const name = persona?.name ?? 'hardcore_collector';
+        const personaKey =
+            persona?.personaKey ??
+            (typeof name === 'string' ? name.toLowerCase().replace(/\s+/g, '_') : 'hardcore_collector');
+        const isPrimaryPersona =
+            typeof persona?.isPrimaryPersona === 'boolean' ? persona.isPrimaryPersona : false;
+
+        return {
+            id: String(persona?.id ?? crypto.randomUUID?.() ?? `persona_${Math.random().toString(36).slice(2)}`),
+            name,
+            description: persona?.description ?? 'A hardcore collector',
+            personaKey,
+            isPrimaryPersona,
+            createdAt: persona?.createdAt?.toString?.() ?? new Date().toISOString(),
+            updatedAt: persona?.updatedAt?.toString?.() ?? new Date().toISOString(),
+            deletedAt: persona?.deletedAt?.toString?.() ?? undefined,
+        } as Persona;
+    });
     // const refNames = mergeFields.map( field => field.mediaValueType );
     // const refUrls = mergeFields.map( field => await canOpenAsset( field ) && await buildAssetUrl(field.value, field, campaign.title, {}) );
     // const [assetRefNames, setAssetRefNames, setAssetUrls, setLoadingAssetRefs] = useAssetResolution()
