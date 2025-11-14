@@ -17,7 +17,6 @@ import { isMediaAssetType } from "@/src/features/assets";
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 import type { MergeField } from "@/src/lib/zod/campaign.schema";
 import type { AssetData } from "@/src/lib/zod/assets.schema";
-import { prisma } from "@/src/server/db";
 
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
@@ -130,24 +129,27 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
         getMergeFieldsForCampaignId( campaign.id )
     ]);
 
+    // =======================================================================
     // 🔍 DEBUG: what does the app *actually* see for CHAR_FG2?
-    const debugFieldId = "4f0e955d-1134-4ed5-852e-ad794813e14f";
-
-    console.log("=== mergeFields from getMergeFieldsForCampaignId ===");
-    console.log(
-        JSON.stringify(
-            mergeFields.filter((f) => f.id === debugFieldId),
-            null,
-            2
-        )
-    );
+    // =======================================================================
+    // const debugFieldId = "4f0e955d-1134-4ed5-852e-ad794813e14f";
+    //
+    // console.log("=== mergeFields from getMergeFieldsForCampaignId ===");
+    // console.log(
+    //     JSON.stringify(
+    //         mergeFields.filter((f) => f.id === debugFieldId),
+    //         null,
+    //         2
+    //     )
+    // );
 
     // it Prisma directly to compare with the Supabase UI
-    const prismaRow = await prisma.shotstackMergeField.findUnique({
-        where: { id: debugFieldId },
-    });
-    console.log("=== Prisma.shotstackMergeField row ===");
-    console.log(JSON.stringify(prismaRow, null, 2));
+    // const prismaRow = await prisma.shotstackMergeField.findUnique({
+    //     where: { id: debugFieldId },
+    // });
+    // console.log("=== Prisma.shotstackMergeField row ===");
+    // console.log(JSON.stringify(prismaRow, null, 2));
+    // =======================================================================
 
 
     const mergeFieldValues = await resolveMergeFieldValues(mergeFields);
