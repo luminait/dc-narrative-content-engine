@@ -16,14 +16,15 @@ import { Input } from '@/ui/shadcn/input';
 import { Textarea } from '@/ui/shadcn/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover';
 import { Label } from '@/ui/shadcn/label';
-import CharactersSection from '@/src/features/campaigns/new/sections/CharactersSelection';
+// Use the CharactersSection component which properly renders character images
+// Use a form-agnostic CharacterPicker inside the Popover to avoid RHF context requirement
+import CharacterPicker from '@/src/features/campaigns/components/CharacterPicker';
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/ui/shadcn/dropzone';
 import { useSupabaseUpload } from '@/src/lib/hooks/use-supabase-upload';
 import { updateMergeFieldAction, duplicateMergeFieldAction, deleteMergeFieldAction } from '@/src/server/actions/mergefield.actions';
 import { toast } from 'sonner';
 
 // Mapping of merge field types to their corresponding asset types and values
-type MergeFieldEntry = [string, MergeFieldAsset];
 type MergeFieldAsset = { type: string } & AssetData;
 
 interface MergeFieldsTabProps {
@@ -187,7 +188,7 @@ export function MergeFieldsTab({
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {/* Asset System Status Warning */}
-                    {(!mergeFieldsLoading && isAssetSystemAvailable() === false) && (
+                    {( !mergeFieldsLoading && !isAssetSystemAvailable() ) && (
                         <Alert className="border-orange-200 bg-orange-50 justify-start">
                             <AlertCircle className="h-4 w-4 text-orange-600" />
                             <AlertDescription className="text-orange-800">
@@ -348,28 +349,38 @@ function MergeFieldItem({
                                             <PopoverTrigger asChild>
                                                 <Button variant="outline" className="mt-1 w-full justify-start">
                                                     {editingState.characterId
-                                                        ? campaignCharacters.find((c) => c.id === editingState.characterId)
-                                                        ?.name || 'Select Character'
+                                                        ? campaignCharacters.find((c) => c.id === editingState.characterId)?.name ||
+                                                          'Select Character'
                                                         : 'Select Character'}
                                                 </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-[600px] p-4" align="start">
-                                                <CharactersSection
-                                                    characters={campaignCharacters.map((c) => ({
-                                                        id: c.id,
-                                                        name: c.name,
-                                                        characterTypes: c.characterTypes || null,
-                                                        imageUrl: c.imageUrl || null,
-                                                    }))}
-                                                    initialSelection={
-                                                        editingState.characterId ? [editingState.characterId] : []
-                                                    }
-                                                    onSelectionChange={onCharacterSelect}
-                                                    selectionMode="single"
-                                                    collapsible={false}
-                                                />
+                                            <PopoverContent
+                                              className="w-[600px] max-w-[80vw] max-h-[80vh] overflow-auto p-4"
+                                              align="start"
+                                            >
+                                              <CharacterPicker
+                                                characters={campaignCharacters.map((c) => ({
+                                                  id: c.id,
+                                                  name: c.name,
+                                                  characterTypes: c.characterTypes || null,
+                                                  imageUrl: c.imageUrl ?? c.defaultImage ?? null,
+                                                }))}
+                                                selectedIds={editingState.characterId ? [editingState.characterId] : []}
+                                                onChange={(ids) => {
+                                                  const characterId = ids[0] ?? '';
+                                                  onCharacterSelect(ids);
+                                                  onUpdateEditState({
+                                                    ...editingState,
+                                                    value: characterId,
+                                                    characterId,
+                                                  });
+                                                }}
+                                                allowMultiple={false}
+                                                showSearch
+                                                showSelectedBadges={false}
+                                              />
                                             </PopoverContent>
-                                        </Popover>
+                                          </Popover>
                                     )}
 
                                     {(field.mediaValueType === 'video' ||
@@ -534,7 +545,7 @@ interface MediaUploadFieldProps {
 }
 
 function MediaUploadField({ campaignId, fieldType, onUploadSuccess }: MediaUploadFieldProps) {
-    // Determine allowed MIME types based on field type
+    // Determine allowed MIME types based on the field type
     const getAllowedMimeTypes = () => {
         if (fieldType === 'video') return ['video/*'];
         if (fieldType === 'audio_music' || fieldType === 'audio_voice') return ['audio/*'];

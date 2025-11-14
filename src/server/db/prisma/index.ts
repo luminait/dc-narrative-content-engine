@@ -1,25 +1,28 @@
 import "server-only";
 import { PrismaClient } from "@/src/server/db/generated/prisma";
+import { withAccelerate } from '@prisma/extension-accelerate'
 
 // Declare a global variable to hold the Prisma client instance
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
-}
+const globalForPrisma = globalThis as unknown as {
+    prisma?: PrismaClient;
+};
 
 // Initialize Prisma Client
 const prisma =
-  global.prisma ||
+    globalForPrisma.prisma ??
   new PrismaClient({
     log:
       process.env.NODE_ENV === "development"
         ? ["query", "error", "warn"]
         : ["error"],
-  });
+  }).$extends(withAccelerate());
 
 // In development, assign the Prisma client to the global variable
 if (process.env.NODE_ENV !== "production") {
-  global.prisma = prisma;
+    // @ts-ignore
+    globalForPrisma.prisma = prisma;
 }
 
+
 export { prisma };
+export default prisma;
