@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { AlertCircle, MoreVertical, Pencil, Copy, Trash2, Check, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/shadcn/card';
 import { Skeleton } from '@/ui/shadcn/skeleton';
@@ -21,8 +22,8 @@ import { Label } from '@/ui/shadcn/label';
 import CharacterPicker from '@/src/features/campaigns/components/CharacterPicker';
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/ui/shadcn/dropzone';
 import { useSupabaseUpload } from '@/src/lib/hooks/use-supabase-upload';
-import { updateMergeFieldAction, duplicateMergeFieldAction, deleteMergeFieldAction } from '@/src/server/actions/mergefield.actions';
 import { toast } from 'sonner';
+import { buildMergeFieldUpdatePayload } from '@/src/lib/utils/mergefield.client-utils';
 
 // Mapping of merge field types to their corresponding asset types and values
 type MergeFieldAsset = { type: string } & AssetData;
@@ -57,15 +58,23 @@ export function MergeFieldsTab({
                                }: MergeFieldsTabProps) {
     const [editingField, setEditingField] = useState<EditingState | null>(null);
     const [savingFieldId, setSavingFieldId] = useState<string | null>(null);
+    const router = useRouter();
 
     // Handle edit mode
     const startEditing = (field: MergeField) => {
+        // For character fields, the stored value is an asset_ref (UUID), not the character id.
+        // Try to resolve the characterId by matching the current value against each character's primaryAssetRef.
+        const resolvedCharacterId =
+            field.type === 'character' && field.value
+                ? (campaignCharacters.find((c) => c.primaryAssetRef && c.primaryAssetRef === field.value)?.id)
+                : undefined;
+
         setEditingField({
             fieldId: field.id || '',
             name: field.name,
             description: field.description || '',
-            value: field.value || '',
-            characterId: field.type === 'character' ? field.value || undefined : undefined,
+            value: field.value || '', // keep the current value (asset_ref for media types)
+            characterId: resolvedCharacterId,
         });
     };
 
@@ -76,45 +85,23 @@ export function MergeFieldsTab({
     const saveEdit = async (field: MergeField) => {
         if (!editingField || !field.id) return;
 
-        // Helper to coerce Decimal-like or object-y numerics to plain numbers
-        const toNumber = (v: unknown): number | null => {
-            if (v === null || v === undefined) return null;
-            if (typeof v === 'number') return v;
-            if (typeof v === 'string') {
-                const n = Number(v);
-                return Number.isFinite(n) ? n : null;
-            }
-            // Prisma Decimal or similar: try toNumber() then valueOf()/Number()
-            if (typeof (v as any)?.toNumber === 'function') {
-                try { return (v as any).toNumber(); } catch {/* noop */}
-            }
-            const n = Number((v as any)?.valueOf?.() ?? v);
-            return Number.isFinite(n) ? n : null;
-        };
-
         setSavingFieldId(field.id);
         try {
             // Build a strictly serializable payload expected by the server action schema.
-            // Do NOT spread `field` (it may contain Decimal instances or functions).
-            const payload = {
-                name: editingField.name ?? '',
-                description: editingField.description ?? '',
-                mediaValueType: field.mediaValueType,   // enum/string
-                value: editingField.value ?? '',
-                type: field.type ?? null,
-                startTime: toNumber((field as any).startTime),
-                endTime: toNumber((field as any).endTime),
-                shouldRefreshOnRegenerate:
-                    typeof (field as any).shouldRefreshOnRegenerate === 'boolean'
-                        ? (field as any).shouldRefreshOnRegenerate
-                        : false,
-            } as const;
+            const payload = buildMergeFieldUpdatePayload(field, editingField);
 
-            const result = await updateMergeFieldAction(field.id, campaign.id, payload as any);
+            const res = await fetch(`/api/mergefields/${campaign.id}/${field.id}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const result = await res.json();
 
-            if (result.success) {
+            if (res.ok && result.success) {
                 toast.success('Merge field updated successfully');
                 setEditingField(null);
+                // Force a refresh so the Server Components re-fetch fresh data
+                router.refresh();
             } else {
                 const err = (result as any)?.error;
                 const message =
@@ -135,11 +122,15 @@ export function MergeFieldsTab({
 
     const handleDuplicate = async (fieldId: string) => {
         try {
-            const result = await duplicateMergeFieldAction(fieldId, campaign.id);
-            if (result.success) {
+            const res = await fetch(`/api/mergefields/${campaign.id}/${fieldId}/duplicate`, {
+                method: 'POST',
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
                 toast.success('Merge field duplicated successfully');
+                router.refresh();
             } else {
-                toast.error(result.error || 'Failed to duplicate merge field');
+                toast.error(result?.error || 'Failed to duplicate merge field');
             }
         } catch (error) {
             toast.error('An error occurred while duplicating the merge field');
@@ -151,11 +142,15 @@ export function MergeFieldsTab({
         if (!confirm('Are you sure you want to delete this merge field?')) return;
 
         try {
-            const result = await deleteMergeFieldAction(fieldId, campaign.id);
-            if (result.success) {
+            const res = await fetch(`/api/mergefields/${campaign.id}/${fieldId}/delete`, {
+                method: 'POST',
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
                 toast.success('Merge field deleted successfully');
+                router.refresh();
             } else {
-                toast.error(result.error || 'Failed to delete merge field');
+                toast.error(result?.error || 'Failed to delete merge field');
             }
         } catch (error) {
             toast.error('An error occurred while deleting the merge field');
@@ -167,14 +162,26 @@ export function MergeFieldsTab({
     const handleCharacterSelect = useCallback((characterIds: string[]) => {
         setEditingField((prev) => {
             if (!prev) return null;
-            const characterId = characterIds[0] || '';
+            const selectedId = characterIds[0] || '';
+            const selectedChar = campaignCharacters.find((c) => c.id === selectedId);
+            const assetRef = selectedChar?.primaryAssetRef || null;
+
+            if (!assetRef) {
+                toast.error('Selected character has no registered asset_ref. Please register an asset for this character.');
+                return {
+                    ...prev,
+                    characterId: selectedId || undefined,
+                };
+            }
+
             return {
                 ...prev,
-                value: characterId,
-                characterId,
+                // Persist the asset_ref (UUID) for character media fields
+                value: assetRef,
+                characterId: selectedId,
             };
         });
-    }, []);
+    }, [campaignCharacters]);
 
     return (
         <>
@@ -367,13 +374,8 @@ function MergeFieldItem({
                                                 }))}
                                                 selectedIds={editingState.characterId ? [editingState.characterId] : []}
                                                 onChange={(ids) => {
-                                                  const characterId = ids[0] ?? '';
+                                                  // This will set editingState.value to the character's asset_ref and keep characterId for display
                                                   onCharacterSelect(ids);
-                                                  onUpdateEditState({
-                                                    ...editingState,
-                                                    value: characterId,
-                                                    characterId,
-                                                  });
                                                 }}
                                                 allowMultiple={false}
                                                 showSearch
@@ -385,14 +387,23 @@ function MergeFieldItem({
 
                                     {(field.mediaValueType === 'video' ||
                                         field.mediaValueType === 'audio_music' ||
-                                        field.mediaValueType === 'audio_voice') && (
-                                        <MediaUploadField
-                                            campaignId={campaignId}
-                                            fieldType={field.mediaValueType}
-                                            onUploadSuccess={(assetUrl) => {
-                                                onUpdateEditState({ ...editingState, value: assetUrl });
-                                            }}
-                                        />
+                                        field.mediaValueType === 'audio_voice' ||
+                                        field.mediaValueType === 'image' ||
+                                        field.mediaValueType === 'image_or_video' ||
+                                        field.mediaValueType === 'gen_ai_voice') && (
+                                        <div className="space-y-2 mt-2">
+                                            <Label htmlFor={`asset-ref-${field.id}`}>Asset Ref (UUID)</Label>
+                                            <Input
+                                                id={`asset-ref-${field.id}`}
+                                                placeholder="Paste the asset_ref (UUID) for this media"
+                                                value={editingState.value}
+                                                onChange={(e) => onUpdateEditState({ ...editingState, value: e.target.value })}
+                                            />
+                                            <MediaUploadField
+                                                campaignId={campaignId}
+                                                fieldType={field.mediaValueType}
+                                            />
+                                        </div>
                                     )}
                                 </div>
 
@@ -541,10 +552,9 @@ function MergeFieldItem({
 interface MediaUploadFieldProps {
     campaignId: string;
     fieldType: string;
-    onUploadSuccess: (assetUrl: string) => void;
 }
 
-function MediaUploadField({ campaignId, fieldType, onUploadSuccess }: MediaUploadFieldProps) {
+function MediaUploadField({ campaignId, fieldType }: MediaUploadFieldProps) {
     // Determine allowed MIME types based on the field type
     const getAllowedMimeTypes = () => {
         if (fieldType === 'video') return ['video/*'];
@@ -563,13 +573,14 @@ function MediaUploadField({ campaignId, fieldType, onUploadSuccess }: MediaUploa
     // Watch for successful uploads
     React.useEffect(() => {
         if (uploadProps.isSuccess && uploadProps.files.length > 0) {
-            // Get the uploaded file URL from Supabase
             const uploadedFile = uploadProps.files[0];
             const assetPath = `campaigns/${campaignId}/merge-fields/${uploadedFile.name}`;
-            onUploadSuccess(assetPath);
-            toast.success('File uploaded successfully');
+            // We only upload to storage here. The registration to obtain an asset_ref must be handled
+            // by an asset ingestion flow. Inform the user accordingly.
+            toast.success('File uploaded to storage. Now register it to obtain an asset_ref, then paste it above.');
+            console.info('[Upload complete] Stored at:', assetPath);
         }
-    }, [uploadProps.isSuccess, uploadProps.files, campaignId, onUploadSuccess]);
+    }, [uploadProps.isSuccess, uploadProps.files, campaignId]);
 
     return (
         <div className="mt-2">

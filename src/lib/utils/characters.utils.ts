@@ -1,6 +1,5 @@
 import { CharacterData } from "@/src/lib/zod/character.schema";
 import { CharacterWithImage } from "@/src/lib/types/ui";
-import { getPublicUrl } from "./supabase.utils";
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 
 // Based on schema.prisma: This defines the shape of the `assets` relation
@@ -42,9 +41,19 @@ export const getCharacterDefaultImage = async (
 
     // Assumes character images are in a "characters" bucket.
     const assetRef = primaryAsset?.assetRef || character.assets[0].assetRef;
-    const asset_url = (await getAssetUrlFromAssetRef(assetRef)).asset_url;
-    return asset_url;
+    return (await getAssetUrlFromAssetRef(assetRef)).asset_url;
     // return getPublicUrl("characters", assetToUse.storageObject.id);
+};
+
+/**
+ * Returns the preferred asset_ref for a character: primary asset_ref if available, otherwise the first.
+ */
+export const getPrimaryAssetRef = (
+    character: RawCharacterFromQuery,
+): string | null => {
+    if (!character.assets || character.assets.length === 0) return null;
+    const primaryAsset = character.assets.find(a => !!a.isPrimary) || character.assets[0];
+    return primaryAsset?.assetRef ?? null;
 };
 
 /**
@@ -59,5 +68,6 @@ export const toUiCharacters = (
     return rawCharacters.map(character => ({
         ...character,
         defaultImage: getCharacterDefaultImage(character),
+        primaryAssetRef: getPrimaryAssetRef(character),
     }));
 };
