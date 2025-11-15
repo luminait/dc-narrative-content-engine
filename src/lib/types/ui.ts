@@ -44,6 +44,11 @@ export type CharacterWithImage = CharacterData & {
     defaultImage?: string;
     imageUrl?: string | null;
     type?: string; // Legacy compatibility for filtering
+    /**
+     * The primary asset_ref (UUID) for this character's visual asset.
+     * Used when assigning a character to a media merge field so we persist the asset_ref, not the character id.
+     */
+    primaryAssetRef?: string | null;
 };
 
 

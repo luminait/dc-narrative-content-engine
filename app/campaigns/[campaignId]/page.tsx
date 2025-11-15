@@ -17,6 +17,7 @@ import { isMediaAssetType } from "@/src/features/assets";
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
 import type { MergeField } from "@/src/lib/zod/campaign.schema";
 import type { AssetData } from "@/src/lib/zod/assets.schema";
+import { toast } from "sonner";
 
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
@@ -106,6 +107,9 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                         },
                     ] as const;
                 } catch (err) {
+                    toast.error(`Failed to resolve merge field ${f.name} (${{ fieldId: f.id, name: f.name, value: f.value } })`, {
+                        description: err instanceof Error ? err.message : "Unknown error",
+                    })
                     console.error(
                         `[resolveMergeFieldValues] Failed to resolve merge field`,
                         { fieldId: f.id, name: f.name, value: f.value },
