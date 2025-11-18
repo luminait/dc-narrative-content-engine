@@ -173,7 +173,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
             images: (p as any).images ?? [],
         })) as any
     );
-    const characters: Character[] = toUiCharacters( rawCharacters );
+    const characters: Character[] = await toUiCharacters( rawCharacters );
     // TODO: Find a cleaner way to convert rawPersonas to type of Persona[]
     // TODO: Find a way to immediately get the value of `isPrimaryPersona`
     const personas: Persona[] = (rawPersonas as any[]).map((persona: any) => {

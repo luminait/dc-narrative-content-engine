@@ -14,7 +14,7 @@ import {
     SidebarMenuItem,
     SidebarSeparator
 } from "@/ui/shadcn/sidebar"
-import {Calendar, ChevronDown, ChevronUp, Home, Megaphone, Settings, User2} from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, Home, ImageIcon, Megaphone, Settings, User2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/ui/shadcn/collapsible";
@@ -31,9 +31,9 @@ const applicationMenuItems = [
         icon: Home,
     },
     {
-        title: "Campaigns",
-        url: "/campaigns",
-        icon: Megaphone,
+        title: "Assets",
+        url: "/assets",
+        icon: ImageIcon,
     },
     {
         title: "Calendar",
@@ -98,7 +98,7 @@ const AppSidebar = () => {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {
-                                applicationMenuItems.map((item, index) => (
+                                applicationMenuItems.map((item, _) => (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild>
                                             <Link href={item.url}>
@@ -132,7 +132,7 @@ const AppSidebar = () => {
                         <CollapsibleContent>
                             <SidebarGroupContent>
                                 {
-                                    campaigns.map((item, index) => (
+                                    campaigns.map((item, _) => (
                                         <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton asChild>
                                                 <Link href={item.url}>
