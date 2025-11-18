@@ -128,8 +128,6 @@ export async function duplicateMergeFieldAction(
     }
 
     try {
-
-
         // 4. Create a duplicate (excluding 'length' as it's computed)
         const duplicatedField = await prisma.shotstackMergeField.create( {
             data: {

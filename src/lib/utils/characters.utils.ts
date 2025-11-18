@@ -62,12 +62,24 @@ export const getPrimaryAssetRef = (
  * @param rawCharacters - The array of raw character data from the database.
  * @returns An array of characters with a computed `defaultImage` field.
  */
-export const toUiCharacters = (
+export const toUiCharacters = async (
     rawCharacters: RawCharacterFromQuery[],
-): CharacterWithImage[] => {
-    return rawCharacters.map(character => ({
-        ...character,
-        defaultImage: getCharacterDefaultImage(character),
-        primaryAssetRef: getPrimaryAssetRef(character),
-    }));
+): Promise<CharacterWithImage[]> => {
+    return await Promise.all(
+        rawCharacters.map(async (character) => {
+            let defaultImage: string | undefined = undefined;
+            try {
+                defaultImage = await getCharacterDefaultImage(character);
+            } catch (e) {
+                // Avoid failing the whole transformation on a single image error
+                console.warn('[toUiCharacters] Failed to resolve default image for character', character.id, e);
+            }
+
+            return {
+                ...character,
+                defaultImage,
+                primaryAssetRef: getPrimaryAssetRef(character),
+            } as CharacterWithImage;
+        })
+    );
 };
