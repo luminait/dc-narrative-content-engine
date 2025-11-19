@@ -1,105 +1,408 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
-
+<!--suppress ALL -->
 <p align="center">
- The fastest way to build apps with Next.js and Supabase
+  <img src="./assets/luminait-header.svg" alt="luminAIt – dc-narrative-content-engine header" />
 </p>
 
+
 <p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
+  <strong>Create story-driven social media content—at scale—through campaigns, characters, personas, AI pipelines, and dynamic video templates.</strong>
 </p>
-<br/>
 
-## Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+⸻
 
-## Demo
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+<!--suppress HtmlDeprecatedAttribute -->
+<div align="center">
 
-## Deploy to Vercel
 
-Vercel deployment will guide you through creating a Supabase account and project.
+Built With
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+<img alt="Next.js logo" src="https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white"/> 
+<img alt="Supabase logo" src="https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white"/>
+<img alt="Prisma logo" src="https://img.shields.io/badge/Prisma-2D3748?logo=prisma&logoColor=white"/>
+<img alt="Vercel logo" src="https://img.shields.io/badge/Vercel_AI-black?logo=vercel&logoColor=white"/>
+<img alt="Shotstack logo" src="https://img.shields.io/badge/Shotstack-FF5C57?logo=shotstack&logoColor=white"/>
+<img alt="n8n logo" src="https://img.shields.io/badge/n8n-f36?logo=n8n&logoColor=white"/>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+</div>
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
 
-## Clone and run locally
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+⸻
 
-2. Create a Next.js app using the Supabase Starter template npx command
+# 🌟 What This Engine Does
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+dc-narrative-content-engine is an AI-powered narrative automation platform that transforms structured campaign data into fully produced, story-driven social media content.
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+**It blends:**
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+* Character personalities 
+* Target personas 
+* Narrative context 
+* Shotstack video merge fields 
+* Vercel AI SDK + LLMs 
+* Supabase assets + campaign data 
+* n8n automations for scheduling and posting
 
-3. Use `cd` to change into the app's directory
+Into a seamless pipeline capable of generating:
+* Images & carousels
+* Dynamic videos assembled via mergefields
+* Captions (short/medium/long)
+* Narrative sequences
 
-   ```bash
-   cd with-supabase-app
-   ```
+All derived from a single campaign definition.
 
-4. Rename `.env.example` to `.env.local` and update the following:
+⸻
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+# 🧭 Table of Contents
+* Architecture￼
+* Folder Structure￼
+* Core Concepts￼
+* AI Generation Pipeline￼
+* Database Schema Summary￼
+* Asset Management￼
+* Shotstack Integration￼
+* n8n Integration￼
+* Deployment￼
+* Local Development￼
+* AI DTO Contract￼
+* Examples￼
+* Roadmap￼
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+⸻
 
-5. You can now run the Next.js local development server:
+# 🏛 Architecture
 
-   ```bash
-   npm run dev
-   ```
+### High-Level System Flow
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+```mermaid
+flowchart TD
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+A[Campaign Data] -->|Characters, Personas, Assets| B(AI DTO Builder)
+B --> C[Vercel AI SDK]
+C -->|Caption, Title, Instructions| D{Post Type}
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+D -->|Image/Carousel| E[Content Generated]
+D -->|Video| F[Shotstack Mergefields]
+F --> G[Shotstack Video Render]
 
-## Feedback and issues
+E --> H[n8n Scheduler]
+G --> H
+H --> I[Auto-Posting / Delivery]
+```
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+⸻
 
-## More Supabase examples
+# 📁 Folder Structure
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+```markdown
+
+dc-narrative-content-engine/
+├── app/                       # Next.js App Router
+│   ├── api/
+│   │   └── ai/
+│   │       └── posts/generate/
+│   ├── campaigns/
+│   └── ...
+├── src/
+│   ├── server/
+│   │   ├── ai/
+│   │   │   ├── dto.ts
+│   │   │   ├── buildAiGenerationJob.ts
+│   │   ├── db/prisma/
+│   │   └── utils/
+│   ├── features/
+│   └── lib/
+└── .env
+└── .env.local
+
+```
+
+
+⸻
+
+# 🎭 Core Concepts
+
+Campaigns
+* Define the objective
+* Narrative context
+* Schedule + cadence
+* Post type (image / carousel / video)
+* Caption length
+* Personas + characters
+* Associated mergefields
+
+Campaigns = story frameworks.
+
+⸻
+
+## Characters
+
+Characters are narrative agents, not just visual assets.
+
+They have:
+* Personality
+* Moral alignment
+* Height/weight
+* Assets (image, video, audio)
+* Behavioral tone
+* Narrative role within campaigns
+
+⸻
+
+## Personas
+
+Personas define target audience groups.
+
+Used for:
+* Copy tone
+* Caption language
+* Hashtag selection
+* Narrative framing
+
+⸻
+
+## Posts
+
+Posts inherited from the campaign by default but can include:
+* Custom instructions
+* Overrides
+* Schedule
+* Mergefield replacements
+
+⸻
+
+# 🤖 AI Generation Pipeline
+
+The pipeline is modular:
+
+Campaign → DTO Builder → AI Model → Post Content → (Video? Shotstack → n8n)
+
+Pipeline Stages
+1. DTO Builder 
+   * Converts relational campaign schema into AiGenerationJob.
+2. AI Model Execution 
+   * Vercel AI SDK
+   * Model providers: OpenAI / Anthropic / etc.
+3. Content Assembly 
+   * Title
+   * Caption
+   * Hashtags
+   * Narrative metadata
+4. Video Branch (if chosen)
+   * Shotstack mergefields
+   * Shotstack render request
+5. Automation (via n8n):
+   * Scheduling 
+   * Reposting 
+   * Versioning 
+   * Notifications
+
+⸻
+
+# 🗄 Database Schema Summary
+
+Uses Supabase Postgres with Prisma.
+
+Includes:
+* Campaign
+* Character
+* Persona
+* Posts
+* Images
+* Character Assets
+* Shotstack Merge Fields
+* Shotstack Render Jobs
+* App Settings
+* StorageObject
+
+RLS enabled on all core tables.
+
+⸻
+
+🖼 Asset Management
+
+Assets stored in Supabase Storage.
+
+A dedicated Supabase Edge Function resolves:
+
+asset_ref_uuid → asset public URL
+
+Example response:
+```json
+{
+  "asset_ref":"f2f00b19-4489-4a0c-bbc0-4b251e4af773",
+  "asset_url":"https://project.supabase.co/storage/v1/object/public/.../greninja.png"
+}
+```
+
+⸻
+
+🎬 Shotstack Integration
+
+Shotstack is used for video assembly.
+
+Mergefields define:
+* Media
+* Position
+* Timing
+* Layers
+* FX
+* Opacity
+* Audio
+* Duration
+
+The AI produces a structured mapping → Shotstack template → final rendered video.
+
+⸻
+
+# 🔄 n8n Integration
+
+n8n handles:
+* Post scheduling
+* Webhook-based generation triggers
+* Auto-posting
+* Multi-platform delivery
+* Complex sequences (weekly, daily)
+
+This enables hands-free content pipelines.
+
+⸻
+
+# ☁️ Deployment
+
+Primary Hosting
+Vercel (Next.js + server actions)
+
+Database + Storage
+Supabase
+
+Automations
+n8n
+
+Video Pipeline
+Shotstack
+
+Deploying requires configuring env vars across Vercel + Supabase.
+
+⸻
+
+
+### Requirements
+
+* Node: v24.9.0
+* PNPM
+* Supabase account
+
+.env
+```
+DATABASE_URL=
+DATABASE_PASSWORD=
+PGSSLROOTCERT=
+NEXT_PUBLIC_SUPABASE_EDGE_URL=
+N8N_WEBHOOK_URL=
+N8N_ENVIRONMENT=
+```
+.env.local
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PROJECT_ID=
+```
+Install Dependencies
+
+```console
+pnpm install
+```
+
+Generate Prisma Client
+
+```console
+pnpm exec prisma generate
+```
+
+⸻
+
+# 📦 AI DTO Contract
+
+Defined in `src/server/ai/dto.ts`.
+
+**Includes:**
+* AiGenerationJob
+* AiCampaignContext
+* AiNarrativeContext
+* AiCharacter
+* AiCharacterAsset
+* AiPersona
+* AiScheduleContext
+* AiPostConfig
+* AiMergeFieldConfig
+* AiTimingConfig
+
+⸻
+
+🧪 Examples
+
+### Campaign JSON
+```json
+{
+  "id": "123",
+  "title": "Late Night Stream Boost",
+  "narrativeContext": "A stylized late-night show...",
+  "daysOfWeek": ["tuesday", "thursday"],
+  "frequency": "weekly"
+}
+```
+
+### AI Job Payload
+
+```json
+{
+  "schemaVersion": "v1",
+  "campaign": { "id": "123", "title": "Late Night Boost" },
+  "narrative": { "characters": [], "personas": [] },
+  "postConfig": { "postType": "video", "captionLength": "medium" }
+}
+```
+### Mergefield Structure
+
+```json
+{
+  "name": "CHAR_FG1",
+  "mediaValueType": "image",
+  "type": "character",
+  "startTime": 0,
+  "endTime": 3.2
+}
+```
+### Generated Post Example
+
+```json
+{
+  "title": "Tonight’s Booster Bonanza",
+  "caption": "The Degen Host is tearing open…",
+  "hashtags": ["#pokemon", "#boosterbox", "#latenight"]
+}
+```
+
+
+⸻
+
+# 🛣 Roadmap
+
+Work in progress — subject to iteration.
+
+	Agent-based orchestration layer
+	Visual mergefield editor
+	Multi-platform posting & analytics
+	Template marketplace
+	AI-based character performance tuning
+	Persona-driven narrative adaptation
+	Post A/B testing pipeline
+
+⸻
