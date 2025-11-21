@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/src/lib/utils/utils";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/src/server/supabase/client";
 import { Button } from "@/ui/shadcn/button";
 import {
   Card,

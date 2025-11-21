@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/src/server/supabase/client";
 import { InfoIcon } from "lucide-react";
 import { FetchDataSteps } from "@/ui/tutorial/fetch-data-steps";
 

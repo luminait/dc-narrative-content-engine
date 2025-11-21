@@ -82,8 +82,8 @@ INSTRUCTIONS:
             ...result.object,
             modelName: 'gpt-4o',
             usageTokens: {
-                input: result.usage.promptTokens,
-                output: result.usage.completionTokens,
+                input: result.usage?.inputTokens ?? 0,
+                output: result.usage?.outputTokens ?? 0,
             },
         };
     } catch (error) {

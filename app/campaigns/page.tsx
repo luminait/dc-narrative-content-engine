@@ -7,7 +7,7 @@ import DashboardCampaignOverview from "@/ui/dashboard/DashboardCampaignOverview"
 import Link from "next/link";  // Add this import
 import Header from "@/ui/layout/Header";
 
-const Dashboard = () => {
+export default function Dashboard() {
     return (
         <div className="flex flex-1 flex-col justify-between items-start">
             <Header
@@ -47,9 +47,9 @@ const Dashboard = () => {
                         icon={<CheckCircle/>}
                     />
                 </div>
-                <DashboardCampaignOverview/>
+                <DashboardCampaignOverview />
             </div>
         </div>
     );
 };
-export default Dashboard;
+

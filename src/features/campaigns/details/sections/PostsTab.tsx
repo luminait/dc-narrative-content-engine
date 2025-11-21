@@ -29,6 +29,14 @@ export function PostsTab( { campaign, posts }: PostsTabProps ) {
 
     return (
         <div className="space-y-4">
+            {posts.length > 0 && (
+                <div className="flex justify-end">
+                    <Button onClick={handleCreatePost} className="flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Create Post
+                    </Button>
+                </div>
+            )}
             {posts.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-8">

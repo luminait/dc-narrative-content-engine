@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Play, FileText, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/shadcn/card';
 import { Checkbox } from '@/ui/shadcn/checkbox';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { getAssetUrlFromRef } from './utils';
+import ImageWithFallback from '@/packages/ui/common/ImageWithFallback';
+import { getAssetUrlFromRef } from '@/src/server/actions/assets';
 import type { CharacterAsset } from './types';
 
+
+// TODO: Delete this file after next commit
 interface CharacterAssetGridProps {
     assets: CharacterAsset[];
     selectedAssets: Set<string>;

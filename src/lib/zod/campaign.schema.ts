@@ -147,3 +147,4 @@ export type MergeField = z.infer<typeof mergeFieldSchema>;
 export type CharacterSelectionData = z.infer<typeof characterSelectionSchema>;
 export type PersonaData = z.infer<typeof personaFormSchema>;
 export type MediaValueType = z.infer<typeof mediaValueTypeSchema>;
+export type CharacterData = z.infer<typeof characterSelectionSchema>;

@@ -23,5 +23,5 @@ export async function listCampaignNamesForUser(): Promise<string[]> {
     select: { title: true },
     orderBy: { title: 'asc' },
   })
-  return rows.map((r) => r.title).filter(Boolean)
+  return rows.map((r: { title: any }) => r.title).filter(Boolean)
 }

@@ -26,15 +26,15 @@ interface CampaignFormProps {
     characters: CharacterWithImage[];
 }
 
-export default function CampaignForm( {
-                                          personas,
-                                          characters,
-                                      }: CampaignFormProps ) {
+export default function CampaignForm({
+    personas,
+    characters,
+}: CampaignFormProps) {
     const router = useRouter();
-    const [ isPending, startTransition ] = useTransition();
+    const [isPending, startTransition] = useTransition();
 
-    const form = useForm<CampaignFormData>( {
-        resolver: zodResolver( campaignFormSchema ),
+    const form = useForm<CampaignFormData>({
+        resolver: zodResolver(campaignFormSchema),
         mode: 'onChange',
         defaultValues: {
             title: 'New Campaign',
@@ -53,57 +53,57 @@ export default function CampaignForm( {
             characters: [],
             mergeFields: [],
         },
-    } );
+    });
 
     const { handleSubmit, watch, formState } = form;
-    const postType = watch( 'postType' );
+    const postType = watch('postType');
 
-    const onSubmit = ( values: CampaignFormData ) => {
-        startTransition( async () => {
-            const result = await createCampaignAction( values );
+    const onSubmit = (values: CampaignFormData) => {
+        startTransition(async () => {
+            const result = await createCampaignAction(values);
 
             if (result.success) {
-                toast.success( 'Campaign created successfully!' );
-                router.push( `/campaigns/${result.campaignId}` );
+                toast.success('Campaign created successfully!');
+                router.push(`/campaigns/${result.campaignId}`);
             } else {
-                toast.error( 'Please check the form for errors.' );
+                toast.error('Please check the form for errors.');
                 // Handle and display specific field errors from result.error
-                console.error( 'Validation errors:', result.error );
+                console.error('Validation errors:', result.error);
             }
-        } );
+        });
     };
 
     return (
         <FormProvider {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-6">
-                <CampaignDetails/>
-                <ScheduleSection/>
-                <PersonasSection personas={personas}/>
+                <CampaignDetails />
+                <ScheduleSection />
+                <PersonasSection personas={personas} />
                 <CharactersSection characters={characters} />
-                <PostTypeSection/>
+                <PostTypeSection />
 
                 {postType === 'video' && (
                     <>
-                        <VideoLengthSection/>
-                        <MergeFieldsSection />
+                        <VideoLengthSection />
+                        <MergeFieldsSection characters={characters} />
                     </>
                 )}
 
                 {/* --- START DEBUGGING BLOCK --- */}
                 <div className="mt-6 p-4 bg-slate-900 border border-slate-700 rounded-lg text-slate-300">
-                  <h3 className="font-mono font-bold text-lg text-white">Debug Output</h3>
-                  <div className="grid grid-cols-2 gap-4 mt-2">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-400">formState.isValid</label>
-                      <pre className="mt-1 text-lg font-bold text-white">{JSON.stringify(formState.isValid)}</pre>
+                    <h3 className="font-mono font-bold text-lg text-white">Debug Output</h3>
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400">formState.isValid</label>
+                            <pre className="mt-1 text-lg font-bold text-white">{JSON.stringify(formState.isValid)}</pre>
+                        </div>
                     </div>
-                  </div>
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-slate-400">formState.errors</label>
-                    <pre className="mt-1 p-2 bg-black rounded-md text-sm whitespace-pre-wrap">
-                      {JSON.stringify(formState.errors, null, 2)}
-                    </pre>
-                  </div>
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-slate-400">formState.errors</label>
+                        <pre className="mt-1 p-2 bg-black rounded-md text-sm whitespace-pre-wrap">
+                            {JSON.stringify(formState.errors, null, 2)}
+                        </pre>
+                    </div>
                 </div>
                 {/* --- END DEBUGGING BLOCK --- */}
 

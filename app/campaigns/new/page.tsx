@@ -41,7 +41,6 @@ async function CampaignFormData() {
         <CampaignForm
             personas={personas}
             characters={characters}
-            valueTypes={valueTypes}
         />
     );
 }

@@ -6,7 +6,8 @@ type CardProps = {
     title: string;
     isLoading: boolean;
     count: string;
-    icon: React.ReactElement;
+    // Use a broadly-typed ReactElement so we can safely add a className via cloneElement
+    icon: React.ReactElement<any>;
     message: string;
 }
 

@@ -5,7 +5,7 @@ import {
     PrismaClient,
     VideoLengthSeconds,
     Weekdays
-} from '@/app/generated/prisma'; // Corrected: Use relative path
+} from '@/src/server/db/generated/prisma'; // Corrected: Use relative path
 
 // Initialize the Prisma Client
 const prisma = new PrismaClient();

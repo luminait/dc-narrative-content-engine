@@ -147,7 +147,7 @@ export async function registerUploadedAssetAction(input: {
   // Characters: create Character + CharacterAsset in a single transaction
   const characterData = characterRegistrationSchema.parse(input.character ?? {})
 
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: { storageObject: { findFirst: (arg0: { where: { name: string; buckets: { id: string } }; select: { id: boolean } }) => any }; character: { create: (arg0: { data: { name: string; isHuman: boolean; isTrainer: boolean; characterTypes: string | null; personality: string | null; heightCentimeters: number | null; weightGrams: number | null; moralAlignment: any }; select: { id: boolean; name: boolean } }) => any }; characterAsset: { create: (arg0: { data: { assetRef: any; name: string; characterId: any; isPrimary: boolean } }) => any } }) => {
     const storageObj = await tx.storageObject.findFirst({
       where: { name: input.objectName, buckets: { id: bucketId } },
       select: { id: true },

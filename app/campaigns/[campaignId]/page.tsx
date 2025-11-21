@@ -15,9 +15,11 @@ import { getMergeFieldsForCampaignId } from "@/src/server/queries/mergefields.qu
 import { isMediaAssetType } from "@/src/features/assets";
 // helper on the server
 import { getAssetUrlFromAssetRef } from "@/src/server/actions/assets";
+import { guessAudioMime } from "@/src/lib/utils/mediaDetection";
+import { determineAssetKind } from "@/src/server/utils/assetTypeVerifier";
 import type { MergeField } from "@/src/lib/zod/campaign.schema";
-import type { AssetData } from "@/src/lib/zod/assets.schema";
-import { toast } from "sonner";
+import type { MergeFieldAsset, MergeFieldAssetMap } from "@/src/lib/types/mergeFieldAsset";
+
 
 
 // In Next.js 15, dynamic APIs like `params` are asynchronous.
@@ -29,38 +31,49 @@ type CampaignDetailsPageProps = {
 };
 
 // Make the component async to fetch data on the server
-const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
+const CampaignDetailsPage = async ({ params }: CampaignDetailsPageProps) => {
     // Destructure campaignId from params to make access explicit
     const { campaignId } = await params;
+    console.log(`[CampaignDetailsPage] Rendering for campaignId: ${campaignId}`);
 
     // Fetch the campaign data
-    const response = await getCampaignById( campaignId );
+    const response = await getCampaignById(campaignId);
 
     // Handle case where the campaign is not found
-    if ( !response ) {
+    if (!response) {
         return <div>Campaign not found</div>;
     }
 
     // Validate the raw data against the Zod schema
-    const parsedResult = campaignSchema.safeParse( response );
+    const parsedResult = campaignSchema.safeParse(response);
 
-    if ( !parsedResult.success ) {
-        console.error( "Campaign data validation failed:", parsedResult.error );
+    if (!parsedResult.success) {
+        console.error("Campaign data validation failed:", parsedResult.error);
         return <div>Invalid campaign data.</div>;
     }
 
     // At this point, we have type-safe data conforming to CampaignData
     const campaignData: CampaignData = parsedResult.data;
 
-    const campaign: Campaign = buildCampaign( campaignData );
+    const campaign: Campaign = buildCampaign(campaignData);
 
-    type MergeFieldAsset = { type: string } & AssetData;
+    // Use the shared MergeFieldAsset type to avoid duplicate, incompatible aliases across modules.
+
+    const guessMimeFromNameOrUrl = (path?: string | null): string | undefined => {
+        if (!path) return undefined;
+        const lower = path.split('?')[0]?.toLowerCase?.() || '';
+        const audio = guessAudioMime(lower);
+        if (audio) return audio;
+        if (lower.endsWith('.mp4') || lower.endsWith('.mov') || lower.endsWith('.webm')) return 'video/mp4';
+        if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.gif') || lower.endsWith('.webp')) return 'image/*';
+        return undefined;
+    };
 
     async function resolveMergeFieldValues(
         fields: MergeField[]
-    ): Promise<Record<string, MergeFieldAsset>> {
-        const entries = await Promise.all(
-            fields.map(async (f) => {
+    ): Promise<MergeFieldAssetMap> {
+        const entries: Array<[string, MergeFieldAsset] | null> = await Promise.all(
+            fields.map(async (f): Promise<[string, MergeFieldAsset] | null> => {
                 try {
                     if (!f.value || !f.mediaValueType) return null;
 
@@ -68,6 +81,8 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
 
                     if (isMediaAssetType(f.mediaValueType)) {
                         if (isUrl) {
+                            const prelim = guessMimeFromNameOrUrl(f.value) || null;
+                            const kind = await determineAssetKind({ url: f.value, objectName: null, mediaValueType: String(f.mediaValueType), guessedContentType: prelim });
                             return [
                                 f.value,
                                 {
@@ -77,6 +92,9 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                                     asset_url: f.value,
                                     path_tokens: null,
                                     bucket_id: null,
+                                    objectName: null,
+                                    contentType: kind.contentType,
+                                    isAudio: kind.isAudio,
                                 },
                             ] as const;
                         } else {
@@ -90,7 +108,19 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                                 return null;
                             }
 
-                            return [f.value, { type: String(f.mediaValueType), ...assetData }] as const;
+                            const objectName = assetData.name;
+                            const prelim = guessMimeFromNameOrUrl(objectName) || null;
+                            const kind = await determineAssetKind({ url: assetData.asset_url, objectName, mediaValueType: String(f.mediaValueType), guessedContentType: prelim });
+                            return [
+                                f.value,
+                                {
+                                    type: String(f.mediaValueType),
+                                    ...assetData,
+                                    objectName,
+                                    contentType: kind.contentType,
+                                    isAudio: kind.isAudio,
+                                } as MergeFieldAsset,
+                            ];
                         }
                     }
 
@@ -104,12 +134,10 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                             path_tokens: null,
                             bucket_id: null,
                             asset_url: null,
-                        },
-                    ] as const;
+                        } as MergeFieldAsset,
+                    ];
                 } catch (err) {
-                    toast.error(`Failed to resolve merge field ${f.name} (${{ fieldId: f.id, name: f.name, value: f.value } })`, {
-                        description: err instanceof Error ? err.message : "Unknown error",
-                    })
+
                     console.error(
                         `[resolveMergeFieldValues] Failed to resolve merge field`,
                         { fieldId: f.id, name: f.name, value: f.value },
@@ -120,17 +148,16 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
             })
         );
 
-        return Object.fromEntries(
-            entries.filter((e): e is readonly [string, MergeFieldAsset] => !!e)
-        );
+        const filtered = entries.filter((e): e is [string, MergeFieldAsset] => e !== null);
+        return Object.fromEntries(filtered);
     }
 
     // Fetch raw data. The return types are now strictly enforced in the query functions.
     const [rawPosts, rawCharacters, rawPersonas, mergeFields] = await Promise.all([
-        getPostsForCampaign( campaign.id ),
-        getCharactersForCampaign( campaign.id ),
-        getPersonasForCampaign( campaign.id ),
-        getMergeFieldsForCampaignId( campaign.id )
+        getPostsForCampaign(campaign.id),
+        getCharactersForCampaign(campaign.id),
+        getPersonasForCampaign(campaign.id),
+        getMergeFieldsForCampaignId(campaign.id)
     ]);
 
     // =======================================================================
@@ -173,7 +200,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
             images: (p as any).images ?? [],
         })) as any
     );
-    const characters: Character[] = await toUiCharacters( rawCharacters );
+    const characters: Character[] = await toUiCharacters(rawCharacters);
     // TODO: Find a cleaner way to convert rawPersonas to type of Persona[]
     // TODO: Find a way to immediately get the value of `isPrimaryPersona`
     const personas: Persona[] = (rawPersonas as any[]).map((persona: any) => {
@@ -209,7 +236,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl">{campaign.title}</h1>
-                        <Badge className={getStatusColor( campaign.status )}>
+                        <Badge className={getStatusColor(campaign.status)}>
                             {campaign.status}
                         </Badge>
                     </div>
@@ -221,7 +248,7 @@ const CampaignDetailsPage = async ( { params }: CampaignDetailsPageProps ) => {
                     )}
                 </div>
             </div>
-            <CampaignDetails/>
+            <CampaignDetails />
             <CampaignDetailTabSwitcher
                 campaign={campaign}
                 posts={posts}

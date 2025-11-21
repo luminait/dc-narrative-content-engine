@@ -1,7 +1,5 @@
-import { PrismaClient, Prisma } from '@/src/server/db/generated/prisma';
-
-// This will be moved to src/server/db.ts as per the architectural guidelines.
-const prisma = new PrismaClient();
+import { Prisma } from '@/src/server/db/generated/prisma';
+import { prisma } from '@/src/server/db';
 
 /**
  * Fetches all campaigns from the database.
@@ -12,7 +10,7 @@ export async function getCampaigns() {
       include: { personas: true, characters: true },
       orderBy: { updatedAt: 'desc' },
     });
-    return campaigns.map((c) => ({ ...c, personaCount: c.personas.length, characterCount: c.characters.length }));
+    return campaigns.map((c: { personas: string | any[]; characters: string | any[]; }) => ({ ...c, personaCount: c.personas.length, characterCount: c.characters.length }));
   } catch (error) {
     console.error('Error fetching campaigns:', error);
     throw new Error('Failed to fetch campaigns.');

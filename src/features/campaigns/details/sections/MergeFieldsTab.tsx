@@ -10,7 +10,6 @@ import type { Campaign, Character, Persona } from '@/src/lib/types/ui';
 import { isAssetSystemAvailable } from '@/src/features/assets';
 import { MergeField } from "@/src/lib/zod/campaign.schema";
 import { Badge } from "@/ui/shadcn/badge";
-import type { AssetData } from "@/src/lib/zod/assets.schema";
 import { Button } from '@/ui/shadcn/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/ui/shadcn/dropdown-menu';
 import { Input } from '@/ui/shadcn/input';
@@ -24,9 +23,14 @@ import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/ui/shadcn/dropz
 import { useSupabaseUpload } from '@/src/lib/hooks/use-supabase-upload';
 import { toast } from 'sonner';
 import { buildMergeFieldUpdatePayload } from '@/src/lib/utils/mergefield.client-utils';
+import type { MergeFieldAsset, MergeFieldAssetMap } from "@/src/lib/types/mergeFieldAsset";
 
 // Mapping of merge field types to their corresponding asset types and values
-type MergeFieldAsset = { type: string } & AssetData;
+// Use shared type to avoid duplicate, incompatible aliases across modules
+
+// Audio helpers hoisted to module scope so they are available to nested components
+const isAudioUrl = (url?: string | null) => !!url && /(\.(mp3|wav|m4a|aac|ogg))(\?.*)?$/i.test(url);
+
 
 interface MergeFieldsTabProps {
     campaign: Campaign;
@@ -35,7 +39,7 @@ interface MergeFieldsTabProps {
     campaignCharacters: Character[];
     mergeFieldsLoading: boolean;
     mergeFieldsError: string | null;
-    campaignMergeFieldValues: Record<string, MergeFieldAsset>;
+    campaignMergeFieldValues: MergeFieldAssetMap;
 }
 
 // Edit mode state for individual merge field
@@ -59,6 +63,8 @@ export function MergeFieldsTab({
     const [editingField, setEditingField] = useState<EditingState | null>(null);
     const [savingFieldId, setSavingFieldId] = useState<string | null>(null);
     const router = useRouter();
+
+    // (Diagnostics removed) If needed again, we can re-enable a dev-only window.__dumpMergeFields helper.
 
     // Handle edit mode
     const startEditing = (field: MergeField) => {
@@ -453,7 +459,7 @@ function MergeFieldItem({
                                             {field.mediaValueType === "text" && field.value}
                                             {field.mediaValueType === 'image' && (
                                                 <img
-                                                    src={campaignMergeFieldValues[field.value]?.asset_url}
+                                                    src={campaignMergeFieldValues[field.value]?.asset_url ?? undefined}
                                                     alt={
                                                         campaignMergeFieldValues[field.value]?.name || field.value
                                                     }
@@ -466,25 +472,42 @@ function MergeFieldItem({
                                                     className="rounded-md border border-gray-200"
                                                 >
                                                     <source
-                                                        src={campaignMergeFieldValues[field.value]?.asset_url}
+                                                        src={campaignMergeFieldValues[field.value]?.asset_url ?? undefined}
                                                         type="video/mp4"
                                                     />
                                                     Your browser does not support the video tag.
                                                 </video>
                                             )}
 
-                                            {field.mediaValueType &&
-                                                ['audio_music', 'audio_voice', 'gen_ai_voice'].includes(
-                                                    field.mediaValueType
-                                                ) && (
-                                                    <audio controls className="w-full mt-2">
-                                                        <source
-                                                            src={campaignMergeFieldValues[field.value]?.asset_url}
-                                                            type="audio/mpeg"
-                                                        />
-                                                        Your browser does not support the audio element.
-                                                    </audio>
-                                                )}
+                                            {(() => {
+                                                const valueKey = String(field.value);
+                                                const mapping = campaignMergeFieldValues[valueKey];
+                                                const mappingUrl = mapping?.asset_url;
+                                                const directUrl = typeof field.value === 'string' && /^(https?:)?\/\//i.test(field.value as any) ? (field.value as string) : undefined;
+                                                const url = mappingUrl || directUrl;
+                                                const fromMappingIsAudio = mapping?.isAudio === true;
+                                                const fromMime = mapping?.contentType || undefined;
+                                                const mimeIsAudio = !!fromMime && fromMime.startsWith('audio/');
+                                                const nameIsAudio = !!mapping?.objectName && /(\.(mp3|wav|m4a|aac|ogg))$/i.test(mapping.objectName);
+                                                const isAudioType = !!field.mediaValueType && ['audio_music', 'audio_voice', 'gen_ai_voice'].includes(field.mediaValueType);
+                                                const isAudioSemantic = field.type && ['voiceover', 'music', 'sfx'].includes(field.type);
+                                                const urlLooksAudio = isAudioUrl(url);
+                                                const shouldRenderAudio = !!url && (isAudioType || fromMappingIsAudio || mimeIsAudio || nameIsAudio || isAudioSemantic || urlLooksAudio);
+                                                if (shouldRenderAudio && url) {
+                                                    // Render audio in a neutral container (avoid inherited link styles) and force a minimal height
+                                                    return (
+                                                        <div className="mt-2 text-gray-900">
+                                                            <audio controls className="block w-full h-10" src={url}>
+                                                                Your browser does not support the audio element.
+                                                            </audio>
+                                                            <div className="mt-1 text-xs text-gray-500">
+                                                                <a href={url} target="_blank" rel="noreferrer" className="underline">Open audio in new tab</a>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
 
                                             {field.mediaValueType === 'image_or_video' &&
                                                 (campaignMergeFieldValues[field.value]?.asset_url?.match(
@@ -496,14 +519,14 @@ function MergeFieldItem({
                                                         className="rounded-md border border-gray-200"
                                                     >
                                                         <source
-                                                            src={campaignMergeFieldValues[field.value]?.asset_url}
+                                                            src={campaignMergeFieldValues[field.value]?.asset_url ?? undefined}
                                                             type="video/mp4"
                                                         />
                                                         Your browser does not support the video tag.
                                                     </video>
                                                 ) : (
                                                     <img
-                                                        src={campaignMergeFieldValues[field.value]?.asset_url}
+                                                        src={campaignMergeFieldValues[field.value]?.asset_url ?? undefined}
                                                         alt={
                                                             campaignMergeFieldValues[field.value]?.name ||
                                                             field.value

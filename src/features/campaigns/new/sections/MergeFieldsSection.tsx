@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import Papa from 'papaparse';
 import { z } from 'zod';
@@ -28,10 +28,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/ui/shadcn/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/shadcn/popover';
+import CharacterPicker from '@/src/features/campaigns/components/CharacterPicker';
+import type { CharacterWithImage } from '@/src/lib/types/ui';
 import type { CampaignFormData, MediaValueType, MergeField } from '../../../../lib/zod/campaign.schema';
 import { MERGE_FIELD_VALUE_TYPES, mergeFieldSchema } from '../../../../lib/zod/campaign.schema';
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/ui/shadcn/dropzone';
+import { useSupabaseUpload } from '@/src/lib/hooks/use-supabase-upload';
+import { toast } from 'sonner';
 
-export default function MergeFieldsSection() {
+interface MergeFieldsSectionProps {
+  characters?: CharacterWithImage[];
+}
+
+export default function MergeFieldsSection({ characters = [] }: MergeFieldsSectionProps) {
   const { control } = useFormContext<CampaignFormData>();
   const { fields, append, remove, insert, replace } = useFieldArray({
     control,
@@ -41,6 +51,52 @@ export default function MergeFieldsSection() {
   const [csvError, setCsvError] = useState<string | null>(null);
 
   const valueTypes = MERGE_FIELD_VALUE_TYPES as unknown as MediaValueType[];
+  const semanticTypes = ['text', 'character', 'environment', 'music', 'voiceover', 'sfx', 'luma_matte'];
+
+  const isHttpUrl = (val?: string | null) => !!val && /^(https?:)?\/\//i.test(val);
+
+  // Helper: small upload component (mirrors Details tab) for the NEW campaign flow
+  function MediaUploadFieldForNew({ fieldType }: { fieldType: string }) {
+    // Determine allowed MIME types based on the field type
+    const getAllowedMimeTypes = () => {
+      if (fieldType === 'video') return ['video/*'];
+      if (fieldType === 'audio_music' || fieldType === 'audio_voice') return ['audio/*'];
+      return [];
+    };
+
+    const uploadProps = useSupabaseUpload({
+      bucketName: 'campaign-assets',
+      path: `campaigns/new/merge-fields`,
+      allowedMimeTypes: getAllowedMimeTypes(),
+      maxFiles: 1,
+      maxFileSize: 100 * 1000 * 1000, // 100MB
+    });
+
+    // Inform the user when upload completes
+    // Note: Actual asset_ref registration still required post-upload
+    useEffect(() => {
+      if (uploadProps.isSuccess && uploadProps.files.length > 0) {
+        const uploadedFile = uploadProps.files[0];
+        const assetPath = `campaigns/new/merge-fields/${uploadedFile.name}`;
+        toast.success('File uploaded to storage. Register it to obtain an asset_ref, then paste it above.');
+        // Reset success to avoid repeated toasts on re-render if hook exposes a reset
+        // @ts-expect-error Optional reset method in hook
+        if (typeof uploadProps.reset === 'function') uploadProps.reset();
+        console.info('[Upload complete] Stored at:', assetPath);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [uploadProps.isSuccess, uploadProps.files]);
+
+    return (
+      <div className="mt-2">
+        <Dropzone {...uploadProps}>
+          <DropzoneEmptyState />
+          <DropzoneContent />
+        </Dropzone>
+      </div>
+    );
+  }
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -281,19 +337,137 @@ export default function MergeFieldsSection() {
                         <FieldError />
                       </Field>
 
+                      <Field title={`mergeFields.${index}.type`}>
+                        <FieldLabel className="text-xs">Semantic Type</FieldLabel>
+                        <FieldContent>
+                          <Controller
+                            name={`mergeFields.${index}.type`}
+                            control={control}
+                            render={({ field }) => (
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {semanticTypes.map((type) => (
+                                    <SelectItem key={type} value={type}>
+                                      {type}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          />
+                        </FieldContent>
+                        <FieldError />
+                      </Field>
+
                       <Field title={`mergeFields.${index}.value`}>
                         <FieldLabel className="text-xs">Value</FieldLabel>
                         <FieldContent>
                           <Controller
                             name={`mergeFields.${index}.value`}
                             control={control}
-                            render={({ field }) => (
-                              <Input
-                                {...field}
-                                value={field.value || ''}
-                                placeholder="URL or text content"
-                              />
-                            )}
+                            render={({ field }) => {
+                              const currentType = control._formValues.mergeFields[index]?.type;
+                              const currentMediaValueType = control._formValues.mergeFields[index]?.mediaValueType;
+
+                              // Character Picker
+                              if (currentType === 'character') {
+                                // Resolve character ID from the asset ref value if possible
+                                const resolvedCharacterId = characters.find(
+                                  (c) => c.primaryAssetRef && c.primaryAssetRef === field.value
+                                )?.id;
+
+                                return (
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button variant="outline" className="w-full justify-start font-normal">
+                                        {resolvedCharacterId
+                                          ? characters.find((c) => c.id === resolvedCharacterId)?.name || 'Select Character'
+                                          : 'Select Character'}
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[600px] max-w-[80vw] max-h-[80vh] overflow-auto p-4" align="start">
+                                      <CharacterPicker
+                                        characters={characters.map((c) => ({
+                                          id: c.id,
+                                          name: c.name,
+                                          characterTypes: c.characterTypes || null,
+                                          imageUrl: c.imageUrl ?? c.defaultImage ?? null,
+                                        }))}
+                                        selectedIds={resolvedCharacterId ? [resolvedCharacterId] : []}
+                                        onChange={(ids) => {
+                                          const selectedId = ids[0];
+                                          const selectedChar = characters.find((c) => c.id === selectedId);
+                                          const assetRef = selectedChar?.primaryAssetRef || null;
+
+                                          if (selectedId && !assetRef) {
+                                            toast.error('Selected character has no registered asset_ref. Please register an asset for this character.');
+                                            return; // keep current value unchanged
+                                          }
+
+                                          field.onChange(assetRef || '');
+                                        }}
+                                        allowMultiple={false}
+                                        showSearch
+                                        showSelectedBadges={false}
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                );
+                              }
+
+                              // Media Asset Ref Input
+                              if (
+                                currentMediaValueType &&
+                                [
+                                  'video',
+                                  'audio_music',
+                                  'audio_voice',
+                                  'image',
+                                  'image_or_video',
+                                  'gen_ai_voice',
+                                ].includes(currentMediaValueType)
+                              ) {
+                                return (
+                                  <div className="space-y-2">
+                                    <FieldLabel className="text-xs">Asset Ref (UUID)</FieldLabel>
+                                    <Input
+                                      {...field}
+                                      value={field.value || ''}
+                                      placeholder="Paste asset_ref (UUID) or direct media URL for preview"
+                                    />
+
+                                    {/* Media Upload (optional) */}
+                                    <MediaUploadFieldForNew fieldType={currentMediaValueType} />
+
+                                    {/* Audio preview if a direct URL is provided */}
+                                    {['audio_music', 'audio_voice', 'gen_ai_voice'].includes(currentMediaValueType) && (
+                                      isHttpUrl(field.value) ? (
+                                        <audio controls className="w-full mt-2">
+                                          <source src={field.value as string} />
+                                          Your browser does not support the audio element.
+                                        </audio>
+                                      ) : (
+                                        (field.value ? (
+                                          <p className="text-xs text-gray-500">Audio preview is available only when a direct URL is provided. Asset refs will preview later in the details tab.</p>
+                                        ) : null)
+                                      )
+                                    )}
+                                  </div>
+                                );
+                              }
+
+                              // Default Text Input
+                              return (
+                                <Input
+                                  {...field}
+                                  value={field.value || ''}
+                                  placeholder="URL or text content"
+                                />
+                              );
+                            }}
                           />
                         </FieldContent>
                         <FieldError />

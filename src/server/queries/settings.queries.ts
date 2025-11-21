@@ -10,7 +10,7 @@ import {
  * Fetch webhook settings from database and normalize.
  * Falls back to environment variables if not found or invalid.
  */
-export const getWebhookSettings = cache(async (): Promise<WebhookSettings> => {
+export const getWebhookSettings = async (): Promise<WebhookSettings> => {
   // Build env fallbacks (keep working even if only N8N_WEBHOOK_URL is present)
   const envEnvironment =
     (process.env.N8N_ENVIRONMENT as 'testing' | 'production') || 'testing';
@@ -28,6 +28,7 @@ export const getWebhookSettings = cache(async (): Promise<WebhookSettings> => {
     environment: envEnvironment,
     testingUrl: envTestingUrl,
     productionUrl: envProductionUrl,
+    shotstackEnvironment: 'sandbox', // Default fallback
   };
 
   try {
@@ -54,6 +55,7 @@ export const getWebhookSettings = cache(async (): Promise<WebhookSettings> => {
       environment: parsed.data.environment ?? fallback.environment,
       testingUrl: parsed.data.testingUrl ?? fallback.testingUrl,
       productionUrl: parsed.data.productionUrl ?? fallback.productionUrl,
+      shotstackEnvironment: parsed.data.shotstackEnvironment ?? fallback.shotstackEnvironment,
     };
 
     return normalized;
@@ -62,4 +64,4 @@ export const getWebhookSettings = cache(async (): Promise<WebhookSettings> => {
     // On any error, still return a sensible fallback so UI can render
     return fallback;
   }
-});
+};

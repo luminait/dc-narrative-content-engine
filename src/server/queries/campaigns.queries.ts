@@ -1,21 +1,21 @@
 import { prisma } from '@/src/server/db/prisma';
 import { unstable_cache } from 'next/cache';
-import { campaignSelect, campaignWithAllSelect, DbCampaignWithAll } from "@/src/server/db/selects/campaign.schema.selects";
+import { campaignWithAllSelect, DbCampaignWithAll } from "@/src/server/db/selects/campaign.schema.selects";
 import { toUiCampaign } from "@/src/lib/utils/campaigns.utils";
-import { CampaignData } from "@/src/lib/zod/campaign.schema";
+import type { CampaignData } from "@/src/lib/zod/campaign.schema";
 
 
 /**
  * Fetches all campaigns with related data using the standardized select.
  */
 export const getCampaigns = unstable_cache(
-    async () => {
+    async (): Promise<CampaignData[]> => {
         const dbCampaigns = await prisma.campaign.findMany({
             where: { deletedAt: null },
             select: campaignWithAllSelect,
             orderBy: { updatedAt: 'desc' },
         });
-        return dbCampaigns.map(c => toUiCampaign(c as DbCampaignWithAll));
+        return dbCampaigns.map((c) => toUiCampaign(c as DbCampaignWithAll));
     },
     ['campaigns'],
     { tags: ['campaigns'], revalidate: 3600 }
@@ -25,7 +25,7 @@ export const getCampaigns = unstable_cache(
  * Fetches a single campaign by ID, returning a UI-optimized object.
  */
 export const getCampaignById = unstable_cache(
-    async (id: string) => {
+    async (id: string): Promise<CampaignData | null> => {
         const dbCampaign = await prisma.campaign.findFirst({
             where: { id, deletedAt: null },
             select: campaignWithAllSelect,
@@ -72,3 +72,6 @@ export const getCampaignsForUI = unstable_cache(async () => {
 ['campaigns-for-ui'],
 { tags: ['campaigns'], revalidate: 3600 }
 );
+
+// Backwards-compatible export expected by tests and other modules
+export const getCampaignsWithCounts = getCampaignsForUI;

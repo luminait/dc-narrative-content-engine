@@ -7,11 +7,10 @@ import { Campaign, Character, Persona, Post } from "@/src/lib/types/ui";
 import { PostsTab } from "@/src/features/campaigns/details/sections/PostsTab";
 import { MergeFieldsTab } from "@/src/features/campaigns/details/sections/MergeFieldsTab";
 import { MergeField } from "@/src/lib/zod/campaign.schema";
-import type { AssetData } from "@/src/lib/zod/assets.schema";
+import type { MergeFieldAsset, MergeFieldAssetMap } from "@/src/lib/types/mergeFieldAsset";
 
 // Mapping of merge field types to their corresponding asset types and values
 type MergeFieldEntry = [ string, MergeFieldAsset ];
-type MergeFieldAsset = { type: string } & AssetData;
 
 interface CampaignDetailTabSwitcherProps {
     campaignPersonas: Persona[],
@@ -19,7 +18,7 @@ interface CampaignDetailTabSwitcherProps {
     characters: Character[],
     posts: Post[],
     campaignMergeFields: MergeField[];
-    campaignMergeFieldValues: Record<string, MergeFieldAsset>;
+    campaignMergeFieldValues: MergeFieldAssetMap;
 }
 
 const CampaignDetailTabSwitcher = ( {

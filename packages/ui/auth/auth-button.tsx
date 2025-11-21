@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/ui/shadcn/button";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/src/server/supabase/client";
 import { LogoutButton } from "./logout-button";
 
 export async function AuthButton() {

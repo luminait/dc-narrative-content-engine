@@ -18,12 +18,16 @@ import type { CampaignData } from '@/src/lib/zod/campaign.schema';
 import PostPreview from './sections/PostPreview';
 import { Separator } from "@/ui/shadcn/separator";
 import PostCustomizationDetailsTabSwitcher from './sections/PostCustomizationDetailsTabSwitcher';
+import type { Character } from '@/src/lib/types/ui';
+import type { AssetData } from '@/src/lib/zod/assets.schema';
 
 interface PostGeneratorClientProps {
     campaign: CampaignData;
+    campaignCharacters?: Character[];
+    campaignMergeFieldValues?: Record<string, { type: string; objectName?: string | null; contentType?: string | null; isAudio?: boolean } & AssetData>;
 }
 
-export default function PostGeneratorClient( { campaign }: PostGeneratorClientProps ) {
+export default function PostGeneratorClient( { campaign, campaignCharacters = [], campaignMergeFieldValues = {} }: PostGeneratorClientProps ) {
     const router = useRouter();
     const [ isPending, startTransition ] = useTransition();
     const [ isGenerating, setIsGenerating ] = useState( false );
@@ -162,7 +166,11 @@ export default function PostGeneratorClient( { campaign }: PostGeneratorClientPr
                                         <CardContent>
                                             <FormProvider {...form}>
                                                 <form onSubmit={handleSubmit( onSubmit )} className="space-y-6">
-                                                    <PostCustomizationDetailsTabSwitcher campaign={campaign} />
+                                                    <PostCustomizationDetailsTabSwitcher
+                                                      campaign={campaign}
+                                                      campaignCharacters={campaignCharacters}
+                                                      campaignMergeFieldValues={campaignMergeFieldValues}
+                                                    />
                                                 </form>
                                             </FormProvider>
                                         </CardContent>
